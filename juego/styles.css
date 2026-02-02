@@ -1,0 +1,38 @@
+.game-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+/* Player styles */
+:root{
+    /* Aproximación visual para 1.78m: 178px (ajustable) */
+    --player-height: 178px;
+}
+
+.player{
+    position: absolute;
+    bottom: 10vh;
+    left: 0;
+    height: var(--player-height);
+    width: auto;
+    will-change: left;
+}
+
+#player-img{
+    display: block;
+    height: 100%;
+    width: auto;
+    user-select: none;
+    pointer-events: none;
+}
+
+/* Reduce image smoothing on scaled GIFs */
+img{ image-rendering: -webkit-optimize-contrast; }
