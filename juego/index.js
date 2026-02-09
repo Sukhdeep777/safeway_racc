@@ -12,7 +12,9 @@
     };
 
     let velocity = 0; // px per frame (modified by speed)
-    const SPEED = 4; // base speed in px per frame, adjust as needed
+    const MAX_SPEED = 1.2; // max speed in px per frame
+    const ACCELERATION = 0.06; // acceleration rate
+    const friction = 0.92; // deceleration factor (0-1)
     let direction = 'right'; // last facing direction
     const keys = { a: false, d: false };
 
@@ -49,13 +51,13 @@
         if(e.key === 'a' || e.key === 'A'){
             keys.a = true;
             direction = 'left';
-            velocity = -SPEED;
+            if(velocity > -MAX_SPEED) velocity = Math.max(velocity - ACCELERATION, -MAX_SPEED);
             setRun('left');
         }
         if(e.key === 'd' || e.key === 'D'){
             keys.d = true;
             direction = 'right';
-            velocity = SPEED;
+            if(velocity < MAX_SPEED) velocity = Math.min(velocity + ACCELERATION, MAX_SPEED);
             setRun('right');
         }
     });
@@ -63,13 +65,11 @@
     window.addEventListener('keyup', (e) => {
         if(e.key === 'a' || e.key === 'A'){
             keys.a = false;
-            if(keys.d){ direction = 'right'; velocity = SPEED; setRun('right'); }
-            else { velocity = 0; setIdle(); }
+            if(!keys.d){ velocity *= friction; } else { direction = 'right'; velocity = Math.min(velocity + ACCELERATION, MAX_SPEED); setRun('right'); }
         }
         if(e.key === 'd' || e.key === 'D'){
             keys.d = false;
-            if(keys.a){ direction = 'left'; velocity = -SPEED; setRun('left'); }
-            else { velocity = 0; setIdle(); }
+            if(!keys.a){ velocity *= friction; } else { direction = 'left'; velocity = Math.max(velocity - ACCELERATION, -MAX_SPEED); setRun('left'); }
         }
     });
 
@@ -85,6 +85,16 @@
     }
 
     function loop(){
+        // Apply acceleration for held keys
+        if(keys.d && velocity < MAX_SPEED) velocity = Math.min(velocity + ACCELERATION, MAX_SPEED);
+        if(keys.a && velocity > -MAX_SPEED) velocity = Math.max(velocity - ACCELERATION, -MAX_SPEED);
+        
+        // Apply friction when no keys are held
+        if(!keys.a && !keys.d) {
+            velocity *= friction;
+            if(Math.abs(velocity) < 0.05) { velocity = 0; setIdle(); }
+        }
+
         if(velocity !== 0){
             posX += velocity;
             applyPosition();
