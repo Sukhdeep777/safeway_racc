@@ -19,7 +19,10 @@ body {
     position: relative;
     width: 1000px;
     height: 600px;
-    background-color: #000000;
+    background-image: url('imagenes/fondodisco.gif');
+    background-size: 100% 100%;
+    background-position: center;
+    background-repeat: no-repeat;
     border: 3px solid #ffffff;
     box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
     overflow: hidden;
@@ -28,12 +31,12 @@ body {
 
 /* Player styles */
 :root{
-    --player-height: 178px;
+    --player-height: 260px;
 }
 
 .player{
     position: absolute;
-    bottom: 10px;
+    bottom: 80px;
     left: 0;
     height: var(--player-height);
     width: auto;
