@@ -5,7 +5,8 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background-color: #1a1a1a;
+    background-color: #444242;
+    font-family: Arial, sans-serif;
 }
 
 .game-wrapper {
@@ -18,7 +19,7 @@ body {
     position: relative;
     width: 1000px;
     height: 600px;
-    background-color: rgba(0, 0, 0, 0.8);
+    background-color: #000000;
     border: 3px solid #ffffff;
     box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
     overflow: hidden;
@@ -27,13 +28,12 @@ body {
 
 /* Player styles */
 :root{
-    /* Aproximación visual para 1.78m: 178px (ajustable) */
     --player-height: 178px;
 }
 
 .player{
     position: absolute;
-    bottom: 10vh;
+    bottom: 10px;
     left: 0;
     height: var(--player-height);
     width: auto;
@@ -46,6 +46,8 @@ body {
     width: auto;
     user-select: none;
     pointer-events: none;
+    object-fit: contain;
+    background-color: transparent;
 }
 
 /* Reduce image smoothing on scaled GIFs */

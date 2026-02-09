@@ -11,10 +11,19 @@
         idleLeft: 'animaciones/paradoizquierda.gif'
     };
 
-    let velocity = 0; // px per frame (modified by speed)
-    const MAX_SPEED = 0.5; // max speed in px per frame
-    const ACCELERATION = 0.025; // acceleration rate
-    const friction = 0.96; // deceleration factor (0-1)
+    // Preload all GIFs
+    const preloadedGifs = {};
+    Object.entries(gifs).forEach(([key, path]) => {
+        const preload = new Image();
+        preload.onload = () => { preloadedGifs[key] = path; };
+        preload.onerror = () => { console.warn(`Failed to load: ${path}`); };
+        preload.src = path;
+    });
+
+    let velocity = 0; // px per frame
+    const MAX_SPEED = 4; // max speed
+    const ACCELERATION = 0.5; // acceleration
+    const friction = 0.85; // deceleration
     let direction = 'right'; // last facing direction
     let currentAnimation = null; // track current animation
     const keys = { a: false, d: false };
@@ -43,8 +52,7 @@
         const newSrc = direction === 'left' ? gifs.idleLeft : gifs.idleRight;
         if(currentAnimation !== newSrc) {
             currentAnimation = newSrc;
-            img.src = '';
-            setTimeout(() => { img.src = newSrc; }, 0);
+            img.src = newSrc;
         }
     }
 
@@ -52,8 +60,7 @@
         const newSrc = dir === 'left' ? gifs.leftRun : gifs.rightRun;
         if(currentAnimation !== newSrc) {
             currentAnimation = newSrc;
-            img.src = '';
-            setTimeout(() => { img.src = newSrc; }, 0);
+            img.src = newSrc;
         }
     }
 
@@ -84,18 +91,19 @@
         }
     });
 
-    // On window resize ensure player stays in bounds (but keep position)
+    // On window resize ensure player stays in bounds
     window.addEventListener('resize', () => {
-        if(isInitialized) applyPosition(); // only apply bounds, don't reinitialize
+        if(isInitialized) applyPosition();
     });
 
     // Initialize position centered horizontally (only called once)
     function init(){
-        if(isInitialized) return; // prevent re-initialization
+        if(isInitialized) return;
         const rect = container.getBoundingClientRect();
         const pRect = player.getBoundingClientRect();
         posX = Math.max(0, (rect.width - pRect.width) / 2);
         applyPosition();
+        setIdle(); // Set initial idle animation
         isInitialized = true;
     }
 
