@@ -12,14 +12,16 @@
     };
 
     let velocity = 0; // px per frame (modified by speed)
-    const MAX_SPEED = 1.2; // max speed in px per frame
-    const ACCELERATION = 0.06; // acceleration rate
-    const friction = 0.92; // deceleration factor (0-1)
+    const MAX_SPEED = 0.5; // max speed in px per frame
+    const ACCELERATION = 0.025; // acceleration rate
+    const friction = 0.96; // deceleration factor (0-1)
     let direction = 'right'; // last facing direction
+    let currentAnimation = null; // track current animation
     const keys = { a: false, d: false };
 
     // Position in px from left of container
     let posX = 0;
+    let isInitialized = false;
 
     function updateBounds(){
         const rect = container.getBoundingClientRect();
@@ -38,12 +40,21 @@
     }
 
     function setIdle(){
-        img.src = direction === 'left' ? gifs.idleLeft : gifs.idleRight;
+        const newSrc = direction === 'left' ? gifs.idleLeft : gifs.idleRight;
+        if(currentAnimation !== newSrc) {
+            currentAnimation = newSrc;
+            img.src = '';
+            setTimeout(() => { img.src = newSrc; }, 0);
+        }
     }
 
     function setRun(dir){
-        if(dir === 'left') img.src = gifs.leftRun;
-        else img.src = gifs.rightRun;
+        const newSrc = dir === 'left' ? gifs.leftRun : gifs.rightRun;
+        if(currentAnimation !== newSrc) {
+            currentAnimation = newSrc;
+            img.src = '';
+            setTimeout(() => { img.src = newSrc; }, 0);
+        }
     }
 
     // Keyboard
@@ -73,15 +84,19 @@
         }
     });
 
-    // On window resize ensure player stays in bounds
-    window.addEventListener('resize', () => applyPosition());
+    // On window resize ensure player stays in bounds (but keep position)
+    window.addEventListener('resize', () => {
+        if(isInitialized) applyPosition(); // only apply bounds, don't reinitialize
+    });
 
-    // Initialize position centered horizontally
+    // Initialize position centered horizontally (only called once)
     function init(){
+        if(isInitialized) return; // prevent re-initialization
         const rect = container.getBoundingClientRect();
         const pRect = player.getBoundingClientRect();
         posX = Math.max(0, (rect.width - pRect.width) / 2);
         applyPosition();
+        isInitialized = true;
     }
 
     function loop(){
@@ -92,7 +107,10 @@
         // Apply friction when no keys are held
         if(!keys.a && !keys.d) {
             velocity *= friction;
-            if(Math.abs(velocity) < 0.05) { velocity = 0; setIdle(); }
+            if(Math.abs(velocity) < 0.05) { 
+                velocity = 0; 
+                setIdle();
+            }
         }
 
         if(velocity !== 0){
