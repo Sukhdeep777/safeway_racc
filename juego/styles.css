@@ -111,6 +111,27 @@ img {
 }
 
 /* =========================================
+   BLOQUES FANTASMA
+   ========================================= */
+   
+#car-obstacle {
+    position: absolute;
+    bottom: 50px;      /* Altura de las ruedas */
+    left: 600px;       /* <--- AJUSTA ESTO: Mueve este número hasta que coincida con el parachoques */
+    width: 250px;      /* <--- AJUSTA ESTO: El largo del coche */
+    height: 100px;     /* La altura del obstáculo */
+    
+    background-color: rgba(255, 0, 0, 0.5); /* Rojo semitransparente para ver dónde está */
+    z-index: 20;       /* Delante del fondo pero detrás del personaje (opcional) */
+    display: none;     /* Oculto en el Nivel 1 */
+}
+
+/* Solo aparece cuando estamos en el Nivel 2 */
+.game-container.level-2 #car-obstacle {
+    display: block;
+}
+
+/* =========================================
    PANTALLA DE INTRO Y TRANSICIONES
    ========================================= */
 #intro-screen {

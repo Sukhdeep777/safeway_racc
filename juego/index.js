@@ -8,6 +8,26 @@
     const introScreen = document.getElementById('intro-screen');
     const blackCurtain = document.getElementById('black-curtain');
 
+// 4. LÓGICA DE MOVIMIENTO
+    
+    function checkCollision(nextX) {
+        if (currentLevel !== 2) return false; // Solo funciona en nivel 2
+
+        const carLeft = parseInt(window.getComputedStyle(carObstacle).left);
+        const playerWidth = player.getBoundingClientRect().width;
+        const playerRightSide = nextX + playerWidth;
+
+        // Si el jugador va a la derecha y toca el coche...
+        if (velocity > 0 && playerRightSide > (carLeft + 20)) {
+            return true; 
+        }
+        return false;
+    }
+    // <--- FIN DE LO NUEVO
+
+    function updateBounds(){
+       // ... (el resto sigue igual)    
+    }
     // 2. ANIMACIONES
     const gifs = {
         rightRun: 'animaciones/correr-derecho.gif',
