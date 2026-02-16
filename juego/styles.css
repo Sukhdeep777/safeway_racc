@@ -34,8 +34,10 @@ body {
 }
 
 .game-container.level-2 {
-    background-image: none; 
-    background-color: #1a0b2e;
+    background-image: url('imagenes/fondoparque.gif');  
+    /*Nos aseguramos de que cubra bien el fondo (igual que la disco) */
+    background-size: cover;
+    background-position: center;
 }
 
 img { 
