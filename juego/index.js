@@ -181,3 +181,4 @@
         img.onload = () => { window.addEventListener('keydown', handleStartInput); };
     }
 })();
+
