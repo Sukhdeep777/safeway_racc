@@ -45,6 +45,25 @@ img {
 }
 
 /* =========================================
+   NUEVO: IMAGEN TUTORIAL (TECLAS)
+   ========================================= */
+.tutorial-keys {
+    position: absolute;
+    bottom: 20px;   /* Separación del borde inferior */
+    left: 20px;     /* Separación del borde izquierdo */
+    width: 60px;   /* Puedes ajustar el tamaño aquí */
+    height: auto;
+    z-index: 5;     /* Por debajo del jugador pero sobre el fondo */
+    opacity: 0.8;   /* Un poco de transparencia para que no distraiga tanto */
+    pointer-events: none; /* Para que no interfiera si haces clic */
+}
+
+/* Ocultar tutorial en el nivel 2 si lo deseas */
+.game-container.level-2 .tutorial-keys {
+    display: none;
+}
+
+/* =========================================
    JUGADOR (PLAYER)
    ========================================= */
 :root {
