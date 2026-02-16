@@ -139,7 +139,7 @@ img {
     position: absolute;
     
     /* AJUSTE: Lo bajamos un poco (30px) para que quede debajo del texto del video */
-    bottom: 30px;
+    bottom: 12px;
     
     color: white;
     font-family: monospace, sans-serif; 
