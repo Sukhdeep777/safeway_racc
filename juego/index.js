@@ -139,6 +139,7 @@
     window.addEventListener('resize', () => { if(isInitialized) applyPosition(); });
 
     // 7. LOOP
+    // 7. LOOP
     function init(){
         if(isInitialized) return;
         posX = 50; 
@@ -148,7 +149,9 @@
         requestAnimationFrame(loop);
     }
 
+    // <--- ESTE ES EL NUEVO LOOP REEMPLAZADO:
     function loop(){
+        // 1. Calcular velocidad
         if(keys.d && velocity < MAX_SPEED) velocity = Math.min(velocity + ACCELERATION, MAX_SPEED);
         if(keys.a && velocity > -MAX_SPEED) velocity = Math.max(velocity - ACCELERATION, -MAX_SPEED);
         
@@ -159,7 +162,20 @@
              if(velocity !== 0) setRun(direction);
         }
 
-        if(velocity !== 0){ posX += velocity; applyPosition(); }
+        // 2. Comprobar colisión y mover
+        if(velocity !== 0){ 
+            // PREGUNTA: ¿Si me muevo, choco?
+            if (checkCollision(posX + velocity)) {
+                // SÍ CHOCO: Frenar en seco
+                velocity = 0;
+                setIdle(); 
+            } else {
+                // NO CHOCO: Moverse normal
+                posX += velocity; 
+                applyPosition(); 
+            }
+        }
+        
         requestAnimationFrame(loop);
     }
 
