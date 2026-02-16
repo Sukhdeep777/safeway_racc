@@ -57,7 +57,7 @@ img {
     left: 20px;     /* Separación del borde izquierdo */
     width: 60px;   /* Puedes ajustar el tamaño aquí */
     height: auto;
-    z-index: 5;     /* Por debajo del jugador pero sobre el fondo */
+    z-index: 11;     /* Por encima del jugador pero sobre el fondo */
     opacity: 0.8;   /* Un poco de transparencia para que no distraiga tanto */
     pointer-events: none; /* Para que no interfiera si haces clic */
 }
