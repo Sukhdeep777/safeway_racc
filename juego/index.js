@@ -7,27 +7,9 @@
     const keyPrompt = document.getElementById('key-prompt');
     const introScreen = document.getElementById('intro-screen');
     const blackCurtain = document.getElementById('black-curtain');
+    // IMPORTANTE: Faltaba definir esta variable aquí arriba
+    const carObstacle = document.getElementById('car-obstacle');
 
-// 4. LÓGICA DE MOVIMIENTO
-    
-    function checkCollision(nextX) {
-        if (currentLevel !== 2) return false; // Solo funciona en nivel 2
-
-        const carLeft = parseInt(window.getComputedStyle(carObstacle).left);
-        const playerWidth = player.getBoundingClientRect().width;
-        const playerRightSide = nextX + playerWidth;
-
-        // Si el jugador va a la derecha y toca el coche...
-        if (velocity > 0 && playerRightSide > (carLeft + 20)) {
-            return true; 
-        }
-        return false;
-    }
-    // <--- FIN DE LO NUEVO
-
-    function updateBounds(){
-       // ... (el resto sigue igual)    
-    }
     // 2. ANIMACIONES
     const gifs = {
         rightRun: 'animaciones/correr-derecho.gif',
@@ -55,6 +37,27 @@
     const keys = { a: false, d: false, e: false };
 
     // 4. LÓGICA DE MOVIMIENTO
+    
+    // Función para detectar colisión con el coche
+    function checkCollision(nextX) {
+        if (currentLevel !== 2) return false; 
+
+        // Posición izquierda del obstáculo
+        const carLeft = parseInt(window.getComputedStyle(carObstacle).left);
+        
+        // Donde estará el borde derecho del jugador
+        const playerWidth = player.getBoundingClientRect().width;
+        const playerRightSide = nextX + playerWidth;
+
+        // LÓGICA VIBE CODING: 
+        // Si me muevo a la derecha Y mi borde derecho toca el borde izquierdo del coche...
+        // He quitado el "+ 20" para que pare justo en la línea roja.
+        if (velocity > 0 && playerRightSide > carLeft) {
+            return true; // ¡Choque!
+        }
+        return false;
+    }
+
     function updateBounds(){
         const rect = container.getBoundingClientRect();
         const pRect = player.getBoundingClientRect();
@@ -139,7 +142,6 @@
     window.addEventListener('resize', () => { if(isInitialized) applyPosition(); });
 
     // 7. LOOP
-    // 7. LOOP
     function init(){
         if(isInitialized) return;
         posX = 50; 
@@ -149,9 +151,8 @@
         requestAnimationFrame(loop);
     }
 
-    // <--- ESTE ES EL NUEVO LOOP REEMPLAZADO:
     function loop(){
-        // 1. Calcular velocidad
+        // 1. Calcular velocidad (física normal)
         if(keys.d && velocity < MAX_SPEED) velocity = Math.min(velocity + ACCELERATION, MAX_SPEED);
         if(keys.a && velocity > -MAX_SPEED) velocity = Math.max(velocity - ACCELERATION, -MAX_SPEED);
         
@@ -162,15 +163,15 @@
              if(velocity !== 0) setRun(direction);
         }
 
-        // 2. Comprobar colisión y mover
+        // 2. Comprobación de Colisión (FRENO DE EMERGENCIA)
         if(velocity !== 0){ 
-            // PREGUNTA: ¿Si me muevo, choco?
+            // Predecimos el futuro: ¿Dónde estaré en el siguiente frame?
             if (checkCollision(posX + velocity)) {
-                // SÍ CHOCO: Frenar en seco
+                // Si la predicción dice que tocaré lo rojo, VELOCIDAD CERO.
                 velocity = 0;
                 setIdle(); 
             } else {
-                // NO CHOCO: Moverse normal
+                // Si hay camino libre, avanzo.
                 posX += velocity; 
                 applyPosition(); 
             }

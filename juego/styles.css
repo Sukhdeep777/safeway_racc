@@ -35,7 +35,6 @@ body {
 
 .game-container.level-2 {
     background-image: url('imagenes/fondoparque.gif');  
-    /*Nos aseguramos de que cubra bien el fondo (igual que la disco) */
     background-size: cover;
     background-position: center;
 }
@@ -111,91 +110,25 @@ img {
 }
 
 /* =========================================
-   BLOQUES FANTASMA
+   BLOQUE FANTASMA (COCHE)
    ========================================= */
-   
 #car-obstacle {
     position: absolute;
-    bottom: 50px;      /* Altura de las ruedas */
-    left: 600px;       /* <--- AJUSTA ESTO: Mueve este número hasta que coincida con el parachoques */
-    width: 250px;      /* <--- AJUSTA ESTO: El largo del coche */
-    height: 100px;     /* La altura del obstáculo */
+    bottom: 50px;      
+    left: 600px;       /* Ajusta esto para mover la barrera izquierda/derecha */
+    width: 250px;      
+    height: 100px;     
     
-    background-color: rgba(255, 0, 0, 0.5); /* Rojo semitransparente para ver dónde está */
-    z-index: 20;       /* Delante del fondo pero detrás del personaje (opcional) */
-    display: none;     /* Oculto en el Nivel 1 */
+    /* Cuando ya tengas el coche bien colocado, cambia esto a 'transparent' */
+    background-color: rgba(255, 0, 0, 0.5); 
+    
+    z-index: 20;       
+    display: none;     
 }
 
-/* Solo aparece cuando estamos en el Nivel 2 */
 .game-container.level-2 #car-obstacle {
     display: block;
 }
 
 /* =========================================
-   PANTALLA DE INTRO Y TRANSICIONES
-   ========================================= */
-#intro-screen {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: 2000;
-    background-color: black;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-#intro-video {
-    position: absolute;  /* 1. Lo saca del flujo normal para que flote al fondo */
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;   /* 2. LA CLAVE: Corta lo que sobra para llenar el hueco */
-    z-index: 0;          /* 3. Se asegura de estar detrás del texto */
-}
-
-/* --- ESTILOS DEL TEXTO DE INICIO (CATALÁN) --- */
-.press-key-msg {
-    position: absolute;
-    
-    /* AJUSTE: Lo bajamos un poco (30px) para que quede debajo del texto del video */
-    bottom: 12px;
-    
-    color: white;
-    font-family: monospace, sans-serif; 
-    z-index: 2001;
-    width: 100%;
-    text-align: center;
-    
-    text-shadow: 2px 2px 4px #000;
-    animation: blink 1.5s infinite;
-}
-
-.sub-text {
-    font-size: 18px; /* Tamaño discreto */
-    opacity: 0.9;
-    letter-spacing: 1px;
-    font-weight: bold;
-}
-
-@keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; } 
-}
-
-/* La cortina negra */
-#black-curtain {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: black;
-    z-index: 1500;
-    opacity: 0;   
-    pointer-events: none; 
-    transition: opacity 1.5s ease;
-}
+   PANTALLA DE INTRO Y TRANS
