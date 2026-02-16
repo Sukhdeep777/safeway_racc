@@ -35,7 +35,7 @@ body {
 
 /* AQUÍ RECUPERAMOS EL PARQUE */
 .game-container.level-2 {
-    background-image: url('imagenes/fondoparque.gif'); 
+    background-image: url('imagenes/image.gif'); 
     background-size: cover;
     background-position: center;
 }
