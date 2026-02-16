@@ -67,3 +67,22 @@ nav ul{
 .center{
     align-items: center;
 }
+
+.contenido{
+    gap: 500px;
+}
+
+.game-link{
+    display: block;
+    width: 300px;
+    height: 100px;
+    background-color: #ffd829;
+    color: #000;
+    font-weight: bold;
+    text-align: center;
+    line-height: 50px;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+    margin-left: 500px;
+}
