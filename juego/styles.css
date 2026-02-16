@@ -276,6 +276,67 @@ img {
     transition: opacity 1.5s ease;
 }
 
+/* =========================================
+   SISTEMA DE DIÀLEGS (NARRADOR I TORRENT)
+   ========================================= */
+
+.dialogue-container {
+    position: absolute;
+    bottom: 40px; 
+    left: 50%;
+    transform: translateX(-50%);
+    width: 70%; /* Ajustado al 70% como pediste */
+    min-height: 140px; 
+    background: rgba(0, 0, 0, 0.85); 
+    border: 2px solid #555;
+    padding: 25px; /* Más espacio interno para que no toque los bordes */
+    display: none; 
+    z-index: 3000;
+    box-sizing: border-box;
+    border-radius: 15px; /* Bordes redondeados como en la imagen */
+}
+
+.speaker-name {
+    display: block;
+    font-weight: bold;
+    font-size: 22px;
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Colores de nombres */
+.name-narrador { color: #0084ff; } /* Azul profesional */
+.name-torrent { color: #ff8800; }  /* Naranja Torrent */
+
+.dialogue-text {
+    color: white;
+    font-size: 19px;
+    margin: 0;
+    line-height: 1.6; /* Mayor separación entre líneas para lectura fácil */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.continue-prompt {
+    position: absolute;
+    bottom: 15px;
+    right: 25px;
+    color: rgba(255, 255, 255, 0.6);
+    font-family: monospace;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.key-cap {
+    background: white;
+    color: black;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: bold;
+    border: 1px solid #555;
+}
 
 /* =========================================
    OBSTÁCULO INVISIBLE (COCHE)
