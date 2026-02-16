@@ -1,3 +1,6 @@
+/* =========================================
+   CONFIGURACIÓN GENERAL Y FONDO
+   ========================================= */
 body {
     margin: 0;
     padding: 0;
@@ -5,7 +8,7 @@ body {
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background-color: #444242;
+    background-color: #222; /* Fondo oscuro fuera del juego */
     font-family: Arial, sans-serif;
 }
 
@@ -15,43 +18,109 @@ body {
     align-items: center;
 }
 
+/* El escenario del juego */
 .game-container {
     position: relative;
     width: 1000px;
     height: 600px;
+    
+    /* Fondo del Nivel 1 */
     background-image: url('imagenes/fondodisco.gif');
-    background-size: 100% 100%;
+    background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
+    
     border: 3px solid #ffffff;
     box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
     overflow: hidden;
     z-index: 1000;
+    transition: background 0.5s ease; /* Transición suave al cambiar de nivel */
 }
 
-/* Player styles */
-:root{
+/* Fondo del Nivel 2 (Se activa con JS) */
+.game-container.level-2 {
+    background-image: none; 
+    background-color: #1a0b2e; /* Morado oscuro */
+}
+
+/* Configuración global de imágenes */
+img { 
+    image-rendering: pixelated; /* Ideal para pixel art */
+}
+
+
+/* =========================================
+   JUGADOR (PLAYER)
+   ========================================= */
+:root {
     --player-height: 260px;
 }
 
-.player{
+.player {
     position: absolute;
-    bottom: 80px;
+    bottom: 80px; /* Nivel del suelo */
     left: 0;
     height: var(--player-height);
     width: auto;
     will-change: left;
+    z-index: 10; /* El jugador SIEMPRE por delante de la puerta */
 }
 
-#player-img{
+#player-img {
     display: block;
     height: 100%;
     width: auto;
     user-select: none;
     pointer-events: none;
     object-fit: contain;
-    background-color: transparent;
 }
 
-/* Reduce image smoothing on scaled GIFs */
-img{ image-rendering: -webkit-optimize-contrast; }
+
+/* =========================================
+   PUERTA Y TECLA "E" (INTERACCIÓN)
+   ========================================= */
+.interactive-object {
+    position: absolute;
+    bottom: 80px; /* Mismo suelo que el jugador */
+    
+    /* AQUÍ ESTÁ EL CAMBIO: right: 0 pega la puerta al borde derecho */
+    left: 800px;
+    
+    height: auto; 
+    width: auto; 
+    
+    /* Alineación vertical: Icono arriba, Puerta abajo */
+    display: flex;
+    flex-direction: column; 
+    align-items: center;    
+    
+    z-index: 1; /* Detrás del jugador */
+}
+
+.door-img {
+    position: relative; 
+    height: 300px; /* Altura fija para la puerta */
+    width: auto;
+    margin: 0; 
+    image-rendering: -webkit-optimize-contrast;
+}
+
+.prompt-icon {
+    width: 100px; /* Icono GRANDE */
+    margin-bottom: 5px; 
+    opacity: 0; /* Invisible por defecto */
+    transition: opacity 0.3s ease;
+    
+    /* Animación de flotar arriba y abajo */
+    animation: float 1.5s infinite ease-in-out;
+}
+
+.prompt-icon.visible {
+    opacity: 1; /* Visible cuando el JS lo activa */
+}
+
+/* Animación de flotación para la tecla E */
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
