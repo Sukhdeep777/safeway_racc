@@ -33,7 +33,6 @@ body {
     transition: background 0.5s ease;
 }
 
-/* AQUÍ RECUPERAMOS EL PARQUE */
 .game-container.level-2 {
     background-image: url('imagenes/image.gif'); 
     background-size: cover;
@@ -42,6 +41,25 @@ body {
 
 img { 
     image-rendering: pixelated;
+}
+
+/* =========================================
+   NUEVO: IMAGEN TUTORIAL (TECLAS)
+   ========================================= */
+.tutorial-keys {
+    position: absolute;
+    bottom: 20px;   /* Separación del borde inferior */
+    left: 20px;     /* Separación del borde izquierdo */
+    width: 60px;   /* Puedes ajustar el tamaño aquí */
+    height: auto;
+    z-index: 5;     /* Por debajo del jugador pero sobre el fondo */
+    opacity: 0.8;   /* Un poco de transparencia para que no distraiga tanto */
+    pointer-events: none; /* Para que no interfiera si haces clic */
+}
+
+/* Ocultar tutorial en el nivel 2 si lo deseas */
+.game-container.level-2 .tutorial-keys {
+    display: none;
 }
 
 /* =========================================
@@ -136,7 +154,6 @@ img {
     z-index: 0;          
 }
 
-/* --- ESTILOS DEL TEXTO DE INICIO (CATALÁN) --- */
 .press-key-msg {
     position: absolute;
     bottom: 12px;
@@ -161,7 +178,6 @@ img {
     50% { opacity: 0.3; } 
 }
 
-/* La cortina negra */
 #black-curtain {
     position: absolute;
     top: 0;
@@ -184,10 +200,7 @@ img {
     left: 600px;       
     width: 250px;      
     height: 100px;     
-    
-    /* CAMBIO IMPORTANTE: Ahora es transparente (invisible) */
     background-color: transparent; 
-    
     z-index: 20;       
     display: none;     
 }
