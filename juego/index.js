@@ -3,12 +3,10 @@
     const img = document.getElementById('player-img');
     const player = document.getElementById('player');
     const container = document.querySelector('.game-container');
-   
-    // Nivel 1
+    
     const level1Exit = document.getElementById('level1-exit');
     const keyPrompt = document.getElementById('key-prompt');
-   
-    // Nivel 2
+    
     const promptSign = document.getElementById('prompt-sign');
     const promptScooter = document.getElementById('prompt-scooter');
     const promptCar = document.getElementById('prompt-car');
@@ -17,12 +15,10 @@
     const blackCurtain = document.getElementById('black-curtain');
     const carObstacle = document.getElementById('car-obstacle');
 
-    // Referencias Caja de Diálogo
     const dialogueBox = document.getElementById('dialogue-box');
     const speakerName = document.getElementById('speaker-name');
     const dialogueText = document.getElementById('dialogue-text');
 
-    // REFERENCIAS NUEVAS (CONFIRMACIÓN)
     const confirmationModal = document.getElementById('confirmation-modal');
     const btnYes = document.getElementById('btn-yes');
     const btnNo = document.getElementById('btn-no');
@@ -49,13 +45,12 @@
     let currentLevel = 1;
     let posX = 0;
     
-    // Estados lógicos
     let isInitialized = false; 
     let gameStarted = false;
     let isNearExit = false;
-    let isDialogueActive = false; // ¿Hay texto en pantalla?
-    let isConfirmationActive = false; // ¿Hay ventana SI/NO en pantalla?
-    let currentInteraction = null; // Guardamos qué objeto estamos tocando ('cartel', etc.)
+    let isDialogueActive = false; 
+    let isConfirmationActive = false; 
+    let currentInteraction = null; 
     let currentStep = 0;
 
     const keys = { a: false, d: false, e: false };
@@ -79,15 +74,12 @@
         if (currentStep < story.length) {
             isDialogueActive = true;
             dialogueBox.style.display = 'block';
-            
             const line = story[currentStep];
             speakerName.textContent = line.name + ":";
             speakerName.className = "speaker-name " + line.class;
             dialogueText.textContent = line.text;
-            
             currentStep++;
         } else {
-            // FIN INTRO
             isDialogueActive = false;
             dialogueBox.style.display = 'none';
             isInitialized = true; 
@@ -95,16 +87,13 @@
         }
     }
 
-    // --- MOSTRAR MENSAJE DEL JUEGO ---
     function showMessage(name, cssClass, text, interactionType) {
         isDialogueActive = true;
-        currentInteraction = interactionType; // Guardamos "cartel", "scooter", etc.
+        currentInteraction = interactionType; 
         dialogueBox.style.display = 'block';
-        
         speakerName.textContent = name + ":";
         speakerName.className = "speaker-name " + cssClass;
         dialogueText.textContent = text;
-        
         velocity = 0;
         setIdle();
     }
@@ -115,35 +104,27 @@
         currentInteraction = null;
     }
 
-    // --- LÓGICA DE CONFIRMACIÓN (SI / NO) ---
     function openConfirmation() {
-        // 1. Cerramos el texto anterior
         dialogueBox.style.display = 'none';
         isDialogueActive = false;
-
-        // 2. Abrimos la modal
-        isConfirmationActive = true; // Bloquea el movimiento
+        isConfirmationActive = true; 
         confirmationModal.style.display = 'block';
     }
 
     function closeConfirmation() {
         confirmationModal.style.display = 'none';
         isConfirmationActive = false;
-        currentInteraction = null; // Reseteamos interacción
+        currentInteraction = null; 
     }
 
     // LISTENERS DE LOS BOTONES
     btnYes.addEventListener('click', () => {
-        // AQUÍ PROGRAMAS QUÉ PASA SI DICES QUE SÍ
-        console.log("Has dicho que SÍ"); 
-        
-        // Por ahora, cerramos y volvemos al juego (o aquí pones Game Over / Next Level)
+        console.log("Has triat l'opció: " + currentInteraction); 
         closeConfirmation();
     });
 
     btnNo.addEventListener('click', () => {
-        console.log("Has dicho que NO");
-        closeConfirmation(); // Simplemente vuelve al juego
+        closeConfirmation(); 
     });
 
     // 6. MOVIMIENTO Y FÍSICA
@@ -231,42 +212,32 @@
         setIdle();
     }
 
-    // 8. INPUTS (TECLADO) - LÓGICA PRINCIPAL
+    // 8. INPUTS (TECLADO)
     window.addEventListener('keydown', (e) => {
         if (!gameStarted) return;
         const key = e.key.toLowerCase();
        
-        // A) GESTIÓN DE DIÁLOGOS
         if(key === 'e' && isDialogueActive) {
-            
-            // 1. INTRO
             if (!isInitialized) {
                 showNextDialogue();
             } 
-            // 2. INTERACCIONES DEL JUEGO
             else {
-                // Si estábamos leyendo el cartel...
-                if (currentInteraction === 'cartel') {
-                    // ...NO cerramos, sino que abrimos confirmación
+                // Si es el cartel o el patinete, abrimos confirmación al pulsar E de nuevo
+                if (currentInteraction === 'cartel' || currentInteraction === 'scooter') {
                     openConfirmation();
                 } else {
-                    // Para cualquier otro texto normal, cerramos
                     closeMessage();
                 }
             }
             return;
         }
 
-        // Si la confirmación está abierta, el teclado no hace nada
         if (isConfirmationActive) return;
 
-        // B) MOVIMIENTO
         if(key === 'a') keys.a = true;
         if(key === 'd') keys.d = true;
 
-        // C) INTERACCIONES (Solo si no hay diálogo ni confirmación)
         if(key === 'e' && !isDialogueActive && !isConfirmationActive) {
-            
             const playerRect = player.getBoundingClientRect();
             const containerRect = container.getBoundingClientRect();
             const relativeX = (playerRect.left + playerRect.width / 2) - containerRect.left;
@@ -276,14 +247,13 @@
             }
 
             if (currentLevel === 2) {
-                // Interacción CARTEL
+                // Lógica del Cartel
                 if (Math.abs(relativeX - 75) < 60) {
-                    showMessage(
-                        "Torrent", 
-                        "name-torrent", 
-                        "És bona opció però la meva casa esta molt lluny.",
-                        "cartel" // IMPORTANTE: Le decimos que esto es el cartel
-                    );
+                    showMessage("Torrent", "name-torrent", "És bona opció però la meva casa està molt lluny.", "cartel");
+                }
+                // Lógica del Patinete (Scooter)
+                if (Math.abs(relativeX - 320) < 60) {
+                    showMessage("Torrent", "name-torrent", "Podria anar amb patinet, però no porto el casc i no vull jugar-me-la.", "scooter");
                 }
             }
         }
@@ -297,7 +267,6 @@
 
     // 9. LOOP PRINCIPAL
     function loop(){
-        // Si hay dialogo O hay confirmación abierta -> Pausa física
         if (!isInitialized || isDialogueActive || isConfirmationActive) {
              if(isInitialized) requestAnimationFrame(loop);
              return;
