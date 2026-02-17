@@ -281,7 +281,7 @@
                     showMessage(
                         "Torrent", 
                         "name-torrent", 
-                        "És bona opció però la meva casa aquesta molt lluny.",
+                        "És bona opció però la meva casa esta molt lluny.",
                         "cartel" // IMPORTANTE: Le decimos que esto es el cartel
                     );
                 }
