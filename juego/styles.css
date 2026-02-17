@@ -43,7 +43,7 @@ body {
 
 /* FONDO NIVEL 3 (PARQUE) */
 .game-container.level-3 {
-    background-image: url('imagenes/fondoparque.gif'); 
+    background-image: url('imagenes/parque.gif'); 
     background-size: cover;
     background-position: center;
 }
