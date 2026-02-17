@@ -22,6 +22,11 @@
     const speakerName = document.getElementById('speaker-name');
     const dialogueText = document.getElementById('dialogue-text');
 
+    // REFERENCIAS NUEVAS (CONFIRMACIÓN)
+    const confirmationModal = document.getElementById('confirmation-modal');
+    const btnYes = document.getElementById('btn-yes');
+    const btnNo = document.getElementById('btn-no');
+
     // 2. IMÁGENES PRECARGADAS
     const gifs = {
         rightRun: 'animaciones/correr-derecho.gif',
@@ -43,10 +48,14 @@
     let currentAnimation = null;
     let currentLevel = 1;
     let posX = 0;
-    let isInitialized = false; // Importante: esto controla si podemos movernos
+    
+    // Estados lógicos
+    let isInitialized = false; 
     let gameStarted = false;
     let isNearExit = false;
-    let isDialogueActive = false;
+    let isDialogueActive = false; // ¿Hay texto en pantalla?
+    let isConfirmationActive = false; // ¿Hay ventana SI/NO en pantalla?
+    let currentInteraction = null; // Guardamos qué objeto estamos tocando ('cartel', etc.)
     let currentStep = 0;
 
     const keys = { a: false, d: false, e: false };
@@ -68,7 +77,6 @@
     // 5. LÓGICA DE DIÁLOGOS
     function showNextDialogue() {
         if (currentStep < story.length) {
-            // MOSTRAR SIGUIENTE FRASE DE LA INTRO
             isDialogueActive = true;
             dialogueBox.style.display = 'block';
             
@@ -79,17 +87,18 @@
             
             currentStep++;
         } else {
-            // FINAL DE LA INTRO -> ACTIVAR EL JUEGO
+            // FIN INTRO
             isDialogueActive = false;
             dialogueBox.style.display = 'none';
-            isInitialized = true; // <--- ESTO ES LO QUE TE FALTABA PARA MOVERTE
+            isInitialized = true; 
             requestAnimationFrame(loop);
         }
     }
 
-    // --- FUNCIÓN PARA MOSTRAR UN MENSAJE ÚNICO (CARTEL, ETC) ---
-    function showMessage(name, cssClass, text) {
-        isDialogueActive = true; 
+    // --- MOSTRAR MENSAJE DEL JUEGO ---
+    function showMessage(name, cssClass, text, interactionType) {
+        isDialogueActive = true;
+        currentInteraction = interactionType; // Guardamos "cartel", "scooter", etc.
         dialogueBox.style.display = 'block';
         
         speakerName.textContent = name + ":";
@@ -100,13 +109,44 @@
         setIdle();
     }
 
-    // --- FUNCIÓN PARA CERRAR EL MENSAJE ---
     function closeMessage() {
         isDialogueActive = false;
         dialogueBox.style.display = 'none';
+        currentInteraction = null;
     }
 
-    // 6. MOVIMIENTO Y COLISIONES
+    // --- LÓGICA DE CONFIRMACIÓN (SI / NO) ---
+    function openConfirmation() {
+        // 1. Cerramos el texto anterior
+        dialogueBox.style.display = 'none';
+        isDialogueActive = false;
+
+        // 2. Abrimos la modal
+        isConfirmationActive = true; // Bloquea el movimiento
+        confirmationModal.style.display = 'block';
+    }
+
+    function closeConfirmation() {
+        confirmationModal.style.display = 'none';
+        isConfirmationActive = false;
+        currentInteraction = null; // Reseteamos interacción
+    }
+
+    // LISTENERS DE LOS BOTONES
+    btnYes.addEventListener('click', () => {
+        // AQUÍ PROGRAMAS QUÉ PASA SI DICES QUE SÍ
+        console.log("Has dicho que SÍ"); 
+        
+        // Por ahora, cerramos y volvemos al juego (o aquí pones Game Over / Next Level)
+        closeConfirmation();
+    });
+
+    btnNo.addEventListener('click', () => {
+        console.log("Has dicho que NO");
+        closeConfirmation(); // Simplemente vuelve al juego
+    });
+
+    // 6. MOVIMIENTO Y FÍSICA
     function updateBounds(){
         const rect = container.getBoundingClientRect();
         const pRect = player.getBoundingClientRect();
@@ -150,7 +190,7 @@
         }
     }
 
-    // 7. INTERACCIONES
+    // 7. CHECKER DE INTERACCIONES
     function checkInteractions() {
         const playerRect = player.getBoundingClientRect();
         const containerRect = container.getBoundingClientRect();
@@ -191,7 +231,7 @@
         setIdle();
     }
 
-    // 8. INPUTS (TECLADO) - *** AQUÍ ESTABA EL PROBLEMA ***
+    // 8. INPUTS (TECLADO) - LÓGICA PRINCIPAL
     window.addEventListener('keydown', (e) => {
         if (!gameStarted) return;
         const key = e.key.toLowerCase();
@@ -199,23 +239,33 @@
         // A) GESTIÓN DE DIÁLOGOS
         if(key === 'e' && isDialogueActive) {
             
-            // CASO 1: Estamos en la INTRO (Aún no hemos empezado a jugar)
+            // 1. INTRO
             if (!isInitialized) {
-                showNextDialogue(); // Esto avanza la historia o activa el juego al final
+                showNextDialogue();
             } 
-            // CASO 2: Estamos jugando y leyendo un cartel
+            // 2. INTERACCIONES DEL JUEGO
             else {
-                closeMessage(); // Esto solo cierra la ventanita
+                // Si estábamos leyendo el cartel...
+                if (currentInteraction === 'cartel') {
+                    // ...NO cerramos, sino que abrimos confirmación
+                    openConfirmation();
+                } else {
+                    // Para cualquier otro texto normal, cerramos
+                    closeMessage();
+                }
             }
             return;
         }
+
+        // Si la confirmación está abierta, el teclado no hace nada
+        if (isConfirmationActive) return;
 
         // B) MOVIMIENTO
         if(key === 'a') keys.a = true;
         if(key === 'd') keys.d = true;
 
-        // C) INTERACCIONES (Solo si no hay diálogo)
-        if(key === 'e' && !isDialogueActive) {
+        // C) INTERACCIONES (Solo si no hay diálogo ni confirmación)
+        if(key === 'e' && !isDialogueActive && !isConfirmationActive) {
             
             const playerRect = player.getBoundingClientRect();
             const containerRect = container.getBoundingClientRect();
@@ -231,7 +281,8 @@
                     showMessage(
                         "Torrent", 
                         "name-torrent", 
-                        "És bona opció però la meva casa esta molt lluny."
+                        "És bona opció però la meva casa aquesta molt lluny.",
+                        "cartel" // IMPORTANTE: Le decimos que esto es el cartel
                     );
                 }
             }
@@ -246,7 +297,8 @@
 
     // 9. LOOP PRINCIPAL
     function loop(){
-        if (!isInitialized || isDialogueActive) {
+        // Si hay dialogo O hay confirmación abierta -> Pausa física
+        if (!isInitialized || isDialogueActive || isConfirmationActive) {
              if(isInitialized) requestAnimationFrame(loop);
              return;
         }
