@@ -13,11 +13,15 @@ body {
 }
 
 
+
+
 .game-wrapper {
     display: flex;
     justify-content: center;
     align-items: center;
 }
+
+
 
 
 .game-container {
@@ -36,6 +40,8 @@ body {
 }
 
 
+
+
 /* FONDO NIVEL 2 */
 .game-container.level-2 {
     background-image: url('imagenes/image.gif');
@@ -44,9 +50,13 @@ body {
 }
 
 
+
+
 img {
     image-rendering: pixelated;
 }
+
+
 
 
 /* =========================================
@@ -64,9 +74,13 @@ img {
 }
 
 
+
+
 .game-container.level-2 .tutorial-keys {
     display: none;
 }
+
+
 
 
 /* =========================================
@@ -75,6 +89,8 @@ img {
 :root {
     --player-height: 260px;
 }
+
+
 
 
 .player {
@@ -88,6 +104,8 @@ img {
 }
 
 
+
+
 #player-img {
     display: block;
     height: 100%;
@@ -96,6 +114,8 @@ img {
     pointer-events: none;
     object-fit: contain;
 }
+
+
 
 
 /* =========================================
@@ -114,6 +134,8 @@ img {
 }
 
 
+
+
 .door-img {
     position: relative;
     height: 300px;
@@ -121,6 +143,8 @@ img {
     margin: 0;
     image-rendering: -webkit-optimize-contrast;
 }
+
+
 
 
 .prompt-icon {
@@ -132,15 +156,21 @@ img {
 }
 
 
+
+
 .prompt-icon.visible {
     opacity: 1;
 }
+
+
 
 
 @keyframes float {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-10px); }
 }
+
+
 
 
 /* =========================================
@@ -158,9 +188,13 @@ img {
 }
 
 
+
+
 .game-container.level-2 #level2-interactions {
     display: block; /* Visible en nivel 2 */
 }
+
+
 
 
 .prompt-l2 {
@@ -172,10 +206,14 @@ img {
 }
 
 
+
+
 .prompt-l2 img {
     width: 100%;
     height: auto;
 }
+
+
 
 
 .prompt-l2.visible {
@@ -183,7 +221,11 @@ img {
 }
 
 
+
+
 /* POSICIONES BASADAS EN TUS FLECHAS */
+
+
 
 
 /* 1. Cartel: Arriba a la izquierda */
@@ -194,6 +236,8 @@ img {
 }
 
 
+
+
 /* 2. Patinete: Centro, altura media */
 #prompt-scooter {
     left: 320px;
@@ -201,11 +245,15 @@ img {
 }
 
 
+
+
 /* 3. Coche: Lo ponemos justo donde empieza el bloque invisible (600px) */
 #prompt-car {
     left: 700px;    /* <-- ALINEADO CON EL OBSTÁCULO */
     bottom: 250px;  /* <-- Altura ajustada para que se vea bien */
 }
+
+
 
 
 /* =========================================
@@ -225,6 +273,8 @@ img {
 }
 
 
+
+
 #intro-video {
     position: absolute;  
     top: 0;
@@ -234,6 +284,8 @@ img {
     object-fit: cover;  
     z-index: 0;          
 }
+
+
 
 
 .press-key-msg {
@@ -249,6 +301,8 @@ img {
 }
 
 
+
+
 .sub-text {
     font-size: 18px;
     opacity: 0.9;
@@ -257,10 +311,14 @@ img {
 }
 
 
+
+
 @keyframes blink {
     0%, 100% { opacity: 1; }
     50% { opacity: 0.3; }
 }
+
+
 
 
 #black-curtain {
@@ -276,25 +334,28 @@ img {
     transition: opacity 1.5s ease;
 }
 
+
 /* =========================================
    SISTEMA DE DIÀLEGS (NARRADOR I TORRENT)
    ========================================= */
 
+
 .dialogue-container {
     position: absolute;
-    bottom: 40px; 
+    bottom: 40px;
     left: 50%;
     transform: translateX(-50%);
     width: 70%; /* Ajustado al 70% como pediste */
-    min-height: 140px; 
-    background: rgba(0, 0, 0, 0.85); 
+    min-height: 140px;
+    background: rgba(0, 0, 0, 0.85);
     border: 2px solid #555;
     padding: 25px; /* Más espacio interno para que no toque los bordes */
-    display: none; 
+    display: none;
     z-index: 3000;
     box-sizing: border-box;
     border-radius: 15px; /* Bordes redondeados como en la imagen */
 }
+
 
 .speaker-name {
     display: block;
@@ -305,9 +366,11 @@ img {
     letter-spacing: 1px;
 }
 
+
 /* Colores de nombres */
 .name-narrador { color: #0084ff; } /* Azul profesional */
 .name-torrent { color: #ff8800; }  /* Naranja Torrent */
+
 
 .dialogue-text {
     color: white;
@@ -316,6 +379,7 @@ img {
     line-height: 1.6; /* Mayor separación entre líneas para lectura fácil */
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
+
 
 .continue-prompt {
     position: absolute;
@@ -329,6 +393,7 @@ img {
     gap: 8px;
 }
 
+
 .key-cap {
     background: white;
     color: black;
@@ -337,6 +402,7 @@ img {
     font-weight: bold;
     border: 1px solid #555;
 }
+
 
 /* =========================================
    OBSTÁCULO INVISIBLE (COCHE)
@@ -351,6 +417,8 @@ img {
     z-index: 20;      
     display: none;    
 }
+
+
 
 
 .game-container.level-2 #car-obstacle {

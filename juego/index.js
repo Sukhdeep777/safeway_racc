@@ -43,7 +43,7 @@
     let currentAnimation = null;
     let currentLevel = 1;
     let posX = 0;
-    let isInitialized = false;
+    let isInitialized = false; // Importante: esto controla si podemos movernos
     let gameStarted = false;
     let isNearExit = false;
     let isDialogueActive = false;
@@ -51,7 +51,7 @@
 
     const keys = { a: false, d: false, e: false };
 
-    // 4. HISTORIA (DIÁLOGOS)
+    // 4. HISTORIA (DIÁLOGOS INTRO)
     const story = [
         {
             name: "Narrador",
@@ -68,6 +68,7 @@
     // 5. LÓGICA DE DIÁLOGOS
     function showNextDialogue() {
         if (currentStep < story.length) {
+            // MOSTRAR SIGUIENTE FRASE DE LA INTRO
             isDialogueActive = true;
             dialogueBox.style.display = 'block';
             
@@ -78,12 +79,31 @@
             
             currentStep++;
         } else {
-            // Final de la intro
+            // FINAL DE LA INTRO -> ACTIVAR EL JUEGO
             isDialogueActive = false;
             dialogueBox.style.display = 'none';
-            isInitialized = true; 
+            isInitialized = true; // <--- ESTO ES LO QUE TE FALTABA PARA MOVERTE
             requestAnimationFrame(loop);
         }
+    }
+
+    // --- FUNCIÓN PARA MOSTRAR UN MENSAJE ÚNICO (CARTEL, ETC) ---
+    function showMessage(name, cssClass, text) {
+        isDialogueActive = true; 
+        dialogueBox.style.display = 'block';
+        
+        speakerName.textContent = name + ":";
+        speakerName.className = "speaker-name " + cssClass;
+        dialogueText.textContent = text;
+        
+        velocity = 0;
+        setIdle();
+    }
+
+    // --- FUNCIÓN PARA CERRAR EL MENSAJE ---
+    function closeMessage() {
+        isDialogueActive = false;
+        dialogueBox.style.display = 'none';
     }
 
     // 6. MOVIMIENTO Y COLISIONES
@@ -140,7 +160,7 @@
             if(!level1Exit || level1Exit.style.display === 'none') return;
             const doorRect = level1Exit.getBoundingClientRect();
             const doorCenter = (doorRect.left + doorRect.width/2) - containerRect.left;
-           
+            
             if (Math.abs(relativePlayerX - doorCenter) < 100) {
                 if (!isNearExit) { isNearExit = true; keyPrompt.classList.add('visible'); }
             } else {
@@ -171,23 +191,49 @@
         setIdle();
     }
 
-    // 8. INPUTS (TECLADO)
+    // 8. INPUTS (TECLADO) - *** AQUÍ ESTABA EL PROBLEMA ***
     window.addEventListener('keydown', (e) => {
         if (!gameStarted) return;
         const key = e.key.toLowerCase();
        
-        // Lógica de diálogos prioritaria
+        // A) GESTIÓN DE DIÁLOGOS
         if(key === 'e' && isDialogueActive) {
-            showNextDialogue();
+            
+            // CASO 1: Estamos en la INTRO (Aún no hemos empezado a jugar)
+            if (!isInitialized) {
+                showNextDialogue(); // Esto avanza la historia o activa el juego al final
+            } 
+            // CASO 2: Estamos jugando y leyendo un cartel
+            else {
+                closeMessage(); // Esto solo cierra la ventanita
+            }
             return;
         }
 
-        // Lógica de juego
+        // B) MOVIMIENTO
         if(key === 'a') keys.a = true;
         if(key === 'd') keys.d = true;
+
+        // C) INTERACCIONES (Solo si no hay diálogo)
         if(key === 'e' && !isDialogueActive) {
+            
+            const playerRect = player.getBoundingClientRect();
+            const containerRect = container.getBoundingClientRect();
+            const relativeX = (playerRect.left + playerRect.width / 2) - containerRect.left;
+
             if (isNearExit && currentLevel === 1) {
                 loadLevel2();
+            }
+
+            if (currentLevel === 2) {
+                // Interacción CARTEL
+                if (Math.abs(relativeX - 75) < 60) {
+                    showMessage(
+                        "Torrent", 
+                        "name-torrent", 
+                        "És bona opció però la meva casa esta molt lluny."
+                    );
+                }
             }
         }
     });
@@ -200,7 +246,10 @@
 
     // 9. LOOP PRINCIPAL
     function loop(){
-        if (!isInitialized || isDialogueActive) return;
+        if (!isInitialized || isDialogueActive) {
+             if(isInitialized) requestAnimationFrame(loop);
+             return;
+        }
 
         if (keys.a && !keys.d) direction = 'left';
         if (keys.d && !keys.a) direction = 'right';
@@ -247,7 +296,7 @@
            
             setTimeout(() => { 
                 blackCurtain.style.opacity = '0'; 
-                showNextDialogue(); // Lanzamos el diálogo tras el fundido
+                showNextDialogue(); 
             }, 500);
         }, 1500);
     }
