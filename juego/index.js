@@ -11,7 +11,7 @@
     const promptSign = document.getElementById('prompt-sign');
     const promptScooter = document.getElementById('prompt-scooter');
     const promptCar = document.getElementById('prompt-car');
-    const promptPark = document.getElementById('prompt-park'); // NUEVO
+    const promptPark = document.getElementById('prompt-park'); 
 
     const introScreen = document.getElementById('intro-screen');
     const blackCurtain = document.getElementById('black-curtain');
@@ -177,6 +177,7 @@
         const carWidth = parseInt(carStyle.width);
         const playerWidth = player.getBoundingClientRect().width;
         
+        // Coordenadas simples de colisión rectangular
         if (nextX + playerWidth > carLeft + 20 && nextX < carLeft + carWidth) {
             return true;
         }
@@ -220,6 +221,15 @@
 
         // NIVEL 2
         if (currentLevel === 2) {
+            
+            // Si el parque ya está desbloqueado, ocultamos las otras interacciones visualmente
+            if (isParkUnlocked) {
+                 promptSign.classList.remove('visible');
+                 promptScooter.classList.remove('visible');
+                 promptCar.classList.remove('visible');
+                 return; // Salimos para no volver a activarlas
+            }
+
             // Cartel
             if (Math.abs(relativePlayerX - 75) < 60) promptSign.classList.add('visible');
             else promptSign.classList.remove('visible');
@@ -231,10 +241,6 @@
             // Coche
             if (Math.abs(relativePlayerX - 600) < 60) promptCar.classList.add('visible');
             else promptCar.classList.remove('visible');
-
-            // Parque (Solo si está desbloqueado)
-            // Nota: La E ya está visible por CSS 'unlocked', aquí solo comprobamos distancia lógica
-            // para saber si puedes pulsar E, no para mostrarla (porque ya se muestra siempre)
         }
     }
 
@@ -327,14 +333,16 @@
                     return; // Importante para no activar otras cosas a la vez
                 }
 
-                if (Math.abs(relativeX - 75) < 60) {
-                    showMessage("Torrent", "name-torrent", "És bona opció però la meva casa està molt lluny.", "cartel");
-                }
-                else if (Math.abs(relativeX - 320) < 60) {
-                    showMessage("Torrent", "name-torrent", "Podria anar amb patinet, però no porto el casc i no vull jugar-me-la.", "scooter");
-                }
-                else if (Math.abs(relativeX - 600) < 100) { 
-                    showMessage("Torrent", "name-torrent", "No sé si estic en bones condicions per conduir...", "coche");
+                if (!isParkUnlocked) {
+                    if (Math.abs(relativeX - 75) < 60) {
+                        showMessage("Torrent", "name-torrent", "És bona opció però la meva casa està molt lluny.", "cartel");
+                    }
+                    else if (Math.abs(relativeX - 320) < 60) {
+                        showMessage("Torrent", "name-torrent", "Podria anar amb patinet, però no porto el casc i no vull jugar-me-la.", "scooter");
+                    }
+                    else if (Math.abs(relativeX - 600) < 100) { 
+                        showMessage("Torrent", "name-torrent", "No sé si estic en bones condicions per conduir...", "coche");
+                    }
                 }
             }
         }
@@ -369,8 +377,13 @@
 
         if(velocity !== 0){
             const nextX = posX + velocity;
-            // Solo comprobamos colisión coche en Nivel 2
-            if (velocity > 0 && checkCollision(nextX)) {
+            
+            // =================================================================
+            // CORRECCIÓN AQUÍ: EL COCHE SIEMPRE COLISIONA EN NIVEL 2
+            // =================================================================
+            // Da igual si el parque está desbloqueado o no (!isParkUnlocked eliminado)
+            // El coche siempre será un bloque sólido.
+            if (currentLevel === 2 && velocity > 0 && checkCollision(nextX)) {
                 velocity = 0;
                 setIdle();
             } else {

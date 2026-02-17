@@ -1,5 +1,5 @@
 /* =========================================
-   CONFIGURACIÓN GENERAL Y FONDO
+   CONFIGURACIÓN GENERAL
    ========================================= */
 body {
     margin: 0;
@@ -12,16 +12,13 @@ body {
     font-family: Arial, sans-serif;
 }
 
-
-
 .game-wrapper {
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
-
-
+/* CONTENEDOR PRINCIPAL (FONDO NIVEL 1) */
 .game-container {
     position: relative;
     width: 1000px;
@@ -37,9 +34,6 @@ body {
     transition: background 0.5s ease;
 }
 
-
-
-
 /* FONDO NIVEL 2 */
 .game-container.level-2 {
     background-image: url('imagenes/image.gif');
@@ -47,39 +41,35 @@ body {
     background-position: center;
 }
 
-
-
+/* FONDO NIVEL 3 (PARQUE) */
+.game-container.level-3 {
+    background-image: url('imagenes/fondoparque.gif'); 
+    background-size: cover;
+    background-position: center;
+}
 
 img {
     image-rendering: pixelated;
 }
 
-
-
-
 /* =========================================
-   IMAGEN TUTORIAL (TECLAS)
+   TUTORIAL TECLAS
    ========================================= */
 .tutorial-keys {
     position: absolute;
-    bottom: 20px;  
-    left: 20px;    
-    width: 60px;  
+    bottom: 20px;   
+    left: 20px;     
+    width: 60px;   
     height: auto;
-    z-index: 11;    
-    opacity: 0.8;  
+    z-index: 11;     
+    opacity: 0.8;   
     pointer-events: none;
 }
-
-
-
-
-.game-container.level-2 .tutorial-keys {
+/* Ocultar tutorial en nivel 2 y 3 */
+.game-container.level-2 .tutorial-keys,
+.game-container.level-3 .tutorial-keys {
     display: none;
 }
-
-
-
 
 /* =========================================
    JUGADOR (PLAYER)
@@ -87,7 +77,6 @@ img {
 :root {
     --player-height: 260px;
 }
-
 
 .player {
     position: absolute;
@@ -99,7 +88,6 @@ img {
     z-index: 10;
 }
 
-
 #player-img {
     display: block;
     height: 100%;
@@ -109,9 +97,8 @@ img {
     object-fit: contain;
 }
 
-
 /* =========================================
-   NIVEL 1: PUERTA Y TECLA
+   NIVEL 1: PUERTA
    ========================================= */
 .interactive-object {
     position: absolute;
@@ -121,10 +108,9 @@ img {
     width: auto;
     display: flex;
     flex-direction: column;
-    align-items: center;    
+    align-items: center;     
     z-index: 1;
 }
-
 
 .door-img {
     position: relative;
@@ -134,8 +120,6 @@ img {
     image-rendering: -webkit-optimize-contrast;
 }
 
-
-
 .prompt-icon {
     width: 100px;
     margin-bottom: 5px;
@@ -144,21 +128,17 @@ img {
     animation: float 1.5s infinite ease-in-out;
 }
 
-
 .prompt-icon.visible {
     opacity: 1;
 }
-
 
 @keyframes float {
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-10px); }
 }
 
-
-
 /* =========================================
-   NIVEL 2: INTERACCIONES (FLECHAS Y PUNTOS)
+   NIVEL 2: INTERACCIONES
    ========================================= */
 #level2-interactions {
     display: none; /* Oculto en nivel 1 */
@@ -171,20 +151,23 @@ img {
     z-index: 15;
 }
 
-
 .game-container.level-2 #level2-interactions {
     display: block; /* Visible en nivel 2 */
 }
 
+/* En Nivel 3 ocultamos las cosas del 2 */
+.game-container.level-3 #level2-interactions,
+.game-container.level-3 #car-obstacle {
+    display: none !important;
+}
 
 .prompt-l2 {
     position: absolute;
-    width: 80px; /* Tamaño de la tecla E */
-    opacity: 0;  /* Invisible por defecto */
+    width: 80px; 
+    opacity: 0;  
     transition: opacity 0.3s ease;
     animation: float 1.5s infinite ease-in-out;
 }
-
 
 .prompt-l2 img {
     width: 100%;
@@ -192,33 +175,45 @@ img {
 }
 
 .prompt-l2.visible {
-    opacity: 1; /* Visible al acercarse */
+    opacity: 1; 
 }
 
-/* POSICIONES BASADAS EN TUS FLECHAS */
+/* POSICIONES NIVEL 2 */
+#prompt-sign { left: 75px; bottom: 300px; width: 95px; }
+#prompt-scooter { left: 320px; bottom: 130px; }
+#prompt-car { left: 700px; bottom: 250px; }
 
-/* 1. Cartel: Arriba a la izquierda */
-#prompt-sign {
-    left: 75px;
-    bottom: 300px;
-    width: 95px;
+/* ENTRADA AL PARQUE (Centro) */
+#prompt-park {
+    left: 50%;
+    bottom: 200px;
+    transform: translateX(-50%);
+    display: none; 
 }
 
-/* 2. Patinete: Centro, altura media */
-#prompt-scooter {
-    left: 320px;
-    bottom: 130px;
+/* Clase para que el parque se vea fijo cuando se desbloquea */
+#prompt-park.unlocked {
+    display: block;
+    opacity: 1 !important; 
 }
 
-/* 3. Coche: Lo ponemos justo donde empieza el bloque invisible (600px) */
-#prompt-car {
-    left: 700px;    /* <-- ALINEADO CON EL OBSTÁCULO */
-    bottom: 250px;  /* <-- Altura ajustada para que se vea bien */
+/* OBSTÁCULO INVISIBLE (COCHE) */
+#car-obstacle {
+    position: absolute;
+    bottom: 50px;       
+    left: 600px;       
+    width: 250px;       
+    height: 100px;     
+    background-color: transparent; 
+    z-index: 20;       
+    display: none;     
 }
-
+.game-container.level-2 #car-obstacle {
+    display: block;
+}
 
 /* =========================================
-   PANTALLA DE INTRO
+   PANTALLA INTRO & CORTINILLA
    ========================================= */
 #intro-screen {
     position: absolute;
@@ -233,305 +228,72 @@ img {
     align-items: center;
 }
 
-
-
-
-
-
-
-
 #intro-video {
-    position: absolute;  
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;  
-    z-index: 0;          
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    object-fit: cover; z-index: 0;
 }
 
-
-
-
-
-
-
-
 .press-key-msg {
-    position: absolute;
-    bottom: 12px;
-    color: white;
-    font-family: monospace, sans-serif;
-    z-index: 2001;
-    width: 100%;
-    text-align: center;
+    position: absolute; bottom: 12px; color: white;
+    font-family: monospace, sans-serif; z-index: 2001;
+    width: 100%; text-align: center;
     text-shadow: 2px 2px 4px #000;
     animation: blink 1.5s infinite;
 }
-
-
-
-
-
-
-
-
-.sub-text {
-    font-size: 18px;
-    opacity: 0.9;
-    letter-spacing: 1px;
-    font-weight: bold;
-}
-
-
-
-
-
-
-
-
-@keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
-}
-
-
-
-
-
-
-
+.sub-text { font-size: 18px; font-weight: bold; opacity: 0.9; letter-spacing: 1px; }
+@keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
 
 #black-curtain {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: black;
-    z-index: 1500;
-    opacity: 0;  
-    pointer-events: none;
-    transition: opacity 1.5s ease;
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background-color: black; z-index: 1500; opacity: 0;   
+    pointer-events: none; transition: opacity 1.5s ease;
 }
 
-
-
-
 /* =========================================
-   SISTEMA DE DIÀLEGS (NARRADOR I TORRENT)
+   DIÁLOGOS
    ========================================= */
-
-
-
-
 .dialogue-container {
-    position: absolute;
-    bottom: 40px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 70%; /* Ajustado al 70% como pediste */
-    min-height: 140px;
-    background: rgba(0, 0, 0, 0.85);
-    border: 2px solid #555;
-    padding: 25px; /* Más espacio interno para que no toque los bordes */
-    display: none;
-    z-index: 3000;
-    box-sizing: border-box;
-    border-radius: 15px; /* Bordes redondeados como en la imagen */
+    position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
+    width: 70%; min-height: 140px;
+    background: rgba(0, 0, 0, 0.85); border: 2px solid #555;
+    padding: 25px; display: none; z-index: 3000;
+    box-sizing: border-box; border-radius: 15px; 
 }
-
-
-
-
 .speaker-name {
-    display: block;
-    font-weight: bold;
-    font-size: 22px;
-    margin-bottom: 12px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
+    display: block; font-weight: bold; font-size: 22px;
+    margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px;
 }
-
-
-
-
-/* Colores de nombres */
-.name-narrador { color: #0084ff; } /* Azul profesional */
-.name-torrent { color: #ff8800; }  /* Naranja Torrent */
-
-
-
-
-.dialogue-text {
-    color: white;
-    font-size: 19px;
-    margin: 0;
-    line-height: 1.6; /* Mayor separación entre líneas para lectura fácil */
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-
-
-
+.name-narrador { color: #0084ff; } 
+.name-torrent { color: #ff8800; }  
+.dialogue-text { color: white; font-size: 19px; margin: 0; line-height: 1.6; font-family: 'Segoe UI', Tahoma, sans-serif; }
 .continue-prompt {
-    position: absolute;
-    bottom: 15px;
-    right: 25px;
-    color: rgba(255, 255, 255, 0.6);
-    font-family: monospace;
-    font-size: 14px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    position: absolute; bottom: 15px; right: 25px;
+    color: rgba(255, 255, 255, 0.6); font-family: monospace; font-size: 14px;
+    display: flex; align-items: center; gap: 8px;
 }
-
-
-
-
-.key-cap {
-    background: white;
-    color: black;
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-weight: bold;
-    border: 1px solid #555;
-}
-
-
-
+.key-cap { background: white; color: black; padding: 2px 8px; border-radius: 4px; font-weight: bold; border: 1px solid #555; }
 
 /* =========================================
-   OBSTÁCULO INVISIBLE (COCHE)
-   ========================================= */
-#car-obstacle {
-    position: absolute;
-    bottom: 50px;      
-    left: 600px;      
-    width: 250px;      
-    height: 100px;    
-    background-color: transparent;
-    z-index: 20;      
-    display: none;    
-}
-
-
-
-
-
-
-
-
-.game-container.level-2 #car-obstacle {
-    display: block;
-}
-
-
-/* =========================================
-   VENTANA DE CONFIRMACIÓN (CUADRADA)
+   VENTANA CONFIRMACIÓN
    ========================================= */
 .confirmation-box {
-    display: none; /* Oculto por defecto */
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%); /* Centrado perfecto */
-    width: 400px;
-    height: 300px;
-    background: rgba(0, 0, 0, 0.95);
-    border: 3px solid #ffffff;
-    z-index: 4000;
-    text-align: center;
-    padding: 20px;
-    box-shadow: 0 0 20px rgba(0,0,0,1);
-    border-radius: 10px;
+    display: none; position: absolute;
+    top: 50%; left: 50%; transform: translate(-50%, -50%); 
+    width: 400px; height: 300px;
+    background: rgba(0, 0, 0, 0.95); border: 3px solid #ffffff;
+    z-index: 4000; text-align: center; padding: 20px;
+    box-shadow: 0 0 20px rgba(0,0,0,1); border-radius: 10px;
     box-sizing: border-box;
 }
-
-
-.confirm-text {
-    color: white;
-    font-size: 24px;
-    margin-top: 40px;
-    margin-bottom: 60px;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-
-.confirm-buttons {
-    display: flex;
-    justify-content: center;
-    gap: 40px;
-}
-
-
+.confirm-text { color: white; font-size: 24px; margin-top: 40px; margin-bottom: 60px; font-family: 'Segoe UI', sans-serif; }
+.confirm-buttons { display: flex; justify-content: center; gap: 40px; }
 .btn {
-    padding: 15px 30px;
-    font-size: 20px;
-    font-weight: bold;
-    border: 2px solid white;
-    cursor: pointer;
-    text-transform: uppercase;
-    font-family: monospace;
-    transition: transform 0.1s;
+    padding: 15px 30px; font-size: 20px; font-weight: bold;
+    border: 2px solid white; cursor: pointer; text-transform: uppercase;
+    font-family: monospace; transition: transform 0.1s;
 }
-
-
-.btn:active {
-    transform: scale(0.95);
-}
-
-
-.btn-yes {
-    background-color: #28a745; /* Verde */
-    color: white;
-}
-
-
-.btn-yes:hover {
-    background-color: #34d058;
-}
-
-
-.btn-no {
-    background-color: #dc3545; /* Rojo */
-    color: white;
-}
-
-
-.btn-no:hover {
-    background-color: #ff4d5e;
-}
-
-/* =========================================
-   ENTRADA AL PARQUE Y NIVEL 3
-   ========================================= */
-
-/* Posición de la tecla E del parque (Centro) */
-#prompt-park {
-    left: 50%;
-    bottom: 200px; /* Un poco más alto para que se vea bien */
-    transform: translateX(-50%); /* Centrado exacto horizontal */
-    display: none; /* Oculto hasta que digas SÍ en el cartel */
-    text-align: center;
-}
-
-/* Clase para mostrar la E fija sin que parpadee */
-#prompt-park.unlocked {
-    display: block;
-    opacity: 1 !important; /* Forzamos que se vea siempre */
-    animation: float 1.5s infinite ease-in-out; /* Mantenemos el flotar bonito */
-}
-
-/* FONDO NIVEL 3 (PARQUE) */
-.game-container.level-3 {
-    background-image: url('imagenes/fondoparque.gif'); /* <--- CAMBIA ESTO POR TU IMAGEN */
-    background-size: cover;
-    background-position: center;
-}
-
-/* Ocultar cosas del Nivel 2 cuando estemos en Nivel 3 */
-.game-container.level-3 #level2-interactions,
-.game-container.level-3 #car-obstacle {
-    display: none !important;
-}
+.btn:active { transform: scale(0.95); }
+.btn-yes { background-color: #28a745; color: white; }
+.btn-yes:hover { background-color: #34d058; }
+.btn-no { background-color: #dc3545; color: white; }
+.btn-no:hover { background-color: #ff4d5e; }
