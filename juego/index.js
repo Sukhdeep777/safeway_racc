@@ -212,7 +212,7 @@
         setIdle();
     }
 
-    // 8. INPUTS (TECLADO)
+// 8. INPUTS (TECLADO) - ACTUALIZADO
     window.addEventListener('keydown', (e) => {
         if (!gameStarted) return;
         const key = e.key.toLowerCase();
@@ -222,8 +222,8 @@
                 showNextDialogue();
             } 
             else {
-                // Si es el cartel o el patinete, abrimos confirmación al pulsar E de nuevo
-                if (currentInteraction === 'cartel' || currentInteraction === 'scooter') {
+                // He añadido 'coche' a la lista para que también abra la confirmación
+                if (currentInteraction === 'cartel' || currentInteraction === 'scooter' || currentInteraction === 'coche') {
                     openConfirmation();
                 } else {
                     closeMessage();
@@ -252,8 +252,17 @@
                     showMessage("Torrent", "name-torrent", "És bona opció però la meva casa està molt lluny.", "cartel");
                 }
                 // Lógica del Patinete (Scooter)
-                if (Math.abs(relativeX - 320) < 60) {
+                else if (Math.abs(relativeX - 320) < 60) {
                     showMessage("Torrent", "name-torrent", "Podria anar amb patinet, però no porto el casc i no vull jugar-me-la.", "scooter");
+                }
+                // --- NUEVA LÓGICA DEL COCHE ---
+                else if (Math.abs(relativeX - 600) < 100) { 
+                    showMessage(
+                        "Torrent", 
+                        "name-torrent", 
+                        "No sé si estic en bones condicions per conduir... Potser no és la decisió més responsable després de la festa.", 
+                        "coche"
+                    );
                 }
             }
         }
