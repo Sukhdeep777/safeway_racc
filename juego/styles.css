@@ -502,3 +502,36 @@ img {
 .btn-no:hover {
     background-color: #ff4d5e;
 }
+
+/* =========================================
+   ENTRADA AL PARQUE Y NIVEL 3
+   ========================================= */
+
+/* Posición de la tecla E del parque (Centro) */
+#prompt-park {
+    left: 50%;
+    bottom: 200px; /* Un poco más alto para que se vea bien */
+    transform: translateX(-50%); /* Centrado exacto horizontal */
+    display: none; /* Oculto hasta que digas SÍ en el cartel */
+    text-align: center;
+}
+
+/* Clase para mostrar la E fija sin que parpadee */
+#prompt-park.unlocked {
+    display: block;
+    opacity: 1 !important; /* Forzamos que se vea siempre */
+    animation: float 1.5s infinite ease-in-out; /* Mantenemos el flotar bonito */
+}
+
+/* FONDO NIVEL 3 (PARQUE) */
+.game-container.level-3 {
+    background-image: url('imagenes/fondoparque.gif'); /* <--- CAMBIA ESTO POR TU IMAGEN */
+    background-size: cover;
+    background-position: center;
+}
+
+/* Ocultar cosas del Nivel 2 cuando estemos en Nivel 3 */
+.game-container.level-3 #level2-interactions,
+.game-container.level-3 #car-obstacle {
+    display: none !important;
+}

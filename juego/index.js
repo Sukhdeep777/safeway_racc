@@ -7,9 +7,11 @@
     const level1Exit = document.getElementById('level1-exit');
     const keyPrompt = document.getElementById('key-prompt');
     
+    // Elementos Nivel 2
     const promptSign = document.getElementById('prompt-sign');
     const promptScooter = document.getElementById('prompt-scooter');
     const promptCar = document.getElementById('prompt-car');
+    const promptPark = document.getElementById('prompt-park'); // NUEVO
 
     const introScreen = document.getElementById('intro-screen');
     const blackCurtain = document.getElementById('black-curtain');
@@ -52,6 +54,9 @@
     let isConfirmationActive = false; 
     let currentInteraction = null; 
     let currentStep = 0;
+    
+    // NUEVA VARIABLE: ¿Está desbloqueado el parque?
+    let isParkUnlocked = false; 
 
     const keys = { a: false, d: false, e: false };
 
@@ -69,7 +74,7 @@
         }
     ];
 
-    // 5. LÓGICA DE DIÁLOGOS
+    // 5. FUNCIONES DE DIÁLOGO Y UI
     function showNextDialogue() {
         if (currentStep < story.length) {
             isDialogueActive = true;
@@ -114,17 +119,38 @@
     function closeConfirmation() {
         confirmationModal.style.display = 'none';
         isConfirmationActive = false;
-        currentInteraction = null; 
+        // No reseteamos currentInteraction aquí para poder usarlo en el btnYes
     }
 
-    // LISTENERS DE LOS BOTONES
+    // --- LÓGICA DE BOTONES (SÍ / NO) ---
     btnYes.addEventListener('click', () => {
-        console.log("Has triat l'opció: " + currentInteraction); 
         closeConfirmation();
+
+        // CASO 1: COCHE (Game Over)
+        if (currentInteraction === 'coche') {
+            showMessage("Narrador", "name-narrador", "Mala idea. Els teus reflexos fallen i acabes tenint un accident.", null);
+            setTimeout(() => location.reload(), 5000);
+        }
+        // CASO 2: PATINETE (Game Over)
+        else if (currentInteraction === 'scooter') {
+            showMessage("Narrador", "name-narrador", "Sense casc i de nit... una mala caiguda t'envia a l'hospital.", null);
+            setTimeout(() => location.reload(), 5000);
+        }
+        // CASO 3: CARTEL -> DESBLOQUEA PARQUE
+        else if (currentInteraction === 'cartel') {
+            showMessage("Torrent", "name-torrent", "Tens raó. Millor vaig caminant pel parc, és més segur i s'arriba abans.", null);
+            
+            // Lógica para activar el parque
+            isParkUnlocked = true;
+            promptPark.classList.add('unlocked'); // Hace visible la E en el medio
+        }
+        
+        currentInteraction = null;
     });
 
     btnNo.addEventListener('click', () => {
         closeConfirmation(); 
+        currentInteraction = null;
     });
 
     // 6. MOVIMIENTO Y FÍSICA
@@ -143,7 +169,9 @@
     }
 
     function checkCollision(nextX) {
-        if (currentLevel !== 2) return false;
+        if (currentLevel !== 2) return false; // Solo colisiona en nivel 2
+        if (currentLevel === 3) return false; // En nivel 3 no hay coche
+
         const carStyle = window.getComputedStyle(carObstacle);
         const carLeft = parseInt(carStyle.left);
         const carWidth = parseInt(carStyle.width);
@@ -177,6 +205,7 @@
         const containerRect = container.getBoundingClientRect();
         const relativePlayerX = (playerRect.left + playerRect.width / 2) - containerRect.left;
 
+        // NIVEL 1
         if (currentLevel === 1) {
             if(!level1Exit || level1Exit.style.display === 'none') return;
             const doorRect = level1Exit.getBoundingClientRect();
@@ -189,17 +218,27 @@
             }
         }
 
+        // NIVEL 2
         if (currentLevel === 2) {
+            // Cartel
             if (Math.abs(relativePlayerX - 75) < 60) promptSign.classList.add('visible');
             else promptSign.classList.remove('visible');
 
+            // Scooter
             if (Math.abs(relativePlayerX - 320) < 60) promptScooter.classList.add('visible');
             else promptScooter.classList.remove('visible');
 
+            // Coche
             if (Math.abs(relativePlayerX - 600) < 60) promptCar.classList.add('visible');
             else promptCar.classList.remove('visible');
+
+            // Parque (Solo si está desbloqueado)
+            // Nota: La E ya está visible por CSS 'unlocked', aquí solo comprobamos distancia lógica
+            // para saber si puedes pulsar E, no para mostrarla (porque ya se muestra siempre)
         }
     }
+
+    // --- CARGAR NIVELES ---
 
     function loadLevel2() {
         currentLevel = 2;
@@ -212,18 +251,47 @@
         setIdle();
     }
 
-// 8. INPUTS (TECLADO) - ACTUALIZADO
+    function loadLevel3() {
+        currentLevel = 3;
+        
+        // Efecto de transición (cortinilla negra opcional)
+        blackCurtain.style.opacity = '1';
+        
+        setTimeout(() => {
+            // Quitamos la clase level-2 y ponemos level-3
+            container.classList.remove('level-2');
+            container.classList.add('level-3');
+
+            // Reseteamos posición
+            posX = 50;
+            velocity = 0;
+            direction = 'right';
+            player.style.left = posX + 'px';
+            setIdle();
+
+            // Mensaje de entrada al nivel 3
+            showMessage("Narrador", "name-narrador", "El parc està tranquil a aquestes hores. L'aire fresc t'ajuda a aclarir la ment.", null);
+
+            setTimeout(() => {
+                blackCurtain.style.opacity = '0';
+            }, 500);
+
+        }, 1000);
+    }
+
+    // 8. INPUTS (TECLADO)
     window.addEventListener('keydown', (e) => {
         if (!gameStarted) return;
         const key = e.key.toLowerCase();
        
+        // A) GESTIÓN DE DIÁLOGOS
         if(key === 'e' && isDialogueActive) {
             if (!isInitialized) {
                 showNextDialogue();
             } 
             else {
-                // He añadido 'coche' a la lista para que también abra la confirmación
-                if (currentInteraction === 'cartel' || currentInteraction === 'scooter' || currentInteraction === 'coche') {
+                // Si es un objeto interactuable, abrimos confirmación
+                if (['cartel', 'scooter', 'coche'].includes(currentInteraction)) {
                     openConfirmation();
                 } else {
                     closeMessage();
@@ -234,35 +302,39 @@
 
         if (isConfirmationActive) return;
 
+        // B) MOVIMIENTO
         if(key === 'a') keys.a = true;
         if(key === 'd') keys.d = true;
 
+        // C) INTERACCIONES
         if(key === 'e' && !isDialogueActive && !isConfirmationActive) {
+            
             const playerRect = player.getBoundingClientRect();
             const containerRect = container.getBoundingClientRect();
             const relativeX = (playerRect.left + playerRect.width / 2) - containerRect.left;
 
+            // Nivel 1 -> Salida
             if (isNearExit && currentLevel === 1) {
                 loadLevel2();
             }
 
+            // Nivel 2
             if (currentLevel === 2) {
-                // Lógica del Cartel
+                
+                // Si el parque está desbloqueado y estamos cerca del centro (aprox 500px)
+                if (isParkUnlocked && Math.abs(relativeX - 500) < 100) {
+                    loadLevel3();
+                    return; // Importante para no activar otras cosas a la vez
+                }
+
                 if (Math.abs(relativeX - 75) < 60) {
                     showMessage("Torrent", "name-torrent", "És bona opció però la meva casa està molt lluny.", "cartel");
                 }
-                // Lógica del Patinete (Scooter)
                 else if (Math.abs(relativeX - 320) < 60) {
                     showMessage("Torrent", "name-torrent", "Podria anar amb patinet, però no porto el casc i no vull jugar-me-la.", "scooter");
                 }
-                // --- NUEVA LÓGICA DEL COCHE ---
                 else if (Math.abs(relativeX - 600) < 100) { 
-                    showMessage(
-                        "Torrent", 
-                        "name-torrent", 
-                        "No sé si estic en bones condicions per conduir... Potser no és la decisió més responsable després de la festa.", 
-                        "coche"
-                    );
+                    showMessage("Torrent", "name-torrent", "No sé si estic en bones condicions per conduir...", "coche");
                 }
             }
         }
@@ -297,6 +369,7 @@
 
         if(velocity !== 0){
             const nextX = posX + velocity;
+            // Solo comprobamos colisión coche en Nivel 2
             if (velocity > 0 && checkCollision(nextX)) {
                 velocity = 0;
                 setIdle();
