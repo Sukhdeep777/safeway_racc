@@ -55,8 +55,9 @@
     let currentInteraction = null; 
     let currentStep = 0;
     
-    // NUEVA VARIABLE: ¿Está desbloqueado el parque?
+    // NUEVAS VARIABLES
     let isParkUnlocked = false; 
+    let isTransitioning = false; // Evita que los niveles se carguen varias veces seguidas
 
     const keys = { a: false, d: false, e: false };
 
@@ -119,7 +120,6 @@
     function closeConfirmation() {
         confirmationModal.style.display = 'none';
         isConfirmationActive = false;
-        // No reseteamos currentInteraction aquí para poder usarlo en el btnYes
     }
 
     // --- LÓGICA DE BOTONES (SÍ / NO) ---
@@ -140,9 +140,8 @@
         else if (currentInteraction === 'cartel') {
             showMessage("Torrent", "name-torrent", "Tens raó. Millor vaig caminant pel parc, és més segur i s'arriba abans.", null);
             
-            // Lógica para activar el parque
             isParkUnlocked = true;
-            promptPark.classList.add('unlocked'); // Hace visible la E en el medio
+            promptPark.classList.add('unlocked');
         }
         
         currentInteraction = null;
@@ -162,22 +161,30 @@
 
     function applyPosition(){
         const bounds = updateBounds();
+        
         if(posX < bounds.min) posX = bounds.min;
-        if(posX > bounds.max) posX = bounds.max;
+        
+        // MODIFICACIÓN: Si estamos en el Nivel 3 y tocamos el borde derecho, cargamos el Nivel 4
+        if (currentLevel === 3 && posX >= bounds.max && !isTransitioning) {
+            posX = bounds.max; 
+            loadLevel4();
+        } else if (posX > bounds.max) {
+            posX = bounds.max;
+        }
+
         player.style.left = posX + 'px';
         checkInteractions();
     }
 
     function checkCollision(nextX) {
-        if (currentLevel !== 2) return false; // Solo colisiona en nivel 2
-        if (currentLevel === 3) return false; // En nivel 3 no hay coche
+        if (currentLevel !== 2) return false; 
+        if (currentLevel === 3) return false; 
 
         const carStyle = window.getComputedStyle(carObstacle);
         const carLeft = parseInt(carStyle.left);
         const carWidth = parseInt(carStyle.width);
         const playerWidth = player.getBoundingClientRect().width;
         
-        // Coordenadas simples de colisión rectangular
         if (nextX + playerWidth > carLeft + 20 && nextX < carLeft + carWidth) {
             return true;
         }
@@ -221,24 +228,19 @@
 
         // NIVEL 2
         if (currentLevel === 2) {
-            
-            // Si el parque ya está desbloqueado, ocultamos las otras interacciones visualmente
             if (isParkUnlocked) {
                  promptSign.classList.remove('visible');
                  promptScooter.classList.remove('visible');
                  promptCar.classList.remove('visible');
-                 return; // Salimos para no volver a activarlas
+                 return; 
             }
 
-            // Cartel
             if (Math.abs(relativePlayerX - 75) < 60) promptSign.classList.add('visible');
             else promptSign.classList.remove('visible');
 
-            // Scooter
             if (Math.abs(relativePlayerX - 320) < 60) promptScooter.classList.add('visible');
             else promptScooter.classList.remove('visible');
 
-            // Coche
             if (Math.abs(relativePlayerX - 600) < 60) promptCar.classList.add('visible');
             else promptCar.classList.remove('visible');
         }
@@ -258,28 +260,56 @@
     }
 
     function loadLevel3() {
+        if (isTransitioning) return;
+        isTransitioning = true;
         currentLevel = 3;
         
-        // Efecto de transición (cortinilla negra opcional)
         blackCurtain.style.opacity = '1';
         
         setTimeout(() => {
-            // Quitamos la clase level-2 y ponemos level-3
             container.classList.remove('level-2');
             container.classList.add('level-3');
 
-            // Reseteamos posición
             posX = 50;
             velocity = 0;
             direction = 'right';
             player.style.left = posX + 'px';
             setIdle();
 
-            // Mensaje de entrada al nivel 3
-            showMessage("Narrador", "name-narrador", "El parc està tranquil a aquestes hores. L'aire fresc t'ajuda a aclarir la ment.", null);
+            showMessage("Narrador", "name-narrador", "El parc està tranquil a aquestes hores. L'aire fresc t'ajuda a aclarir la ment. Segueix endavant.", null);
 
             setTimeout(() => {
                 blackCurtain.style.opacity = '0';
+                isTransitioning = false;
+            }, 500);
+
+        }, 1000);
+    }
+
+    // NUEVO: Función para cargar el Nivel 4 (Siguiente escenario)
+    function loadLevel4() {
+        if (isTransitioning) return;
+        isTransitioning = true;
+        currentLevel = 4;
+        
+        blackCurtain.style.opacity = '1';
+        
+        setTimeout(() => {
+            container.classList.remove('level-3');
+            container.classList.add('level-4');
+
+            posX = 50;
+            velocity = 0;
+            direction = 'right';
+            player.style.left = posX + 'px';
+            setIdle();
+
+            // Puedes personalizar este mensaje final o eliminarlo
+            showMessage("Narrador", "name-narrador", "Has arribat al següent carrer. Ja falta poc per arribar a casa.", null);
+
+            setTimeout(() => {
+                blackCurtain.style.opacity = '0';
+                isTransitioning = false;
             }, 500);
 
         }, 1000);
@@ -296,7 +326,6 @@
                 showNextDialogue();
             } 
             else {
-                // Si es un objeto interactuable, abrimos confirmación
                 if (['cartel', 'scooter', 'coche'].includes(currentInteraction)) {
                     openConfirmation();
                 } else {
@@ -326,11 +355,9 @@
 
             // Nivel 2
             if (currentLevel === 2) {
-                
-                // Si el parque está desbloqueado y estamos cerca del centro (aprox 500px)
                 if (isParkUnlocked && Math.abs(relativeX - 500) < 100) {
                     loadLevel3();
-                    return; // Importante para no activar otras cosas a la vez
+                    return; 
                 }
 
                 if (!isParkUnlocked) {
@@ -378,11 +405,6 @@
         if(velocity !== 0){
             const nextX = posX + velocity;
             
-            // =================================================================
-            // CORRECCIÓN AQUÍ: EL COCHE SIEMPRE COLISIONA EN NIVEL 2
-            // =================================================================
-            // Da igual si el parque está desbloqueado o no (!isParkUnlocked eliminado)
-            // El coche siempre será un bloque sólido.
             if (currentLevel === 2 && velocity > 0 && checkCollision(nextX)) {
                 velocity = 0;
                 setIdle();

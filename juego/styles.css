@@ -48,6 +48,15 @@ body {
     background-position: center;
 }
 
+/* FONDO NIVEL 4 (ESCENARIO FINAL / SIGUIENTE) */
+.game-container.level-4 {
+    /* Aquí puedes poner la imagen de tu siguiente escenario */
+    /* background-image: url('imagenes/tu-siguiente-fondo.gif'); */
+    background-color: #111; /* Color de fondo por defecto por si no hay imagen */
+    background-size: cover;
+    background-position: center;
+}
+
 img {
     image-rendering: pixelated;
 }
@@ -65,9 +74,10 @@ img {
     opacity: 0.8;   
     pointer-events: none;
 }
-/* Ocultar tutorial en nivel 2 y 3 */
+/* Ocultar tutorial a partir del nivel 2 */
 .game-container.level-2 .tutorial-keys,
-.game-container.level-3 .tutorial-keys {
+.game-container.level-3 .tutorial-keys,
+.game-container.level-4 .tutorial-keys {
     display: none;
 }
 
@@ -141,7 +151,7 @@ img {
    NIVEL 2: INTERACCIONES
    ========================================= */
 #level2-interactions {
-    display: none; /* Oculto en nivel 1 */
+    display: none; /* Oculto por defecto */
     position: absolute;
     top: 0;
     left: 0;
@@ -155,9 +165,11 @@ img {
     display: block; /* Visible en nivel 2 */
 }
 
-/* En Nivel 3 ocultamos las cosas del 2 */
+/* Ocultar elementos del Nivel 2 en Niveles 3 y 4 */
 .game-container.level-3 #level2-interactions,
-.game-container.level-3 #car-obstacle {
+.game-container.level-3 #car-obstacle,
+.game-container.level-4 #level2-interactions,
+.game-container.level-4 #car-obstacle {
     display: none !important;
 }
 
@@ -191,7 +203,6 @@ img {
     display: none; 
 }
 
-/* Clase para que el parque se vea fijo cuando se desbloquea */
 #prompt-park.unlocked {
     display: block;
     opacity: 1 !important; 
@@ -211,6 +222,31 @@ img {
 .game-container.level-2 #car-obstacle {
     display: block;
 }
+
+/* =========================================
+   NIVEL 3: FLECHA INDICADORA
+   ========================================= */
+#arrow-forward {
+    position: absolute;
+    right: 30px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 80px;
+    display: none;
+    z-index: 15;
+}
+
+/* Solo se muestra en el Nivel 3 */
+.game-container.level-3 #arrow-forward {
+    display: block;
+    animation: pointRight 1s infinite alternate;
+}
+
+@keyframes pointRight {
+    from { transform: translate(0, -50%); }
+    to { transform: translate(20px, -50%); }
+}
+
 
 /* =========================================
    PANTALLA INTRO & CORTINILLA
