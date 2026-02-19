@@ -158,7 +158,7 @@ img {
     width: 100%;
     height: 100%;
     pointer-events: none;
-    z-index: 15;
+    z-index: 5;
 }
 
 .game-container.level-2 #level2-interactions {
@@ -233,7 +233,7 @@ img {
     transform: translateY(-50%);
     width: 80px;
     display: none;
-    z-index: 15;
+    z-index: 5;
 }
 
 /* Solo se muestra en el Nivel 3 */

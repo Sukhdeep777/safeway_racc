@@ -126,15 +126,13 @@
     btnYes.addEventListener('click', () => {
         closeConfirmation();
 
-        // CASO 1: COCHE (Game Over)
+        // CASO 1: COCHE (De momento no pasa nada)
         if (currentInteraction === 'coche') {
-            showMessage("Narrador", "name-narrador", "Mala idea. Els teus reflexos fallen i acabes tenint un accident.", null);
-            setTimeout(() => location.reload(), 5000);
+            // No hacemos nada para que el jugador siga moviéndose libremente
         }
-        // CASO 2: PATINETE (Game Over)
+        // CASO 2: PATINETE (De momento no pasa nada)
         else if (currentInteraction === 'scooter') {
-            showMessage("Narrador", "name-narrador", "Sense casc i de nit... una mala caiguda t'envia a l'hospital.", null);
-            setTimeout(() => location.reload(), 5000);
+            // No hacemos nada para que el jugador siga moviéndose libremente
         }
         // CASO 3: CARTEL -> DESBLOQUEA PARQUE
         else if (currentInteraction === 'cartel') {
@@ -164,7 +162,7 @@
         
         if(posX < bounds.min) posX = bounds.min;
         
-        // MODIFICACIÓN: Si estamos en el Nivel 3 y tocamos el borde derecho, cargamos el Nivel 4
+        // Si estamos en el Nivel 3 y tocamos el borde derecho, cargamos el Nivel 4
         if (currentLevel === 3 && posX >= bounds.max && !isTransitioning) {
             posX = bounds.max; 
             loadLevel4();
@@ -286,7 +284,7 @@
         }, 1000);
     }
 
-    // NUEVO: Función para cargar el Nivel 4 (Siguiente escenario)
+    // Función para cargar el Nivel 4 (Siguiente escenario)
     function loadLevel4() {
         if (isTransitioning) return;
         isTransitioning = true;
@@ -304,7 +302,6 @@
             player.style.left = posX + 'px';
             setIdle();
 
-            // Puedes personalizar este mensaje final o eliminarlo
             showMessage("Narrador", "name-narrador", "Has arribat al següent carrer. Ja falta poc per arribar a casa.", null);
 
             setTimeout(() => {
@@ -362,7 +359,7 @@
 
                 if (!isParkUnlocked) {
                     if (Math.abs(relativeX - 75) < 60) {
-                        showMessage("Torrent", "name-torrent", "És bona opció però la meva casa està molt lluny.", "cartel");
+                        showMessage("Torrent", "name-torrent", "La meva casa està molt lluny.", "cartel");
                     }
                     else if (Math.abs(relativeX - 320) < 60) {
                         showMessage("Torrent", "name-torrent", "Podria anar amb patinet, però no porto el casc i no vull jugar-me-la.", "scooter");
