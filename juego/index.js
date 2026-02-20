@@ -302,8 +302,6 @@
             player.style.left = posX + 'px';
             setIdle();
 
-            showMessage("Narrador", "name-narrador", "Has arribat al següent carrer. Ja falta poc per arribar a casa.", null);
-
             setTimeout(() => {
                 blackCurtain.style.opacity = '0';
                 isTransitioning = false;
