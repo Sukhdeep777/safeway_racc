@@ -13,6 +13,9 @@
     const promptCar = document.getElementById('prompt-car');
     const promptPark = document.getElementById('prompt-park'); 
 
+    // Referencia al icono del paso de peatones (opcional visualmente)
+    const promptCrosswalk = document.getElementById('prompt-crosswalk');
+
     const introScreen = document.getElementById('intro-screen');
     const blackCurtain = document.getElementById('black-curtain');
     const carObstacle = document.getElementById('car-obstacle');
@@ -55,9 +58,11 @@
     let currentInteraction = null; 
     let currentStep = 0;
     
-    // NUEVAS VARIABLES
     let isParkUnlocked = false; 
-    let isTransitioning = false; // Evita que los niveles se carguen varias veces seguidas
+    let isTransitioning = false; 
+    
+    // VARIABLE NUEVA: Para controlar el diálogo automático del semáforo
+    let hasSpokenAtCrosswalk = false;
 
     const keys = { a: false, d: false, e: false };
 
@@ -126,20 +131,13 @@
     btnYes.addEventListener('click', () => {
         closeConfirmation();
 
-        // CASO 1: COCHE (De momento no pasa nada)
-        if (currentInteraction === 'coche') {
-            // No hacemos nada para que el jugador siga moviéndose libremente
-        }
-        // CASO 2: PATINETE (De momento no pasa nada)
-        else if (currentInteraction === 'scooter') {
-            // No hacemos nada para que el jugador siga moviéndose libremente
-        }
-        // CASO 3: CARTEL -> DESBLOQUEA PARQUE
-        else if (currentInteraction === 'cartel') {
+        if (currentInteraction === 'cartel') {
             showMessage("Torrent", "name-torrent", "Tens raó. Millor vaig caminant pel parc, és més segur i s'arriba abans.", null);
-            
             isParkUnlocked = true;
             promptPark.classList.add('unlocked');
+        }
+        else if (currentInteraction === 'paso-peatones') {
+            showMessage("Narrador", "name-narrador", "Has decidit creuar en vermell. Has tingut sort, però ha estat una acció molt imprudent.", null);
         }
         
         currentInteraction = null;
@@ -147,6 +145,9 @@
 
     btnNo.addEventListener('click', () => {
         closeConfirmation(); 
+        if (currentInteraction === 'paso-peatones') {
+            showMessage("Torrent", "name-torrent", "Millor m'espero a que es posi en verd. No vull tenir un accident.", null);
+        }
         currentInteraction = null;
     });
 
@@ -159,10 +160,9 @@
 
     function applyPosition(){
         const bounds = updateBounds();
-        
         if(posX < bounds.min) posX = bounds.min;
         
-        // Si estamos en el Nivel 3 y tocamos el borde derecho, cargamos el Nivel 4
+        // Transición de Nivel 3 a 4
         if (currentLevel === 3 && posX >= bounds.max && !isTransitioning) {
             posX = bounds.max; 
             loadLevel4();
@@ -171,13 +171,27 @@
         }
 
         player.style.left = posX + 'px';
+
+        // ============================================================
+        // LÓGICA AUTOMÁTICA NIVEL 4: PASO DE PEATONES
+        // ============================================================
+        if (currentLevel === 4 && !hasSpokenAtCrosswalk) {
+            // Si llegamos al pixel 280 (borde de la acera)
+            if (posX >= 280) {
+                velocity = 0;      // Detener movimiento
+                keys.d = false;    // Soltar la tecla virtualmente
+                hasSpokenAtCrosswalk = true; // Marcar como hablado para que no se repita
+                
+                // Lanzar el mensaje automáticamente. El tipo 'paso-peatones' servirá para el SÍ/NO
+                showMessage("Torrent", "name-torrent", "Vaja, el semàfor està en vermell... Hauria de creuar ara mateix o m'espero a que canviï?", "paso-peatones");
+            }
+        }
+
         checkInteractions();
     }
 
     function checkCollision(nextX) {
         if (currentLevel !== 2) return false; 
-        if (currentLevel === 3) return false; 
-
         const carStyle = window.getComputedStyle(carObstacle);
         const carLeft = parseInt(carStyle.left);
         const carWidth = parseInt(carStyle.width);
@@ -232,13 +246,10 @@
                  promptCar.classList.remove('visible');
                  return; 
             }
-
             if (Math.abs(relativePlayerX - 75) < 60) promptSign.classList.add('visible');
             else promptSign.classList.remove('visible');
-
             if (Math.abs(relativePlayerX - 320) < 60) promptScooter.classList.add('visible');
             else promptScooter.classList.remove('visible');
-
             if (Math.abs(relativePlayerX - 600) < 60) promptCar.classList.add('visible');
             else promptCar.classList.remove('visible');
         }
@@ -250,9 +261,7 @@
         currentLevel = 2;
         level1Exit.style.display = 'none';
         container.classList.add('level-2');
-        posX = 50;
-        velocity = 0;
-        direction = 'right';
+        posX = 50; velocity = 0; direction = 'right';
         player.style.left = posX + 'px';
         setIdle();
     }
@@ -261,52 +270,41 @@
         if (isTransitioning) return;
         isTransitioning = true;
         currentLevel = 3;
-        
         blackCurtain.style.opacity = '1';
-        
         setTimeout(() => {
             container.classList.remove('level-2');
             container.classList.add('level-3');
-
-            posX = 50;
-            velocity = 0;
-            direction = 'right';
+            posX = 50; velocity = 0; direction = 'right';
             player.style.left = posX + 'px';
             setIdle();
-
             showMessage("Narrador", "name-narrador", "El parc està tranquil a aquestes hores. L'aire fresc t'ajuda a aclarir la ment. Segueix endavant.", null);
-
-            setTimeout(() => {
-                blackCurtain.style.opacity = '0';
-                isTransitioning = false;
-            }, 500);
-
+            setTimeout(() => { blackCurtain.style.opacity = '0'; isTransitioning = false; }, 500);
         }, 1000);
     }
 
-    // Función para cargar el Nivel 4 (Siguiente escenario)
     function loadLevel4() {
         if (isTransitioning) return;
         isTransitioning = true;
         currentLevel = 4;
         
+        // Reseteamos el estado del diálogo para este nivel
+        hasSpokenAtCrosswalk = false; 
+
         blackCurtain.style.opacity = '1';
-        
         setTimeout(() => {
             container.classList.remove('level-3');
             container.classList.add('level-4');
-
-            posX = 50;
-            velocity = 0;
-            direction = 'right';
+            posX = 50; velocity = 0; direction = 'right';
             player.style.left = posX + 'px';
             setIdle();
 
-            setTimeout(() => {
-                blackCurtain.style.opacity = '0';
-                isTransitioning = false;
+            // HE QUITADO EL MENSAJE DEL NARRADOR AQUÍ.
+            // Ahora no dirá nada al entrar, solo se abrirá la cortina.
+            
+            setTimeout(() => { 
+                blackCurtain.style.opacity = '0'; 
+                isTransitioning = false; 
             }, 500);
-
         }, 1000);
     }
 
@@ -315,13 +313,18 @@
         if (!gameStarted) return;
         const key = e.key.toLowerCase();
        
-        // A) GESTIÓN DE DIÁLOGOS
+        // Si hay un diálogo activo y pulsamos E...
         if(key === 'e' && isDialogueActive) {
             if (!isInitialized) {
                 showNextDialogue();
             } 
             else {
-                if (['cartel', 'scooter', 'coche'].includes(currentInteraction)) {
+                // Si la interacción es del tipo 'paso-peatones' (la automática),
+                // al cerrar el texto abrimos la confirmación
+                if (currentInteraction === 'paso-peatones') {
+                    openConfirmation();
+                } 
+                else if (['cartel', 'scooter', 'coche'].includes(currentInteraction)) {
                     openConfirmation();
                 } else {
                     closeMessage();
@@ -332,39 +335,22 @@
 
         if (isConfirmationActive) return;
 
-        // B) MOVIMIENTO
         if(key === 'a') keys.a = true;
         if(key === 'd') keys.d = true;
 
-        // C) INTERACCIONES
         if(key === 'e' && !isDialogueActive && !isConfirmationActive) {
-            
             const playerRect = player.getBoundingClientRect();
             const containerRect = container.getBoundingClientRect();
             const relativeX = (playerRect.left + playerRect.width / 2) - containerRect.left;
 
-            // Nivel 1 -> Salida
-            if (isNearExit && currentLevel === 1) {
-                loadLevel2();
-            }
+            if (isNearExit && currentLevel === 1) loadLevel2();
 
-            // Nivel 2
             if (currentLevel === 2) {
-                if (isParkUnlocked && Math.abs(relativeX - 500) < 100) {
-                    loadLevel3();
-                    return; 
-                }
-
+                if (isParkUnlocked && Math.abs(relativeX - 500) < 100) { loadLevel3(); return; }
                 if (!isParkUnlocked) {
-                    if (Math.abs(relativeX - 75) < 60) {
-                        showMessage("Torrent", "name-torrent", "La meva casa està molt lluny.", "cartel");
-                    }
-                    else if (Math.abs(relativeX - 320) < 60) {
-                        showMessage("Torrent", "name-torrent", "Podria anar amb patinet, però no porto el casc i no vull jugar-me-la.", "scooter");
-                    }
-                    else if (Math.abs(relativeX - 600) < 100) { 
-                        showMessage("Torrent", "name-torrent", "No sé si estic en bones condicions per conduir...", "coche");
-                    }
+                    if (Math.abs(relativeX - 75) < 60) showMessage("Torrent", "name-torrent", "La meva casa està molt lluny.", "cartel");
+                    else if (Math.abs(relativeX - 320) < 60) showMessage("Torrent", "name-torrent", "Podria anar amb patinet, però no porto el casc i no vull jugar-me-la.", "scooter");
+                    else if (Math.abs(relativeX - 600) < 100) showMessage("Torrent", "name-torrent", "No sé si estic en bones condicions per conduir...", "coche");
                 }
             }
         }
@@ -399,13 +385,10 @@
 
         if(velocity !== 0){
             const nextX = posX + velocity;
-            
             if (currentLevel === 2 && velocity > 0 && checkCollision(nextX)) {
-                velocity = 0;
-                setIdle();
+                velocity = 0; setIdle();
             } else {
-                posX = nextX;
-                applyPosition();
+                posX = nextX; applyPosition();
             }
         }
         requestAnimationFrame(loop);
@@ -417,16 +400,11 @@
         gameStarted = true;
         window.removeEventListener('keydown', handleStartInput);
         blackCurtain.style.opacity = '1';
-
         setTimeout(() => {
             introScreen.style.display = 'none';
             const video = introScreen.querySelector('video');
             if(video) video.pause();
-           
-            posX = 50;
-            applyPosition();
-            setIdle();
-           
+            posX = 50; applyPosition(); setIdle();
             setTimeout(() => { 
                 blackCurtain.style.opacity = '0'; 
                 showNextDialogue(); 
