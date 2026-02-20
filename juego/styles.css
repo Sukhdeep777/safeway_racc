@@ -50,8 +50,7 @@ body {
 
 /* FONDO NIVEL 4 (ESCENARIO FINAL / SIGUIENTE) */
 .game-container.level-4 {
-    /* Aquí puedes poner la imagen de tu siguiente escenario */
-    /* background-image: url('imagenes/tu-siguiente-fondo.gif'); */
+    background-image: url('imagenes/busrojo.gif');
     background-color: #111; /* Color de fondo por defecto por si no hay imagen */
     background-size: cover;
     background-position: center;
