@@ -332,3 +332,32 @@ img {
 .btn-yes:hover { background-color: #34d058; }
 .btn-no { background-color: #dc3545; color: white; }
 .btn-no:hover { background-color: #ff4d5e; }
+
+/* =========================================
+   NIVEL 4: INTERACCIÓN SEMÁFORO
+   ========================================= */
+
+/* Posicionamiento del icono sobre el paso de peatones */
+#prompt-crosswalk {
+    position: absolute;
+    left: 630px;      /* Alineado con el semáforo de la imagen */
+    bottom: 330px;    /* Altura sobre el semáforo */
+    width: 80px;      /* Tamaño del icono */
+    z-index: 100;
+    opacity: 0;       /* Invisible por defecto */
+    transition: opacity 0.3s ease;
+    animation: float 1.5s infinite ease-in-out;
+    pointer-events: none;
+}
+
+/* Solo se permite que sea visible si el contenedor tiene la clase level-4 */
+.game-container.level-4 #prompt-crosswalk.visible {
+    opacity: 1;
+}
+
+/* Animación de flotación (por si no la tenías definida arriba) */
+@keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
