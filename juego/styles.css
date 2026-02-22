@@ -376,14 +376,14 @@ img {
     display: none; /* Oculto por defecto */
     position: absolute;
     top: 0; left: 0; width: 100%; height: 100%;
-    background-color: rgba(0, 0, 0, 0.95);
+    /* CAMBIADO A NEGRO SEMITRANSPARENTE */
+    background-color: rgba(0, 0, 0, 0.8); /* 0.8 es la opacidad (80%) */
     z-index: 5000;
     flex-direction: column;
     justify-content: center;
     align-items: center;
     text-align: center;
 }
-
 .game-over-title {
     color: #ff4d5e;
     font-size: 40px;

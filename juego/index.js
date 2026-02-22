@@ -230,8 +230,10 @@ function applyPosition(){
             }
 
             // Cuando el coche (y el jugador) salen de la pantalla por abajo
-            if (carY < -300) {
-                gameOverScreen.style.display = 'flex'; // Muestra la pantalla de Game Over
+// Cuando el coche sale de la pantalla...
+            if (carY < -300) {  // (O si usas la horizontal: si carX > 1200)
+                gameOverScreen.style.display = 'flex'; // Muestra la pantalla negra
+                player.style.display = 'none';         // <-- AÑADE ESTO: Oculta a Torrent
             } else {
                 requestAnimationFrame(animateCar);
             }
@@ -344,8 +346,9 @@ function loadLevel4() {
         blackCurtain.style.opacity = '1';
         killerCar.style.display = 'none'; 
         
-        // NUEVO: Reseteamos la altura del jugador por si fue atropellado
-        player.style.bottom = '80px'; 
+        // <-- AÑADE ESTAS DOS LÍNEAS PARA RESETEAR AL JUGADOR -->
+        player.style.display = 'block';  // Lo vuelve a hacer visible
+        player.style.bottom = '80px';    // Lo devuelve a su altura original
         
         setTimeout(() => {
             container.classList.remove('level-3');
