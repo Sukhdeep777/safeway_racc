@@ -366,11 +366,10 @@ img {
    ========================================= */
 #killer-car {
     position: absolute;
-    bottom: 60px; /* Ajusta según la altura de tu carretera */
-    left: -400px;
-    width: 300px; /* Tamaño del coche */
-    z-index: 15; /* Por encima del jugador */
+    width: 250px; /* Tamaño máximo cuando llega a la cámara */
+    z-index: 15; /* Mayor que el z-index del jugador (que es 10) */
     display: none;
+    transform-origin: bottom center; /* Hace que el coche crezca de forma natural */
 }
 
 .game-over-box {

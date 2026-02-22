@@ -183,7 +183,7 @@ function applyPosition(){
 
         // NUEVO: LÓGICA DE ATROPELLO
         // Si decidió cruzar (isCrossingBadly) y llega al medio de la carretera (aprox pixel 550)
-        if (currentLevel === 4 && isCrossingBadly && posX >= 550 && !isDead) {
+        if (currentLevel === 4 && isCrossingBadly && posX >= 427 && !isDead) {
             triggerDeathSequence(); // Lanza la animación
         }
 
@@ -191,7 +191,7 @@ function applyPosition(){
     }
 
 
-// === ANIMACIÓN DE ATROPELLO ===
+// === ANIMACIÓN DE ATROPELLO (DESDE EL FONDO) ===
     function triggerDeathSequence() {
         isDead = true;
         velocity = 0;
@@ -200,29 +200,38 @@ function applyPosition(){
         setIdle();
 
         killerCar.style.display = 'block';
-        let carX = -400; // El coche empieza fuera de la pantalla por la izquierda
-        killerCar.style.left = carX + 'px';
-
+        
+        // Posición inicial: Lejos en el horizonte (arriba y pequeño)
+        let carY = 400; // Altura en el horizonte (puedes subirlo si quieres que empiece más lejos)
+        let carScale = 0.2; // Escala muy pequeña
+        
+        // Centramos el coche con la posición actual del jugador
+        killerCar.style.left = (posX - 50) + 'px'; // Ajusta el -50 para centrar tu coche.png con el personaje
+        killerCar.style.bottom = carY + 'px';
+        killerCar.style.transform = `scale(${carScale})`;
+        
         let isHit = false;
 
         function animateCar() {
-            carX += 25; // Velocidad muy rápida del coche
-            killerCar.style.left = carX + 'px';
+            carY -= 12; // Velocidad a la que el coche "baja" hacia la cámara
+            carScale += 0.04; // Velocidad a la que el coche "crece" (efecto 3D)
+            
+            killerCar.style.bottom = carY + 'px';
+            killerCar.style.transform = `scale(${carScale})`;
 
-            // Detectar el impacto (cuando el coche alcanza al jugador)
-            if (!isHit && carX + 200 >= posX) {
+            // El jugador está en bottom: 80px. El impacto ocurre cuando el coche llega a esa altura.
+            if (!isHit && carY <= 100) {
                 isHit = true;
             }
 
-            // Si ha impactado, el jugador se mueve pegado al morro del coche (se lo lleva)
+            // Si el coche lo golpea, el jugador es arrastrado hacia abajo (hacia la cámara)
             if (isHit) {
-                posX = carX + 200; 
-                player.style.left = posX + 'px';
+                player.style.bottom = carY + 'px'; 
             }
 
-            // Cuando el coche sale de la pantalla por la derecha
-            if (carX > 1200) {
-                gameOverScreen.style.display = 'flex'; // Muestra la pantalla negra
+            // Cuando el coche (y el jugador) salen de la pantalla por abajo
+            if (carY < -300) {
+                gameOverScreen.style.display = 'flex'; // Muestra la pantalla de Game Over
             } else {
                 requestAnimationFrame(animateCar);
             }
@@ -333,7 +342,10 @@ function loadLevel4() {
         isDead = false;          // Reset
 
         blackCurtain.style.opacity = '1';
-        killerCar.style.display = 'none'; // Oculta el coche por si venimos de un reintento
+        killerCar.style.display = 'none'; 
+        
+        // NUEVO: Reseteamos la altura del jugador por si fue atropellado
+        player.style.bottom = '80px'; 
         
         setTimeout(() => {
             container.classList.remove('level-3');
