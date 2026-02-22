@@ -28,6 +28,9 @@
     const btnYes = document.getElementById('btn-yes');
     const btnNo = document.getElementById('btn-no');
 
+    const killerCar = document.getElementById('killer-car');
+    const gameOverScreen = document.getElementById('game-over-screen');
+    const btnRetry = document.getElementById('btn-retry');
     // 2. IMÁGENES PRECARGADAS
     const gifs = {
         rightRun: 'animaciones/correr-derecho.gif',
@@ -60,7 +63,8 @@
     
     let isParkUnlocked = false; 
     let isTransitioning = false; 
-    
+    let isCrossingBadly = false; // Controla si decidió cruzar en rojo
+    let isDead = false;          // Controla si está en la animación de atropello
     // VARIABLE NUEVA: Para controlar el diálogo automático del semáforo
     let hasSpokenAtCrosswalk = false;
 
@@ -129,32 +133,22 @@
 
 // --- LÓGICA DE BOTONES (SÍ / NO) ---
     btnYes.addEventListener('click', () => {
-        closeConfirmation(); // Cierra la ventana modal
+        closeConfirmation(); 
 
         if (currentInteraction === 'cartel') {
-            // Desbloqueamos el parque en silencio
             isParkUnlocked = true;
             promptPark.classList.add('unlocked');
+        } else if (currentInteraction === 'paso-peatones') {
+            // El jugador decide cruzar en rojo
+            isCrossingBadly = true; 
         }
-        // Si es el 'paso-peatones', no hacemos nada más visualmente, solo cerramos.
         
-        currentInteraction = null; // Limpiamos la interacción
-    });
-
-    btnNo.addEventListener('click', () => {
-        closeConfirmation(); // Cierra la ventana modal
-        
-        // Si es el 'paso-peatones', no hacemos nada más visualmente, solo cerramos.
-        
-        currentInteraction = null; // Limpiamos la interacción
+        currentInteraction = null; 
     });
 
     btnNo.addEventListener('click', () => {
         closeConfirmation(); 
-        if (currentInteraction === 'paso-peatones') {
-            showMessage("Torrent", "name-torrent", "Millor m'espero a que es posi en verd. No vull tenir un accident.", null);
-        }
-        currentInteraction = null;
+        currentInteraction = null; 
     });
 
     // 6. MOVIMIENTO Y FÍSICA
@@ -165,34 +159,77 @@
     }
 
 function applyPosition(){
-    const bounds = updateBounds();
-    if(posX < bounds.min) posX = bounds.min;
-    
-    if (currentLevel === 3 && posX >= bounds.max && !isTransitioning) {
-        posX = bounds.max; 
-        loadLevel4();
-    } else if (posX > bounds.max) {
-        posX = bounds.max;
-    }
-
-    player.style.left = posX + 'px';
-
-    // ============================================================
-    // LÓGICA AUTOMÁTICA NIVEL 4 (MODIFICADA)
-    // ============================================================
-    // Añadimos !isTransitioning para que no hable a oscuras
-    if (currentLevel === 4 && !hasSpokenAtCrosswalk && !isTransitioning) {
-        if (posX >= 144) {
-            velocity = 0;      
-            keys.d = false;    
-            hasSpokenAtCrosswalk = true; 
-            
-            showMessage("Torrent", "name-torrent", "Vaja, el semàfor està en vermell... Hauria de creuar ara mateix o m'espero a que canviï?", "paso-peatones");
+        const bounds = updateBounds();
+        if(posX < bounds.min) posX = bounds.min;
+        
+        if (currentLevel === 3 && posX >= bounds.max && !isTransitioning) {
+            posX = bounds.max; 
+            loadLevel4();
+        } else if (posX > bounds.max) {
+            posX = bounds.max;
         }
+
+        player.style.left = posX + 'px';
+
+        // LÓGICA AUTOMÁTICA NIVEL 4 (Diálogo Semáforo)
+        if (currentLevel === 4 && !hasSpokenAtCrosswalk && !isTransitioning && !isDead) {
+            if (posX >= 144) {
+                velocity = 0;      
+                keys.d = false;    
+                hasSpokenAtCrosswalk = true; 
+                showMessage("Torrent", "name-torrent", "Vaja, el semàfor està en vermell... Hauria de creuar ara mateix o m'espero a que canviï?", "paso-peatones");
+            }
+        }
+
+        // NUEVO: LÓGICA DE ATROPELLO
+        // Si decidió cruzar (isCrossingBadly) y llega al medio de la carretera (aprox pixel 550)
+        if (currentLevel === 4 && isCrossingBadly && posX >= 550 && !isDead) {
+            triggerDeathSequence(); // Lanza la animación
+        }
+
+        checkInteractions();
     }
 
-    checkInteractions();
-}
+
+// === ANIMACIÓN DE ATROPELLO ===
+    function triggerDeathSequence() {
+        isDead = true;
+        velocity = 0;
+        keys.a = false;
+        keys.d = false;
+        setIdle();
+
+        killerCar.style.display = 'block';
+        let carX = -400; // El coche empieza fuera de la pantalla por la izquierda
+        killerCar.style.left = carX + 'px';
+
+        let isHit = false;
+
+        function animateCar() {
+            carX += 25; // Velocidad muy rápida del coche
+            killerCar.style.left = carX + 'px';
+
+            // Detectar el impacto (cuando el coche alcanza al jugador)
+            if (!isHit && carX + 200 >= posX) {
+                isHit = true;
+            }
+
+            // Si ha impactado, el jugador se mueve pegado al morro del coche (se lo lleva)
+            if (isHit) {
+                posX = carX + 200; 
+                player.style.left = posX + 'px';
+            }
+
+            // Cuando el coche sale de la pantalla por la derecha
+            if (carX > 1200) {
+                gameOverScreen.style.display = 'flex'; // Muestra la pantalla negra
+            } else {
+                requestAnimationFrame(animateCar);
+            }
+        }
+        
+        requestAnimationFrame(animateCar);
+    }
 
     function checkCollision(nextX) {
         if (currentLevel !== 2) return false; 
@@ -287,38 +324,32 @@ function applyPosition(){
     }
 
 function loadLevel4() {
-    if (isTransitioning) return;
-    isTransitioning = true;
-    currentLevel = 4;
-    
-    hasSpokenAtCrosswalk = false; 
+        if (isTransitioning) return;
+        isTransitioning = true;
+        currentLevel = 4;
+        
+        hasSpokenAtCrosswalk = false; 
+        isCrossingBadly = false; // Reset
+        isDead = false;          // Reset
 
-    // 1. Cerramos cortina
-    blackCurtain.style.opacity = '1';
-    
-    setTimeout(() => {
-        // 2. Cambiamos el fondo y reseteamos posición
-        container.classList.remove('level-3');
-        container.classList.add('level-4');
-        posX = 50; 
-        velocity = 0; 
-        direction = 'right';
-        player.style.left = posX + 'px';
-        setIdle();
+        blackCurtain.style.opacity = '1';
+        killerCar.style.display = 'none'; // Oculta el coche por si venimos de un reintento
+        
+        setTimeout(() => {
+            container.classList.remove('level-3');
+            container.classList.add('level-4');
+            posX = 50; 
+            velocity = 0; 
+            direction = 'right';
+            player.style.left = posX + 'px';
+            setIdle();
 
-        // 3. Abrimos cortina
-        setTimeout(() => { 
-            blackCurtain.style.opacity = '0'; 
-            
-            // 4. IMPORTANTE: Esperamos 600ms (lo que tarda el CSS en aclarar la pantalla)
-            // antes de permitir que se activen diálogos por posición.
-            setTimeout(() => {
-                isTransitioning = false; 
-            }, 600);
-            
-        }, 500);
-    }, 1000);
-}
+            setTimeout(() => { 
+                blackCurtain.style.opacity = '0'; 
+                setTimeout(() => { isTransitioning = false; }, 600);
+            }, 500);
+        }, 1000);
+    }
 
     // 8. INPUTS (TECLADO)
     window.addEventListener('keydown', (e) => {
@@ -426,5 +457,10 @@ function loadLevel4() {
 
     if(img.complete) { window.addEventListener('keydown', handleStartInput); }
     else { img.onload = () => { window.addEventListener('keydown', handleStartInput); }; }
+
+    btnRetry.addEventListener('click', () => {
+        gameOverScreen.style.display = 'none';
+        loadLevel4(); // Vuelve a cargar el nivel del autobús desde el principio
+    });
 
 })();
