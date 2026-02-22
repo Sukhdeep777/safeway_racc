@@ -158,37 +158,35 @@
         return { min: 0, max: rect.width - pRect.width };
     }
 
-    function applyPosition(){
-        const bounds = updateBounds();
-        if(posX < bounds.min) posX = bounds.min;
-        
-        // Transición de Nivel 3 a 4
-        if (currentLevel === 3 && posX >= bounds.max && !isTransitioning) {
-            posX = bounds.max; 
-            loadLevel4();
-        } else if (posX > bounds.max) {
-            posX = bounds.max;
-        }
-
-        player.style.left = posX + 'px';
-
-        // ============================================================
-        // LÓGICA AUTOMÁTICA NIVEL 4: PASO DE PEATONES
-        // ============================================================
-        if (currentLevel === 4 && !hasSpokenAtCrosswalk) {
-            // Si llegamos al pixel 280 (borde de la acera)
-            if (posX >= 280) {
-                velocity = 0;      // Detener movimiento
-                keys.d = false;    // Soltar la tecla virtualmente
-                hasSpokenAtCrosswalk = true; // Marcar como hablado para que no se repita
-                
-                // Lanzar el mensaje automáticamente. El tipo 'paso-peatones' servirá para el SÍ/NO
-                showMessage("Torrent", "name-torrent", "Vaja, el semàfor està en vermell... Hauria de creuar ara mateix o m'espero a que canviï?", "paso-peatones");
-            }
-        }
-
-        checkInteractions();
+function applyPosition(){
+    const bounds = updateBounds();
+    if(posX < bounds.min) posX = bounds.min;
+    
+    if (currentLevel === 3 && posX >= bounds.max && !isTransitioning) {
+        posX = bounds.max; 
+        loadLevel4();
+    } else if (posX > bounds.max) {
+        posX = bounds.max;
     }
+
+    player.style.left = posX + 'px';
+
+    // ============================================================
+    // LÓGICA AUTOMÁTICA NIVEL 4 (MODIFICADA)
+    // ============================================================
+    // Añadimos !isTransitioning para que no hable a oscuras
+    if (currentLevel === 4 && !hasSpokenAtCrosswalk && !isTransitioning) {
+        if (posX >= 144) {
+            velocity = 0;      
+            keys.d = false;    
+            hasSpokenAtCrosswalk = true; 
+            
+            showMessage("Torrent", "name-torrent", "Vaja, el semàfor està en vermell... Hauria de creuar ara mateix o m'espero a que canviï?", "paso-peatones");
+        }
+    }
+
+    checkInteractions();
+}
 
     function checkCollision(nextX) {
         if (currentLevel !== 2) return false; 
@@ -282,31 +280,39 @@
         }, 1000);
     }
 
-    function loadLevel4() {
-        if (isTransitioning) return;
-        isTransitioning = true;
-        currentLevel = 4;
-        
-        // Reseteamos el estado del diálogo para este nivel
-        hasSpokenAtCrosswalk = false; 
+function loadLevel4() {
+    if (isTransitioning) return;
+    isTransitioning = true;
+    currentLevel = 4;
+    
+    hasSpokenAtCrosswalk = false; 
 
-        blackCurtain.style.opacity = '1';
-        setTimeout(() => {
-            container.classList.remove('level-3');
-            container.classList.add('level-4');
-            posX = 50; velocity = 0; direction = 'right';
-            player.style.left = posX + 'px';
-            setIdle();
+    // 1. Cerramos cortina
+    blackCurtain.style.opacity = '1';
+    
+    setTimeout(() => {
+        // 2. Cambiamos el fondo y reseteamos posición
+        container.classList.remove('level-3');
+        container.classList.add('level-4');
+        posX = 50; 
+        velocity = 0; 
+        direction = 'right';
+        player.style.left = posX + 'px';
+        setIdle();
 
-            // HE QUITADO EL MENSAJE DEL NARRADOR AQUÍ.
-            // Ahora no dirá nada al entrar, solo se abrirá la cortina.
+        // 3. Abrimos cortina
+        setTimeout(() => { 
+            blackCurtain.style.opacity = '0'; 
             
-            setTimeout(() => { 
-                blackCurtain.style.opacity = '0'; 
+            // 4. IMPORTANTE: Esperamos 600ms (lo que tarda el CSS en aclarar la pantalla)
+            // antes de permitir que se activen diálogos por posición.
+            setTimeout(() => {
                 isTransitioning = false; 
-            }, 500);
-        }, 1000);
-    }
+            }, 600);
+            
+        }, 500);
+    }, 1000);
+}
 
     // 8. INPUTS (TECLADO)
     window.addEventListener('keydown', (e) => {
