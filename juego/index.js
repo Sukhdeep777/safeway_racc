@@ -127,20 +127,26 @@
         isConfirmationActive = false;
     }
 
-    // --- LÓGICA DE BOTONES (SÍ / NO) ---
+// --- LÓGICA DE BOTONES (SÍ / NO) ---
     btnYes.addEventListener('click', () => {
-        closeConfirmation();
+        closeConfirmation(); // Cierra la ventana modal
 
         if (currentInteraction === 'cartel') {
-            showMessage("Torrent", "name-torrent", "Tens raó. Millor vaig caminant pel parc, és més segur i s'arriba abans.", null);
+            // Desbloqueamos el parque en silencio
             isParkUnlocked = true;
             promptPark.classList.add('unlocked');
         }
-        else if (currentInteraction === 'paso-peatones') {
-            showMessage("Narrador", "name-narrador", "Has decidit creuar en vermell. Has tingut sort, però ha estat una acció molt imprudent.", null);
-        }
+        // Si es el 'paso-peatones', no hacemos nada más visualmente, solo cerramos.
         
-        currentInteraction = null;
+        currentInteraction = null; // Limpiamos la interacción
+    });
+
+    btnNo.addEventListener('click', () => {
+        closeConfirmation(); // Cierra la ventana modal
+        
+        // Si es el 'paso-peatones', no hacemos nada más visualmente, solo cerramos.
+        
+        currentInteraction = null; // Limpiamos la interacción
     });
 
     btnNo.addEventListener('click', () => {
