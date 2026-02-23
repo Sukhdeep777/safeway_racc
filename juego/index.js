@@ -33,6 +33,8 @@
     const btnRetry = document.getElementById('btn-retry');
     const victoryScreen = document.getElementById('victory-screen');
     const btnPlayAgain = document.getElementById('btn-play-again');
+    const busVideoScreen = document.getElementById('bus-video-screen');
+    const busVideo = document.getElementById('bus-video');
     // 2. IMÁGENES PRECARGADAS
     const gifs = {
         rightRun: 'animaciones/correr-derecho.gif',
@@ -78,6 +80,7 @@
 
     const keys = { a: false, d: false, e: false };
     let isWaitingForLight = false; // Bloquea al jugador mientras el semáforo cambia
+    let isLevelFinished = false; // Controla si ya se activó el final
     // 4. HISTORIA (DIÁLOGOS INTRO)
     const story = [
         {
@@ -274,10 +277,11 @@ function applyPosition(){
         } 
         // --- LÓGICA DE VICTORIA ARREGLADA ---
         // Añadimos !isTransitioning para que no salte durante el fundido a negro
-        else if (currentLevel === 4 && !isTransitioning && !isCrossingBadly && posX >= 600 && !isDead) {
-            posX = 600; // Fija a Torrent al pisar la acera derecha
-            triggerVictory(); // Llamamos a la función de ganar
-        } 
+        else if (currentLevel === 4 && !isTransitioning && !isCrossingBadly && posX >= 600 && !isDead && !isLevelFinished) {
+            isLevelFinished = true; // Evita que se dispare en bucle
+            posX = 600; 
+            playBusVideo(); // Llamamos al video
+        }
         else if (posX > bounds.max) {
             posX = bounds.max;
         }
@@ -371,6 +375,25 @@ function applyPosition(){
         // a su estado de "Fábrica" es recargar la página.
         window.location.reload(); 
     });
+
+// === ANIMACIÓN DE VIDEO DEL AUTOBÚS (CINEMÁTICA FINAL) ===
+    function playBusVideo() {
+        // Frenamos al personaje
+        velocity = 0;
+        keys.a = false;
+        keys.d = false;
+        setIdle();
+        
+        // Mostramos la pantalla negra y empezamos el vídeo
+        busVideoScreen.style.display = 'flex';
+        busVideo.play();
+
+        // Este evento detecta exactamente el segundo en el que el vídeo termina
+        busVideo.onended = () => {
+            busVideoScreen.style.display = 'none'; // Ocultamos el vídeo
+            triggerVictory(); // Ahora sí, lanzamos la pantalla de "Objetivo Conseguido"
+        };
+    }
 
     function checkCollision(nextX) {
         if (currentLevel !== 2) return false; 
@@ -472,6 +495,7 @@ function loadLevel4() {
         hasSpokenAtCrosswalk = false; 
         isCrossingBadly = false; // Reset
         isDead = false;          // Reset
+        isLevelFinished = false; 
         
         // <-- ESTAS DOS LÍNEAS FALTABAN -->
         isWaitingForLight = false; 
