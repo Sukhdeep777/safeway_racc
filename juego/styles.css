@@ -391,3 +391,10 @@ img {
     text-transform: uppercase;
     letter-spacing: 2px;
 }
+
+.level-patinete {
+    background-image: url('imagenes/fondopatinete.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}

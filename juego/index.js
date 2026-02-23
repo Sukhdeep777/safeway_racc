@@ -152,6 +152,10 @@
         } else if (currentInteraction === 'paso-peatones') {
             // El jugador decide cruzar en rojo
             isCrossingBadly = true; 
+        } 
+        // --- AQUÍ AÑADES LO DEL PATINETE ---
+        else if (currentInteraction === 'scooter') {
+            loadLevelPatinete();
         }
         
         currentInteraction = null; 
@@ -523,7 +527,32 @@ function loadLevel4() {
             }, 500);
         }, 1000);
     }
+    function loadLevelPatinete() {
+        if (isTransitioning) return;
+        isTransitioning = true;
+        currentLevel = 5; // Le asignamos el nivel 5
+        
+        blackCurtain.style.opacity = '1';
 
+        setTimeout(() => {
+            // Quitamos el fondo de la calle y ponemos el del patinete
+            container.classList.remove('level-2');
+            container.classList.add('level-patinete');
+            
+            // Posicionamos a Torrent al inicio de la pantalla
+            posX = 50; 
+            velocity = 0; 
+            direction = 'right';
+            player.style.left = posX + 'px';
+            setIdle();
+
+            // Quitamos el fundido en negro
+            setTimeout(() => { 
+                blackCurtain.style.opacity = '0'; 
+                setTimeout(() => { isTransitioning = false; }, 600);
+            }, 500);
+        }, 1000);
+    }
 // 8. INPUTS (TECLADO)
     window.addEventListener('keydown', (e) => {
         if (!gameStarted) return;
@@ -569,8 +598,7 @@ function loadLevel4() {
                 if (isParkUnlocked && Math.abs(relativeX - 500) < 100) { loadLevel3(); return; }
                 if (!isParkUnlocked) {
                     if (Math.abs(relativeX - 75) < 60) showMessage("Torrent", "name-torrent", "La meva casa està molt lluny.", "cartel");
-                    else if (Math.abs(relativeX - 320) < 60) showMessage("Torrent", "name-torrent", "Podria anar amb patinet, però no porto el casc i no vull jugar-me-la.", "scooter");
-                    else if (Math.abs(relativeX - 600) < 100) showMessage("Torrent", "name-torrent", "No sé si estic en bones condicions per conduir...", "coche");
+else if (Math.abs(relativeX - 320) < 60) showMessage("Torrent", "name-torrent", "Hi ha un patinet aquí. Puc agafar-lo per arribar més ràpid, però no porto casc. L'agafo?", "scooter");                    else if (Math.abs(relativeX - 600) < 100) showMessage("Torrent", "name-torrent", "No sé si estic en bones condicions per conduir...", "coche");
                 }
             }
         }
