@@ -35,6 +35,7 @@
     const btnPlayAgain = document.getElementById('btn-play-again');
     const busVideoScreen = document.getElementById('bus-video-screen');
     const busVideo = document.getElementById('bus-video');
+    const tutorialTeclas = document.getElementById('tutorial-teclas');
     // 2. IMÁGENES PRECARGADAS
     const gifs = {
         rightRun: 'animaciones/correr-derecho.gif',
@@ -412,7 +413,19 @@ function applyPosition(){
         return false;
     }
 
-    function setIdle(){
+function setIdle(){
+        // Si estamos en el nivel del patinete, forzamos la imagen del patinete
+        if (currentLevel === 5) {
+            const newSrc = 'imagenes/patinete.gif';
+            if(currentAnimation !== newSrc) {
+                currentAnimation = newSrc;
+                img.src = newSrc;
+            }
+            return;
+        }
+
+        // Para el resto de niveles, lógica normal
+        img.style.transform = 'scaleX(1)'; // Reseteamos el volteo por si acaso
         const newSrc = direction === 'left' ? gifs.idleLeft : gifs.idleRight;
         if(currentAnimation !== newSrc) {
             currentAnimation = newSrc;
@@ -421,6 +434,20 @@ function applyPosition(){
     }
 
     function setRun(dir){
+        // Si estamos en el nivel del patinete, forzamos la imagen del patinete
+        if (currentLevel === 5) {
+            const newSrc = 'imagenes/patinete.gif';
+            if(currentAnimation !== newSrc) {
+                currentAnimation = newSrc;
+                img.src = newSrc;
+            }
+            // Volteamos el patinete en espejo si vamos a la izquierda
+            img.style.transform = dir === 'left' ? 'scaleX(-1)' : 'scaleX(1)';
+            return;
+        }
+
+        // Para el resto de niveles, lógica normal
+        img.style.transform = 'scaleX(1)'; // Reseteamos el volteo por si acaso
         const newSrc = dir === 'left' ? gifs.leftRun : gifs.rightRun;
         if(currentAnimation !== newSrc) {
             currentAnimation = newSrc;
@@ -527,7 +554,7 @@ function loadLevel4() {
             }, 500);
         }, 1000);
     }
-    function loadLevelPatinete() {
+function loadLevelPatinete() {
         if (isTransitioning) return;
         isTransitioning = true;
         currentLevel = 5; // Le asignamos el nivel 5
@@ -539,11 +566,19 @@ function loadLevel4() {
             container.classList.remove('level-2');
             container.classList.add('level-patinete');
             
+            // --- NUEVO: Ocultamos el tutorial ---
+            if (tutorialTeclas) tutorialTeclas.style.display = 'none';
+
             // Posicionamos a Torrent al inicio de la pantalla
             posX = 50; 
             velocity = 0; 
             direction = 'right';
             player.style.left = posX + 'px';
+            
+            // --- NUEVO: Subimos al personaje a la carretera ---
+            // (Ajusta este número si ves que el patinete queda muy arriba o muy abajo)
+            player.style.bottom = '220px'; 
+            
             setIdle();
 
             // Quitamos el fundido en negro
