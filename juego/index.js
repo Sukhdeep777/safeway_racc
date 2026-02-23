@@ -38,6 +38,12 @@
         idleRight: 'animaciones/paradoderecha.gif',
         idleLeft: 'animaciones/paradoizquierda.gif'
     };
+    // (Debajo de los gifs del jugador...)
+    const bgPreloads = ['imagenes/busamarillo.gif', 'imagenes/busverde.gif'];
+    bgPreloads.forEach(path => {
+        const preloadBg = new Image();
+        preloadBg.src = path;
+    });
     Object.values(gifs).forEach(path => {
         const preload = new Image();
         preload.src = path;
@@ -69,7 +75,7 @@
     let hasSpokenAtCrosswalk = false;
 
     const keys = { a: false, d: false, e: false };
-
+    let isWaitingForLight = false; // Bloquea al jugador mientras el semáforo cambia
     // 4. HISTORIA (DIÁLOGOS INTRO)
     const story = [
         {
@@ -146,11 +152,109 @@
         currentInteraction = null; 
     });
 
-    btnNo.addEventListener('click', () => {
+btnNo.addEventListener('click', () => {
         closeConfirmation(); 
+
+        if (currentInteraction === 'paso-peatones') {
+            // El jugador decide ser prudente y esperar
+            isWaitingForLight = true;
+            
+            // Forzamos al jugador a quedarse completamente quieto
+            keys.a = false;
+            keys.d = false;
+            velocity = 0;
+            setIdle();
+
+            // --- 1. ANIMACIÓN DEL COCHE VERTICAL (DESDE EL FONDO) ---
+            killerCar.style.display = 'block';
+            
+            let carY = 400; // Empieza lejos en el horizonte
+            let carScale = 0.2; // Escala inicial pequeña
+            
+            // Lo posicionamos un poco más a la derecha de Torrent para que pase por la carretera
+            // Ajusta este "+ 150" si necesitas que el coche pase más a la izquierda o derecha
+            killerCar.style.left = (posX + 250) + 'px'; 
+            killerCar.style.bottom = carY + 'px';
+            killerCar.style.transform = `scale(${carScale})`;
+
+            function passCarVertically() {
+                carY -= 25; // Velocidad de caída muy alta (pasa rápido)
+                carScale += 0.08; // Crece rápido para mantener la perspectiva
+                
+                killerCar.style.bottom = carY + 'px';
+                killerCar.style.transform = `scale(${carScale})`;
+
+                // Cuando el coche sale de la pantalla por abajo (hacia la cámara)
+// Cuando el coche sale de la pantalla por abajo (hacia la cámara)
+                if (carY < -300) {
+                    killerCar.style.display = 'none'; // Lo ocultamos
+                    
+                    // --- 2. TRANSICIÓN DE FONDOS CON FUNDIDO ---
+                    changeBackgroundSmoothly('imagenes/busamarillo.gif');
+
+                    // Esperamos 3 segundos y cambiamos a verde
+                    setTimeout(() => {
+                        changeBackgroundSmoothly('imagenes/busverde.gif');
+                        
+                        // Esperamos a que acabe el fundido (600ms) para lanzar el diálogo
+                        setTimeout(() => {
+                            // Mensaje educativo y de alivio
+                            showMessage("Torrent", "name-torrent", "Uf... Has vist a quina velocitat anava aquell cotxe? Menys mal que m'he esperat. Ara sí que està verd.", null);
+                            
+                            // Liberamos al jugador
+                            isWaitingForLight = false;
+                        }, 600); 
+
+                    }, 3000); 
+                    
+                } else {
+                    // Seguimos animando hasta que salga de la pantalla
+                    requestAnimationFrame(passCarVertically);
+                }
+            }
+            
+            // Disparamos la animación del coche
+            requestAnimationFrame(passCarVertically);
+        }
+
         currentInteraction = null; 
     });
 
+// --- FUNCIÓN PARA TRANSICIONES SUAVES DE FONDO ---
+    function changeBackgroundSmoothly(newImgSrc) {
+        // Aseguramos que el jugador y el coche siempre estén por delante
+        player.style.zIndex = '10';
+        killerCar.style.zIndex = '10';
+
+        // Creamos una capa temporal
+        const fader = document.createElement('div');
+        fader.style.position = 'absolute';
+        fader.style.top = '0';
+        fader.style.left = '0';
+        fader.style.width = '100%';
+        fader.style.height = '100%';
+        fader.style.backgroundImage = `url('${newImgSrc}')`;
+        // Ajusta esto a 'cover' o '100% 100%' según cómo tengas tu CSS original
+        fader.style.backgroundSize = 'cover'; 
+        fader.style.backgroundPosition = 'center';
+        fader.style.zIndex = '1'; // Se pone justo encima del fondo actual
+        fader.style.opacity = '0';
+        fader.style.transition = 'opacity 0.6s ease-in-out'; // Duración del fundido (0.6 seg)
+        fader.style.pointerEvents = 'none';
+
+        container.appendChild(fader);
+
+        // Disparamos la transición visual
+        requestAnimationFrame(() => {
+            fader.style.opacity = '1';
+        });
+
+        // Cuando termina el fundido, aplicamos el fondo real y borramos la capa
+        setTimeout(() => {
+            container.style.backgroundImage = `url('${newImgSrc}')`;
+            fader.remove();
+        }, 600);
+    }
     // 6. MOVIMIENTO Y FÍSICA
     function updateBounds(){
         const rect = container.getBoundingClientRect();
@@ -342,6 +446,10 @@ function loadLevel4() {
         hasSpokenAtCrosswalk = false; 
         isCrossingBadly = false; // Reset
         isDead = false;          // Reset
+        
+        // <-- ESTAS DOS LÍNEAS FALTABAN -->
+        isWaitingForLight = false; 
+        container.style.backgroundImage = ""; // Borra el verde/amarillo para que vuelva al rojo por defecto
 
         blackCurtain.style.opacity = '1';
         killerCar.style.display = 'none'; 
@@ -366,9 +474,13 @@ function loadLevel4() {
         }, 1000);
     }
 
-    // 8. INPUTS (TECLADO)
+// 8. INPUTS (TECLADO)
     window.addEventListener('keydown', (e) => {
         if (!gameStarted) return;
+        
+        // Bloqueo del jugador mientras espera el semáforo
+        if (isWaitingForLight) return; 
+
         const key = e.key.toLowerCase();
        
         // Si hay un diálogo activo y pulsamos E...
