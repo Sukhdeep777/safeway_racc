@@ -87,9 +87,15 @@ let isCrossingBadly = false; // Controla si decidió cruzar en rojo
     let isLevelFinished = false; // Controla si ya se activó el final
 
     // --- NUEVAS VARIABLES PARA EL MINIJUEGO DEL PATINETE ---
-    let rocks = [];           // Array para guardar las rocas en pantalla
-    let rockSpawnTimer = 0;   // Contador para saber cuándo sacar la siguiente roca
-    let isMinigameActive = false; // Para parar el juego si te chocas
+// --- NUEVAS VARIABLES PARA EL MINIJUEGO DEL PATINETE ---
+    let rocks = [];           
+    let rockSpawnTimer = 0;   
+    let isMinigameActive = false; 
+
+    // --- NUEVAS VARIABLES PARA EL EFECTO MAREO ---
+    let rockSpeed = 5;          // Velocidad inicial de las rocas
+    let drunkFrameCount = 0;    // Contador de tiempo
+    let dizzinessLevel = 0;     // Nivel de borrachera/mareo
     // 4. HISTORIA (DIÁLOGOS INTRO)
     const story = [
         {
@@ -458,6 +464,8 @@ function applyPosition(){
         isDead = true;
         velocity = 0;
         keys.w = false; keys.s = false; // Soltamos teclas
+
+        container.style.transform = 'none';
         
         // --- NUEVO: Cambiamos el texto al de la caída ---
         if (gameOverText) {
@@ -638,12 +646,18 @@ function loadLevelPatinete() {
             // Ocultamos el tutorial
             if (tutorialTeclas) tutorialTeclas.style.display = 'none';
 
-            // Limpieza y setup del minijuego
+// --- NUEVO: Limpieza y setup del minijuego ---
             rocks.forEach(rock => rock.remove());
             rocks = []; 
             rockSpawnTimer = 0;
             isMinigameActive = true; 
             isDead = false; 
+            
+            // --- NUEVO: Resetear borrachera ---
+            rockSpeed = 5;
+            drunkFrameCount = 0;
+            dizzinessLevel = 0;
+            container.style.transform = 'none'; // Quita el mareo de la pantalla
 
             // --- ¡AQUÍ ESTÁ LA SOLUCIÓN! ---
             player.style.display = 'block'; // Volvemos a hacer visible al personaje
@@ -741,11 +755,27 @@ else if (Math.abs(relativeX - 320) < 60) showMessage("Torrent", "name-torrent", 
         }
 
         // --- LÓGICA EXCLUSIVA PARA EL PATINETE (NIVEL 5) ---
+       // --- LÓGICA EXCLUSIVA PARA EL PATINETE (NIVEL 5) ---
         if (currentLevel === 5) {
             // Solo ejecutamos la lógica si el minijuego está activo y no estamos muertos
             if (!isMinigameActive || isDead) {
                 requestAnimationFrame(loop);
                 return;
+            }
+
+            // 0. LÓGICA DEL TIEMPO Y MAREO (Se actualiza aprox cada 5 segundos = 300 frames)
+            drunkFrameCount++;
+            if (drunkFrameCount % 300 === 0) { 
+                rockSpeed += 1.5;        // Las rocas van más rápido
+                dizzinessLevel += 0.8;   // Aumenta el nivel de mareo visual
+            }
+
+            // Aplicamos el efecto visual de balanceo a la pantalla si hay mareo
+            if (dizzinessLevel > 0) {
+                // Fórmulas matemáticas para balancear la pantalla suavemente
+                let rotacion = Math.sin(drunkFrameCount * 0.03) * dizzinessLevel;
+                let movY = Math.cos(drunkFrameCount * 0.04) * (dizzinessLevel * 2);
+                container.style.transform = `rotate(${rotacion}deg) translateY(${movY}px) scale(1.05)`;
             }
 
             // 1. MOVIMIENTO DEL JUGADOR (W/S)
@@ -755,43 +785,45 @@ else if (Math.abs(relativeX - 320) < 60) showMessage("Torrent", "name-torrent", 
             if (keys.w) speedY = VELOCIDAD_PATINETE;
             if (keys.s) speedY = -VELOCIDAD_PATINETE;
 
-            if (speedY !== 0) {
-                posY += speedY;
+            // Involuntario desvío vertical para simular pérdida de equilibrio
+            let perdidaEquilibrio = Math.sin(drunkFrameCount * 0.05) * (dizzinessLevel * 1.5);
+
+            if (speedY !== 0 || perdidaEquilibrio !== 0) {
+                posY += speedY + perdidaEquilibrio; // Sumamos tu tecla + el mareo involuntario
+                
                 // LÍMITES DE LOS CARRILES
                 if (posY > 340) posY = 340; // Límite superior
-                if (posY < 150) posY = 150; // Límite inferior (lo he subido un poco para que no pise la acera)
+                if (posY < 150) posY = 150; // Límite inferior
                 player.style.bottom = posY + 'px';
             }
             setRun('right'); // Forzamos la animación
 
             // 2. GENERACIÓN DE ROCAS
             rockSpawnTimer++;
-            // Cada 90 frames (aprox 1.5 segundos) generamos una roca
-            if (rockSpawnTimer > 90) {
+            // Cuanto más mareo, menos tiempo tarda en salir la siguiente roca
+            let tiempoSpawn = Math.max(40, 90 - (dizzinessLevel * 10)); 
+            
+            if (rockSpawnTimer > tiempoSpawn) {
                 spawnRock();
                 rockSpawnTimer = 0;
             }
 
-// 3. ACTUALIZACIÓN DE ROCAS (Movimiento y Colisión)
+            // 3. ACTUALIZACIÓN DE ROCAS (Movimiento y Colisión)
             const playerRect = player.getBoundingClientRect();
-            const VELOCIDAD_ROCA = 5; 
 
             for (let i = rocks.length - 1; i >= 0; i--) {
                 const rock = rocks[i];
                 
-                // Mover roca a la izquierda
+                // Mover roca a la izquierda (usando la rockSpeed dinámica)
                 let currentRockX = parseFloat(rock.style.left);
-                currentRockX -= VELOCIDAD_ROCA;
+                currentRockX -= rockSpeed; 
                 rock.style.left = currentRockX + 'px';
 
                 // Comprobar Colisión
                 const rockRect = rock.getBoundingClientRect();
                 if (check2DCollision(playerRect, rockRect, 15)) { 
                     triggerScooterDeath(); // ¡CHOCASTE!
-                    
-                    // ---> AQUÍ ES DONDE PONEMOS LO DEL LOOP <---
                     requestAnimationFrame(loop); 
-                    
                     return; // Salimos del frame actual
                 }
 
@@ -802,7 +834,7 @@ else if (Math.abs(relativeX - 320) < 60) showMessage("Torrent", "name-torrent", 
                 }
             }
 
-        } 
+        }
         // --- LÓGICA NORMAL (NIVELES 1 AL 4) ---
         else {
             // (Todo el bloque "else" de los niveles normales sigue exactamente igual que antes)
