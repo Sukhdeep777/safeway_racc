@@ -75,13 +75,20 @@
     
     let isParkUnlocked = false; 
     let isTransitioning = false; 
-    let isCrossingBadly = false; // Controla si decidió cruzar en rojo
+let isCrossingBadly = false; // Controla si decidió cruzar en rojo
     let isDead = false;          // Controla si está en la animación de atropello
+    
     // VARIABLE NUEVA: Para controlar el diálogo automático del semáforo
     let hasSpokenAtCrosswalk = false;
 
-    const keys = { a: false, d: false, e: false, w: false, s: false };    let isWaitingForLight = false; // Bloquea al jugador mientras el semáforo cambia
+    const keys = { a: false, d: false, e: false, w: false, s: false };    
+    let isWaitingForLight = false; // Bloquea al jugador mientras el semáforo cambia
     let isLevelFinished = false; // Controla si ya se activó el final
+
+    // --- NUEVAS VARIABLES PARA EL MINIJUEGO DEL PATINETE ---
+    let rocks = [];           // Array para guardar las rocas en pantalla
+    let rockSpawnTimer = 0;   // Contador para saber cuándo sacar la siguiente roca
+    let isMinigameActive = false; // Para parar el juego si te chocas
     // 4. HISTORIA (DIÁLOGOS INTRO)
     const story = [
         {
@@ -400,6 +407,56 @@ function applyPosition(){
         };
     }
 
+// === FUNCIONES AUXILIARES MINIJUEGO PATINETE ===
+
+    // Función para crear una roca nueva
+// Función para crear una roca nueva
+    function spawnRock() {
+        const rock = document.createElement('img');
+        rock.src = 'imagenes/roca.png';
+        rock.className = 'obstacle-rock'; // Clase para poder borrarlas luego
+        rock.style.position = 'absolute';
+        rock.style.width = '50px';  
+        rock.style.zIndex = '5';    
+        rock.style.left = '850px';  
+
+        // --- NUEVO: Solo dos posiciones posibles (Máximo o Mínimo) ---
+        const carrilArriba = 400;
+        const carrilAbajo = 130;
+        
+        // 50% de probabilidad de salir arriba o abajo
+        if (Math.random() > 0.5) {
+            rock.style.bottom = carrilArriba + 'px';
+        } else {
+            rock.style.bottom = carrilAbajo + 'px';
+        }
+
+        container.appendChild(rock);
+        rocks.push(rock); 
+    }
+
+    // Función genérica para detectar colisión entre dos rectángulos (2D)
+    // "margin" sirve para hacer la colisión un poco más permisiva y que no sea tan frustrante
+    function check2DCollision(rect1, rect2, margin = 10) {
+        return !(
+            rect1.top + margin    > rect2.bottom - margin ||
+            rect1.bottom - margin < rect2.top + margin    ||
+            rect1.right - margin  < rect2.left + margin   ||
+            rect1.left + margin   > rect2.right - margin
+        );
+    }
+
+    // Función específica para morir en el patinete
+    function triggerScooterDeath() {
+        isMinigameActive = false; // Paramos el juego
+        isDead = true;
+        velocity = 0;
+        keys.w = false; keys.s = false; // Soltamos teclas
+        
+        // Mostramos la pantalla de Game Over directamente
+        gameOverScreen.style.display = 'flex';
+        player.style.display = 'none'; // Ocultamos a Torrent
+    }
     function checkCollision(nextX) {
         if (currentLevel !== 2) return false; 
         const carStyle = window.getComputedStyle(carObstacle);
@@ -555,41 +612,50 @@ function loadLevel4() {
         }, 1000);
     }
 function loadLevelPatinete() {
-        if (isTransitioning) return;
-        isTransitioning = true;
-        currentLevel = 5; // Le asignamos el nivel 5
-        
-        blackCurtain.style.opacity = '1';
+        if (isTransitioning) return;
+        isTransitioning = true;
+        currentLevel = 5; // Le asignamos el nivel 5
+        
+        blackCurtain.style.opacity = '1';
 
-        setTimeout(() => {
-            // Quitamos el fondo de la calle y ponemos el del patinete
-            container.classList.remove('level-2');
-            container.classList.add('level-patinete');
-            
-            // --- NUEVO: Ocultamos el tutorial ---
-            if (tutorialTeclas) tutorialTeclas.style.display = 'none';
+        setTimeout(() => {
+            // Quitamos el fondo de la calle y ponemos el del patinete
+            container.classList.remove('level-2');
+            container.classList.add('level-patinete');
+            
+            // Ocultamos el tutorial
+            if (tutorialTeclas) tutorialTeclas.style.display = 'none';
 
-            // Posicionamos a Torrent al inicio de la pantalla
-            posX = 50; 
-            velocity = 0; 
-            direction = 'right';
-            player.style.left = posX + 'px';
-            
-            // --- NUEVO: Subimos al personaje a la carretera ---
-            // (Ajusta este número si ves que el patinete queda muy arriba o muy abajo)
-            
-            posY = 220;                         // <--- AQUÍ GUARDAMOS LA VARIABLE
-            player.style.bottom = posY + 'px';  // <--- Y AQUÍ LA APLICAMOS
-            
-            setIdle();
+            // Limpieza y setup del minijuego
+            rocks.forEach(rock => rock.remove());
+            rocks = []; 
+            rockSpawnTimer = 0;
+            isMinigameActive = true; 
+            isDead = false; 
 
-            // Quitamos el fundido en negro
-            setTimeout(() => { 
-                blackCurtain.style.opacity = '0'; 
-                setTimeout(() => { isTransitioning = false; }, 600);
-            }, 500);
-        }, 1000);
-    }
+            // --- ¡AQUÍ ESTÁ LA SOLUCIÓN! ---
+            player.style.display = 'block'; // Volvemos a hacer visible al personaje
+            // -------------------------------
+
+            // Posicionamos a Torrent al inicio de la pantalla
+            posX = 50; 
+            velocity = 0; 
+            direction = 'right';
+            player.style.left = posX + 'px';
+            
+            // Subimos al personaje a la carretera
+            posY = 220;                       
+            player.style.bottom = posY + 'px'; 
+            
+            setIdle();
+
+            // Quitamos el fundido en negro
+            setTimeout(() => { 
+                blackCurtain.style.opacity = '0'; 
+                setTimeout(() => { isTransitioning = false; }, 600);
+            }, 500);
+        }, 1000);
+    }
 // 8. INPUTS (TECLADO)
     window.addEventListener('keydown', (e) => {
         if (!gameStarted) return;
@@ -651,65 +717,106 @@ else if (Math.abs(relativeX - 320) < 60) showMessage("Torrent", "name-torrent", 
         if(key === 's' || e.key === 'ArrowDown') keys.s = false;
     });
 
-    // 9. LOOP PRINCIPAL
+
 // 9. LOOP PRINCIPAL
-    function loop(){
-        if (!isInitialized || isDialogueActive || isConfirmationActive) {
-             if(isInitialized) requestAnimationFrame(loop);
-             return;
-        }
+    function loop(){
+        if (!isInitialized || isDialogueActive || isConfirmationActive) {
+             if(isInitialized) requestAnimationFrame(loop);
+             return;
+        }
 
-        // --- LÓGICA EXCLUSIVA PARA EL PATINETE (NIVEL 5) ---
-        if (currentLevel === 5) {
-            let speedY = 0;
-            const VELOCIDAD_PATINETE = 4; // Puedes subir o bajar este número para que vaya más rápido o lento
+        // --- LÓGICA EXCLUSIVA PARA EL PATINETE (NIVEL 5) ---
+        if (currentLevel === 5) {
+            // Solo ejecutamos la lógica si el minijuego está activo y no estamos muertos
+            if (!isMinigameActive || isDead) {
+                requestAnimationFrame(loop);
+                return;
+            }
 
-            if (keys.w) speedY = VELOCIDAD_PATINETE;
-            if (keys.s) speedY = -VELOCIDAD_PATINETE;
+            // 1. MOVIMIENTO DEL JUGADOR (W/S)
+            let speedY = 0;
+            const VELOCIDAD_PATINETE = 4; 
 
-            if (speedY !== 0) {
-                posY += speedY;
-                
-                // LÍMITES DE LOS CARRILES: 
-                // Ajusta estos dos números (330 y 120) para que no se salga del asfalto rojo
-                if (posY > 340) posY = 340; // Límite del carril superior
-                if (posY < 180) posY = 180; // Límite del carril inferior
-                
-                player.style.bottom = posY + 'px';
-            }
-            
-            // Forzamos la animación del patinete
-            setRun('right');
+            if (keys.w) speedY = VELOCIDAD_PATINETE;
+            if (keys.s) speedY = -VELOCIDAD_PATINETE;
 
-        } 
-        // --- LÓGICA NORMAL (NIVELES 1 AL 4) ---
-        else {
-            if (keys.a && !keys.d) direction = 'left';
-            if (keys.d && !keys.a) direction = 'right';
+            if (speedY !== 0) {
+                posY += speedY;
+                // LÍMITES DE LOS CARRILES
+                if (posY > 340) posY = 340; // Límite superior
+                if (posY < 150) posY = 150; // Límite inferior (lo he subido un poco para que no pise la acera)
+                player.style.bottom = posY + 'px';
+            }
+            setRun('right'); // Forzamos la animación
 
-            if(keys.d && velocity < MAX_SPEED) velocity = Math.min(velocity + ACCELERATION, MAX_SPEED);
-            if(keys.a && velocity > -MAX_SPEED) velocity = Math.max(velocity - ACCELERATION, -MAX_SPEED);
-           
-            if(!keys.a && !keys.d) {
-                velocity *= friction;
-                if(Math.abs(velocity) < 0.05) velocity = 0;
-            }
+            // 2. GENERACIÓN DE ROCAS
+            rockSpawnTimer++;
+            // Cada 90 frames (aprox 1.5 segundos) generamos una roca
+            if (rockSpawnTimer > 90) {
+                spawnRock();
+                rockSpawnTimer = 0;
+            }
 
-            if (velocity === 0) setIdle();
-            else setRun(direction);
+// 3. ACTUALIZACIÓN DE ROCAS (Movimiento y Colisión)
+            const playerRect = player.getBoundingClientRect();
+            const VELOCIDAD_ROCA = 5; 
 
-            if(velocity !== 0){
-                const nextX = posX + velocity;
-                if (currentLevel === 2 && velocity > 0 && checkCollision(nextX)) {
-                    velocity = 0; setIdle();
-                } else {
-                    posX = nextX; applyPosition();
-                }
-            }
-        }
-        
-        requestAnimationFrame(loop);
-    }
+            for (let i = rocks.length - 1; i >= 0; i--) {
+                const rock = rocks[i];
+                
+                // Mover roca a la izquierda
+                let currentRockX = parseFloat(rock.style.left);
+                currentRockX -= VELOCIDAD_ROCA;
+                rock.style.left = currentRockX + 'px';
+
+                // Comprobar Colisión
+                const rockRect = rock.getBoundingClientRect();
+                if (check2DCollision(playerRect, rockRect, 15)) { 
+                    triggerScooterDeath(); // ¡CHOCASTE!
+                    
+                    // ---> AQUÍ ES DONDE PONEMOS LO DEL LOOP <---
+                    requestAnimationFrame(loop); 
+                    
+                    return; // Salimos del frame actual
+                }
+
+                // Borrar roca si sale de la pantalla
+                if (currentRockX < -100) {
+                    rock.remove();      
+                    rocks.splice(i, 1); 
+                }
+            }
+
+        } 
+        // --- LÓGICA NORMAL (NIVELES 1 AL 4) ---
+        else {
+            // (Todo el bloque "else" de los niveles normales sigue exactamente igual que antes)
+            if (keys.a && !keys.d) direction = 'left';
+            if (keys.d && !keys.a) direction = 'right';
+
+            if(keys.d && velocity < MAX_SPEED) velocity = Math.min(velocity + ACCELERATION, MAX_SPEED);
+            if(keys.a && velocity > -MAX_SPEED) velocity = Math.max(velocity - ACCELERATION, -MAX_SPEED);
+           
+            if(!keys.a && !keys.d) {
+                velocity *= friction;
+                if(Math.abs(velocity) < 0.05) velocity = 0;
+            }
+
+            if (velocity === 0) setIdle();
+            else setRun(direction);
+
+            if(velocity !== 0){
+                const nextX = posX + velocity;
+                if (currentLevel === 2 && velocity > 0 && checkCollision(nextX)) {
+                    velocity = 0; setIdle();
+                } else {
+                    posX = nextX; applyPosition();
+                }
+            }
+        }
+        
+        requestAnimationFrame(loop);
+    }
     // 10. INICIO DEL JUEGO
     function handleStartInput() {
         if (gameStarted) return;
@@ -731,9 +838,15 @@ else if (Math.abs(relativeX - 320) < 60) showMessage("Torrent", "name-torrent", 
     if(img.complete) { window.addEventListener('keydown', handleStartInput); }
     else { img.onload = () => { window.addEventListener('keydown', handleStartInput); }; }
 
-    btnRetry.addEventListener('click', () => {
+btnRetry.addEventListener('click', () => {
         gameOverScreen.style.display = 'none';
-        loadLevel4(); // Vuelve a cargar el nivel del autobús desde el principio
+        
+        // Dependiendo del nivel en el que hayamos muerto, recargamos uno u otro
+        if (currentLevel === 5) {
+            loadLevelPatinete(); // Si morimos en el patinete, reiniciamos el patinete
+        } else {
+            loadLevel4(); // Si morimos en el paso de peatones, reiniciamos el paso de peatones
+        }
     });
 
-})();
+})(); // Fin de tu código
