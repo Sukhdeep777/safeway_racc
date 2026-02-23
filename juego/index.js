@@ -63,6 +63,7 @@
     let currentAnimation = null;
     let currentLevel = 1;
     let posX = 0;
+    let posY = 70; // Por si quieres usarlo para el patinete o futuras mecánicas
     
     let isInitialized = false; 
     let gameStarted = false;
@@ -79,8 +80,7 @@
     // VARIABLE NUEVA: Para controlar el diálogo automático del semáforo
     let hasSpokenAtCrosswalk = false;
 
-    const keys = { a: false, d: false, e: false };
-    let isWaitingForLight = false; // Bloquea al jugador mientras el semáforo cambia
+    const keys = { a: false, d: false, e: false, w: false, s: false };    let isWaitingForLight = false; // Bloquea al jugador mientras el semáforo cambia
     let isLevelFinished = false; // Controla si ya se activó el final
     // 4. HISTORIA (DIÁLOGOS INTRO)
     const story = [
@@ -555,39 +555,41 @@ function loadLevel4() {
         }, 1000);
     }
 function loadLevelPatinete() {
-        if (isTransitioning) return;
-        isTransitioning = true;
-        currentLevel = 5; // Le asignamos el nivel 5
-        
-        blackCurtain.style.opacity = '1';
+        if (isTransitioning) return;
+        isTransitioning = true;
+        currentLevel = 5; // Le asignamos el nivel 5
+        
+        blackCurtain.style.opacity = '1';
 
-        setTimeout(() => {
-            // Quitamos el fondo de la calle y ponemos el del patinete
-            container.classList.remove('level-2');
-            container.classList.add('level-patinete');
-            
-            // --- NUEVO: Ocultamos el tutorial ---
-            if (tutorialTeclas) tutorialTeclas.style.display = 'none';
+        setTimeout(() => {
+            // Quitamos el fondo de la calle y ponemos el del patinete
+            container.classList.remove('level-2');
+            container.classList.add('level-patinete');
+            
+            // --- NUEVO: Ocultamos el tutorial ---
+            if (tutorialTeclas) tutorialTeclas.style.display = 'none';
 
-            // Posicionamos a Torrent al inicio de la pantalla
-            posX = 50; 
-            velocity = 0; 
-            direction = 'right';
-            player.style.left = posX + 'px';
-            
-            // --- NUEVO: Subimos al personaje a la carretera ---
-            // (Ajusta este número si ves que el patinete queda muy arriba o muy abajo)
-            player.style.bottom = '220px'; 
-            
-            setIdle();
+            // Posicionamos a Torrent al inicio de la pantalla
+            posX = 50; 
+            velocity = 0; 
+            direction = 'right';
+            player.style.left = posX + 'px';
+            
+            // --- NUEVO: Subimos al personaje a la carretera ---
+            // (Ajusta este número si ves que el patinete queda muy arriba o muy abajo)
+            
+            posY = 220;                         // <--- AQUÍ GUARDAMOS LA VARIABLE
+            player.style.bottom = posY + 'px';  // <--- Y AQUÍ LA APLICAMOS
+            
+            setIdle();
 
-            // Quitamos el fundido en negro
-            setTimeout(() => { 
-                blackCurtain.style.opacity = '0'; 
-                setTimeout(() => { isTransitioning = false; }, 600);
-            }, 500);
-        }, 1000);
-    }
+            // Quitamos el fundido en negro
+            setTimeout(() => { 
+                blackCurtain.style.opacity = '0'; 
+                setTimeout(() => { isTransitioning = false; }, 600);
+            }, 500);
+        }, 1000);
+    }
 // 8. INPUTS (TECLADO)
     window.addEventListener('keydown', (e) => {
         if (!gameStarted) return;
@@ -621,6 +623,8 @@ function loadLevelPatinete() {
 
         if(key === 'a') keys.a = true;
         if(key === 'd') keys.d = true;
+        if(key === 'w' || e.key === 'ArrowUp') keys.w = true;
+        if(key === 's' || e.key === 'ArrowDown') keys.s = true;
 
         if(key === 'e' && !isDialogueActive && !isConfirmationActive) {
             const playerRect = player.getBoundingClientRect();
@@ -639,44 +643,73 @@ else if (Math.abs(relativeX - 320) < 60) showMessage("Torrent", "name-torrent", 
         }
     });
 
-    window.addEventListener('keyup', (e) => {
-        const key = e.key.toLowerCase();
-        if(key === 'a') keys.a = false;
-        if(key === 'd') keys.d = false;
-    });
+        window.addEventListener('keyup', (e) => {
+        const key = e.key.toLowerCase();
+        if(key === 'a') keys.a = false;
+        if(key === 'd') keys.d = false;
+        if(key === 'w' || e.key === 'ArrowUp') keys.w = false;
+        if(key === 's' || e.key === 'ArrowDown') keys.s = false;
+    });
 
     // 9. LOOP PRINCIPAL
-    function loop(){
-        if (!isInitialized || isDialogueActive || isConfirmationActive) {
-             if(isInitialized) requestAnimationFrame(loop);
-             return;
-        }
+// 9. LOOP PRINCIPAL
+    function loop(){
+        if (!isInitialized || isDialogueActive || isConfirmationActive) {
+             if(isInitialized) requestAnimationFrame(loop);
+             return;
+        }
 
-        if (keys.a && !keys.d) direction = 'left';
-        if (keys.d && !keys.a) direction = 'right';
+        // --- LÓGICA EXCLUSIVA PARA EL PATINETE (NIVEL 5) ---
+        if (currentLevel === 5) {
+            let speedY = 0;
+            const VELOCIDAD_PATINETE = 4; // Puedes subir o bajar este número para que vaya más rápido o lento
 
-        if(keys.d && velocity < MAX_SPEED) velocity = Math.min(velocity + ACCELERATION, MAX_SPEED);
-        if(keys.a && velocity > -MAX_SPEED) velocity = Math.max(velocity - ACCELERATION, -MAX_SPEED);
-       
-        if(!keys.a && !keys.d) {
-            velocity *= friction;
-            if(Math.abs(velocity) < 0.05) velocity = 0;
-        }
+            if (keys.w) speedY = VELOCIDAD_PATINETE;
+            if (keys.s) speedY = -VELOCIDAD_PATINETE;
 
-        if (velocity === 0) setIdle();
-        else setRun(direction);
+            if (speedY !== 0) {
+                posY += speedY;
+                
+                // LÍMITES DE LOS CARRILES: 
+                // Ajusta estos dos números (330 y 120) para que no se salga del asfalto rojo
+                if (posY > 340) posY = 340; // Límite del carril superior
+                if (posY < 180) posY = 180; // Límite del carril inferior
+                
+                player.style.bottom = posY + 'px';
+            }
+            
+            // Forzamos la animación del patinete
+            setRun('right');
 
-        if(velocity !== 0){
-            const nextX = posX + velocity;
-            if (currentLevel === 2 && velocity > 0 && checkCollision(nextX)) {
-                velocity = 0; setIdle();
-            } else {
-                posX = nextX; applyPosition();
-            }
-        }
-        requestAnimationFrame(loop);
-    }
+        } 
+        // --- LÓGICA NORMAL (NIVELES 1 AL 4) ---
+        else {
+            if (keys.a && !keys.d) direction = 'left';
+            if (keys.d && !keys.a) direction = 'right';
 
+            if(keys.d && velocity < MAX_SPEED) velocity = Math.min(velocity + ACCELERATION, MAX_SPEED);
+            if(keys.a && velocity > -MAX_SPEED) velocity = Math.max(velocity - ACCELERATION, -MAX_SPEED);
+           
+            if(!keys.a && !keys.d) {
+                velocity *= friction;
+                if(Math.abs(velocity) < 0.05) velocity = 0;
+            }
+
+            if (velocity === 0) setIdle();
+            else setRun(direction);
+
+            if(velocity !== 0){
+                const nextX = posX + velocity;
+                if (currentLevel === 2 && velocity > 0 && checkCollision(nextX)) {
+                    velocity = 0; setIdle();
+                } else {
+                    posX = nextX; applyPosition();
+                }
+            }
+        }
+        
+        requestAnimationFrame(loop);
+    }
     // 10. INICIO DEL JUEGO
     function handleStartInput() {
         if (gameStarted) return;
