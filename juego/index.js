@@ -36,6 +36,7 @@
     const busVideoScreen = document.getElementById('bus-video-screen');
     const busVideo = document.getElementById('bus-video');
     const tutorialTeclas = document.getElementById('tutorial-teclas');
+    const gameOverText = document.getElementById('game-over-text');
     // 2. IMÁGENES PRECARGADAS
     const gifs = {
         rightRun: 'animaciones/correr-derecho.gif',
@@ -327,6 +328,11 @@ function applyPosition(){
         keys.d = false;
         setIdle();
 
+        // --- NUEVO: Nos aseguramos de que salga el texto del coche ---
+        if (gameOverText) {
+            gameOverText.innerText = "Creuar en vermell no ha estat una bona idea...";
+        }
+
         killerCar.style.display = 'block';
         
         // Posición inicial: Lejos en el horizonte (arriba y pequeño)
@@ -422,7 +428,7 @@ function applyPosition(){
 
         // --- NUEVO: Solo dos posiciones posibles (Máximo o Mínimo) ---
         const carrilArriba = 400;
-        const carrilAbajo = 130;
+        const carrilAbajo = 180;
         
         // 50% de probabilidad de salir arriba o abajo
         if (Math.random() > 0.5) {
@@ -452,6 +458,11 @@ function applyPosition(){
         isDead = true;
         velocity = 0;
         keys.w = false; keys.s = false; // Soltamos teclas
+        
+        // --- NUEVO: Cambiamos el texto al de la caída ---
+        if (gameOverText) {
+            gameOverText.innerText = "Has caigut per no portar casc i t'has lesionat.";
+        }
         
         // Mostramos la pantalla de Game Over directamente
         gameOverScreen.style.display = 'flex';
@@ -594,6 +605,7 @@ function loadLevel4() {
         
         // <-- AÑADE ESTAS DOS LÍNEAS PARA RESETEAR AL JUGADOR -->
         player.style.display = 'block';  // Lo vuelve a hacer visible
+        player.style.transform = 'scale(1)';
         player.style.bottom = '80px';    // Lo devuelve a su altura original
         
         setTimeout(() => {
@@ -637,11 +649,14 @@ function loadLevelPatinete() {
             player.style.display = 'block'; // Volvemos a hacer visible al personaje
             // -------------------------------
 
-            // Posicionamos a Torrent al inicio de la pantalla
+// Posicionamos a Torrent al inicio de la pantalla
             posX = 50; 
             velocity = 0; 
             direction = 'right';
             player.style.left = posX + 'px';
+            
+            // --- NUEVO: Hacemos al personaje más pequeño para esquivar mejor ---
+            player.style.transform = 'scale(0.7)'; // Prueba a bajarlo a 0.6 si sigue siendo muy grande
             
             // Subimos al personaje a la carretera
             posY = 220;                       
