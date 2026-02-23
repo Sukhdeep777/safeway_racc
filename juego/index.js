@@ -31,6 +31,8 @@
     const killerCar = document.getElementById('killer-car');
     const gameOverScreen = document.getElementById('game-over-screen');
     const btnRetry = document.getElementById('btn-retry');
+    const victoryScreen = document.getElementById('victory-screen');
+    const btnPlayAgain = document.getElementById('btn-play-again');
     // 2. IMÁGENES PRECARGADAS
     const gifs = {
         rightRun: 'animaciones/correr-derecho.gif',
@@ -269,7 +271,14 @@ function applyPosition(){
         if (currentLevel === 3 && posX >= bounds.max && !isTransitioning) {
             posX = bounds.max; 
             loadLevel4();
-        } else if (posX > bounds.max) {
+        } 
+        // --- LÓGICA DE VICTORIA ARREGLADA ---
+        // Añadimos !isTransitioning para que no salte durante el fundido a negro
+        else if (currentLevel === 4 && !isTransitioning && !isCrossingBadly && posX >= 600 && !isDead) {
+            posX = 600; // Fija a Torrent al pisar la acera derecha
+            triggerVictory(); // Llamamos a la función de ganar
+        } 
+        else if (posX > bounds.max) {
             posX = bounds.max;
         }
 
@@ -285,15 +294,14 @@ function applyPosition(){
             }
         }
 
-        // NUEVO: LÓGICA DE ATROPELLO
-        // Si decidió cruzar (isCrossingBadly) y llega al medio de la carretera (aprox pixel 550)
+        // LÓGICA DE ATROPELLO
+        // Si decidió cruzar (isCrossingBadly) y llega al medio de la carretera (aprox pixel 427)
         if (currentLevel === 4 && isCrossingBadly && posX >= 427 && !isDead) {
-            triggerDeathSequence(); // Lanza la animación
+            triggerDeathSequence(); 
         }
 
         checkInteractions();
     }
-
 
 // === ANIMACIÓN DE ATROPELLO (DESDE EL FONDO) ===
     function triggerDeathSequence() {
@@ -345,6 +353,24 @@ function applyPosition(){
         
         requestAnimationFrame(animateCar);
     }
+
+// === ANIMACIÓN DE VICTORIA ===
+    function triggerVictory() {
+        velocity = 0;
+        keys.a = false;
+        keys.d = false;
+        setIdle();
+        
+        // Mostramos la pantalla de victoria (usamos 'flex' porque así lo centramos en el CSS en línea)
+        victoryScreen.style.display = 'flex';
+    }
+
+    // === BOTÓN VOLVER A JUGAR ===
+    btnPlayAgain.addEventListener('click', () => {
+        // La forma más limpia y segura de reiniciar un juego de navegador 
+        // a su estado de "Fábrica" es recargar la página.
+        window.location.reload(); 
+    });
 
     function checkCollision(nextX) {
         if (currentLevel !== 2) return false; 
