@@ -39,10 +39,7 @@
     const tutorialTeclas = document.getElementById('tutorial-teclas');
     const gameOverText = document.getElementById('game-over-text');
 
-    // ── NUEVAS REFERENCIAS: Vídeos del móvil (se muestran encima del fondo como el personaje) ──
-    const movilParadoVideo = document.getElementById('movil-parado-video');
-    const movilVideo       = document.getElementById('movil-video');
-    // ─────────────────────────────────────────────────────────────────────────
+    // (Los GIFs del móvil se controlan desde setIdle/setRun con isCrossingBadly)
 
     // 2. IMÁGENES PRECARGADAS
     const gifs = {
@@ -193,9 +190,9 @@
             isParkUnlocked = true;
             promptPark.classList.add('unlocked');
         } else if (currentInteraction === 'paso-peatones') {
-            // El jugador decide cruzar en rojo → primero vídeo parado mirando móvil
+            // El jugador decide cruzar en rojo → se queda parado mirando el móvil
             isCrossingBadly = true;
-            playMovilParadoVideo(); // ← NUEVO: encadena los dos vídeos antes del atropello
+            setIdle(); // Muestra movilparado.gif (la lógica está en setIdle)
         } else if (currentInteraction === 'scooter') {
             loadLevelPatinete();
         }
@@ -323,64 +320,15 @@
             }
         }
 
-        // NOTA: La lógica de atropello ya NO se activa por posición.
-        // Ahora se activa al terminar el vídeo movil.mp4 (ver playMovilWalkVideo).
-
-        checkInteractions();
-    }
-
-    // =========================================================
-    // === NUEVAS FUNCIONES: VÍDEOS DEL MÓVIL ==================
-    // =========================================================
-
-    // Coloca un <video> exactamente donde está el personaje y lo muestra
-    function showVideoAsPlayer(videoEl) {
-        videoEl.style.left   = posX + 'px';
-        videoEl.style.bottom = '80px';
-        videoEl.style.display = 'block';
-    }
-
-    function hideVideoAsPlayer(videoEl) {
-        videoEl.style.display = 'none';
-    }
-
-    // VÍDEO 1: Personaje parado mirando el móvil
-    function playMovilParadoVideo() {
-        velocity = 0;
-        keys.a = false;
-        keys.d = false;
-
-        // Ocultamos el sprite del personaje y mostramos el vídeo en su lugar
-        player.style.display = 'none';
-        showVideoAsPlayer(movilParadoVideo);
-        movilParadoVideo.currentTime = 0;
-        movilParadoVideo.play();
-
-        // Al terminar → encadenamos con el vídeo de caminar
-        movilParadoVideo.onended = () => {
-            hideVideoAsPlayer(movilParadoVideo);
-            playMovilWalkVideo();
-        };
-    }
-
-    // VÍDEO 2: Personaje caminando mirando el móvil
-    function playMovilWalkVideo() {
-        showVideoAsPlayer(movilVideo);
-        movilVideo.currentTime = 0;
-        movilVideo.play();
-
-        // Al terminar → colocamos al personaje en mitad del paso y atropello
-        movilVideo.onended = () => {
-            hideVideoAsPlayer(movilVideo);
-            // Volvemos a mostrar el sprite para la animación de atropello
-            player.style.display = 'block';
-            posX = 427;
-            player.style.left = posX + 'px';
+        // LÓGICA DE ATROPELLO: si cruza en rojo y llega al centro del paso
+        if (currentLevel === 4 && isCrossingBadly && posX >= 427 && !isDead) {
             if (gameOverText) {
                 gameOverText.innerText = "Anar mirant el mòbil mentre creuaves en vermell no ha estat una bona idea...";
             }
-            triggerDeathSequence();
-        };
+            triggerDeathSequence(); 
+        }
+
+        checkInteractions();
     }
 
     // =========================================================
@@ -584,6 +532,17 @@
             return;
         }
 
+        // Si está cruzando mirando el móvil → gif parado con móvil
+        if (isCrossingBadly) {
+            img.style.transform = 'scaleX(1)';
+            const newSrc = 'imagenes/movilparado.gif';
+            if(currentAnimation !== newSrc) {
+                currentAnimation = newSrc;
+                img.src = newSrc;
+            }
+            return;
+        }
+
         img.style.transform = 'scaleX(1)';
         const newSrc = direction === 'left' ? gifs.idleLeft : gifs.idleRight;
         if(currentAnimation !== newSrc) {
@@ -595,6 +554,17 @@
     function setRun(dir){
         if (currentLevel === 5) {
             const newSrc = 'imagenes/patinete.gif';
+            if(currentAnimation !== newSrc) {
+                currentAnimation = newSrc;
+                img.src = newSrc;
+            }
+            img.style.transform = dir === 'left' ? 'scaleX(-1)' : 'scaleX(1)';
+            return;
+        }
+
+        // Si está cruzando mirando el móvil → gif de caminar con móvil
+        if (isCrossingBadly) {
+            const newSrc = 'imagenes/movil.gif';
             if(currentAnimation !== newSrc) {
                 currentAnimation = newSrc;
                 img.src = newSrc;
@@ -662,8 +632,6 @@
         dialogueBox.style.zIndex = '5001';
         confirmationModal.style.display = 'none';
         scooterVideoScreen.style.display = 'none';
-        movilParadoVideo.style.display = 'none';
-        movilVideo.style.display = 'none';
         gameOverScreen.style.display = 'none';
 
         rocks.forEach(r => r.remove());
@@ -722,9 +690,7 @@
         player.style.transform = 'scale(1)';
         player.style.bottom = '80px';
         
-        // Limpiamos también los vídeos del móvil por si quedaron abiertos
-        movilParadoVideo.style.display = 'none';
-        movilVideo.style.display = 'none';
+        // isCrossingBadly ya se resetea arriba, los GIFs se actualizan solos
 
         setTimeout(() => {
             container.classList.remove('level-3');
@@ -1009,9 +975,7 @@
         rocks.forEach(r => r.remove());
         rocks = [];
 
-        // Limpiamos vídeos del móvil
-        movilParadoVideo.style.display = 'none';
-        movilVideo.style.display = 'none';
+        // isCrossingBadly se resetea en loadLevel2/loadLevel4
 
         loadLevel2();
     });
