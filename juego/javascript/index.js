@@ -81,6 +81,7 @@
     let isTransitioning = false; 
     let isCrossingBadly = false;
     let isDead = false;
+    let phoneAnimPlayed = false; // Controla si ya se mostró la animación de sacar el móvil
     
     let hasSpokenAtCrosswalk = false;
 
@@ -191,7 +192,8 @@
             promptPark.classList.add('unlocked');
         } else if (currentInteraction === 'paso-peatones') {
             isCrossingBadly = true;
-            startPhoneDistraction(); // Secuencia cinemática automática
+            phoneAnimPlayed = false; // Permitir que salga la animación de sacar el móvil
+            setIdle(); // Primera vez: muestra movilparado.gif
         } else if (currentInteraction === 'scooter') {
             loadLevelPatinete();
         }
@@ -330,51 +332,6 @@
         checkInteractions();
     }
 
-    // =========================================================
-    // === SECUENCIA CINEMÁTICA: DISTRACCIÓN CON EL MÓVIL ======
-    // =========================================================
-    function startPhoneDistraction() {
-        // Bloqueamos completamente el control del jugador
-        velocity = 0;
-        keys.a = false;
-        keys.d = false;
-        direction = 'right';
-
-        // FASE 1: El personaje se para y mira el móvil (2.5 segundos)
-        currentAnimation = null; // Forzamos el cambio de gif
-        img.style.transform = 'scaleX(1)';
-        img.src = 'imagenes/movilparado.gif';
-        currentAnimation = 'imagenes/movilparado.gif';
-
-        setTimeout(() => {
-            // FASE 2: Empieza a caminar solo mirando el móvil
-            currentAnimation = null;
-            img.style.transform = 'scaleX(1)';
-            img.src = 'imagenes/movil.gif';
-            currentAnimation = 'imagenes/movil.gif';
-
-            // Animamos el movimiento automático hacia el paso de peatones
-            function walkTowardsDeath() {
-                if (!isCrossingBadly || isDead) return;
-
-                posX += 1.8; // Velocidad de paseo tranquilo mirando el móvil
-                player.style.left = posX + 'px';
-
-                if (posX >= 427) {
-                    // Ha llegado al medio del paso → atropello
-                    if (gameOverText) {
-                        gameOverText.innerText = "Anar mirant el mòbil mentre creuaves en vermell no ha estat una bona idea...";
-                    }
-                    triggerDeathSequence();
-                } else {
-                    requestAnimationFrame(walkTowardsDeath);
-                }
-            }
-
-            requestAnimationFrame(walkTowardsDeath);
-
-        }, 2500); // 2.5 segundos parado mirando el móvil
-    }
     // =========================================================
 
     // === ANIMACIÓN DE ATROPELLO (DESDE EL FONDO) ===
@@ -576,8 +533,17 @@
             return;
         }
 
-        // Si está en la secuencia del móvil, no interrumpimos el gif
-        if (isCrossingBadly) return;
+        if (isCrossingBadly) {
+            if (!phoneAnimPlayed) {
+                // Primera vez que se para: mostrar animación de sacar el móvil
+                phoneAnimPlayed = true;
+                img.style.transform = 'scaleX(1)';
+                img.src = 'imagenes/movilparado.gif';
+                currentAnimation = 'imagenes/movilparado.gif';
+            }
+            // Las veces siguientes NO tocamos img.src → el gif no se reinicia
+            return;
+        }
 
         img.style.transform = 'scaleX(1)';
         const newSrc = direction === 'left' ? gifs.idleLeft : gifs.idleRight;
@@ -598,8 +564,16 @@
             return;
         }
 
-        // Si está en la secuencia del móvil, no interrumpimos el gif
-        if (isCrossingBadly) return;
+        if (isCrossingBadly) {
+            // Caminar mirando el móvil
+            const newSrc = 'imagenes/movil.gif';
+            if(currentAnimation !== newSrc) {
+                currentAnimation = newSrc;
+                img.src = newSrc;
+            }
+            img.style.transform = dir === 'left' ? 'scaleX(-1)' : 'scaleX(1)';
+            return;
+        }
 
         img.style.transform = 'scaleX(1)';
         const newSrc = dir === 'left' ? gifs.leftRun : gifs.rightRun;
@@ -709,6 +683,7 @@
         isDead = false;
         isLevelFinished = false; 
         isWaitingForLight = false; 
+        phoneAnimPlayed = false;
         container.style.backgroundImage = "";
 
         blackCurtain.style.opacity = '1';
@@ -800,9 +775,6 @@
         if (!gameStarted) return;
         
         if (isWaitingForLight) return;
-        
-        // Bloqueamos movimiento durante la secuencia cinemática del móvil
-        if (isCrossingBadly) return;
 
         const key = e.key.toLowerCase();
        
