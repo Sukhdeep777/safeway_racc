@@ -77,9 +77,10 @@
             <img src="imagenes/coche.png" id="killer-car" alt="Coche asesino">
 
             <div id="game-over-screen" class="game-over-box">
-                <h1 class="game-over-title">HAS ESTAT ATROPELLAT!</h1>
+                <h1 class="game-over-title" id="game-over-title">HAS ESTAT ATROPELLAT!</h1>
                 <p id="game-over-text" style="color:white; margin-bottom: 30px;">Creuar en vermell no ha estat una bona idea...</p>
                 <button id="btn-retry" class="btn btn-yes">Torna-ho a intentar</button>
+                <button id="btn-new-path" class="btn btn-no" style="display:none; margin-top: 15px;">Reinicia per provar altres camins</button>
             </div>
             
             <div id="victory-screen" style="display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); z-index: 100; flex-direction: column; justify-content: center; align-items: center; color: white; text-align: center;">

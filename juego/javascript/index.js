@@ -111,17 +111,17 @@ let isCrossingBadly = false; // Controla si decidió cruzar en rojo
         {
             name: "Narrador",
             class: "name-narrador",
-            text: "Primera multa: No portar casc. La protecció està obligatòria. 50 euros."
+            text: "La primera multa: no portar casc. La protecció és obligatòria. 50 euros."
         },
         {
             name: "Narrador",
             class: "name-narrador",
-            text: "Segona multa: Escuchar música mentres conduïs. Distreu i impedeix escoltar els sons de transit. 30 euros."
+            text: "La segona multa: escoltar música mentre condueixes. Això et distreu i t’impedeix escoltar els sons del trànsit. 30 euros."
         },
         {
             name: "Narrador",
             class: "name-narrador",
-            text: "Tercera multa: No tenir el patinet autoritzat a la DGT. Cal registre oficial. 60 euros. Total: 140 euros que no hauries de gastar."
+            text: "La tercera multa: no tenir el patinet registrat a la DGT. És necessari el registre oficial. 60 euros.Un totalde 140 euros."
         }
     ];
     // 4. HISTORIA (DIÁLOGOS INTRO)
@@ -537,15 +537,19 @@ function applyPosition(){
 
             scooterFinesStep++;
         } else {
-            // Después de todos los diálogos, mostramos la pantalla de Game Over
             isDialogueActive = false;
             isScooterFinesPlaying = false;
             dialogueBox.style.display = 'none';
             scooterVideoScreen.style.display = 'none';
 
-            if (gameOverText) {
-                gameOverText.innerText = "Has caigut per no portar casc i t'has lesionat.";
-            }
+            // ✅ Cambiamos el título y ocultamos el botón de reintentar
+            const titleEl = document.getElementById('game-over-title');
+            if (titleEl) titleEl.innerText = "T'HAN ENXAMPAT!";
+            if (gameOverText) gameOverText.innerText = "Has rebut 140 euros de multes per no respectar les normes del patinet.";
+
+            document.getElementById('btn-retry').style.display = 'none';
+            document.getElementById('btn-new-path').style.display = 'inline-block';
+
             gameOverScreen.style.display = 'flex';
         }
     }
@@ -1057,5 +1061,24 @@ btnRetry.addEventListener('click', () => {
             loadLevel4(); // Si morimos en el paso de peatones, reiniciamos el paso de peatones
         }
     });
+
+document.getElementById('btn-new-path').addEventListener('click', () => {
+    // Reseteamos la pantalla de game over para la próxima vez
+    gameOverScreen.style.display = 'none';
+    const titleEl = document.getElementById('game-over-title');
+    if (titleEl) titleEl.innerText = "HAS ESTAT ATROPELLAT!";
+    document.getElementById('btn-retry').style.display = 'inline-block';
+    document.getElementById('btn-new-path').style.display = 'none';
+    dialogueBox.style.zIndex = ''; // Reset z-index del diálogo
+
+    // Limpieza de variables del patinete
+    isScooterFinesPlaying = false;
+    scooterFinesStep = 0;
+    rocks.forEach(r => r.remove());
+    rocks = [];
+
+    // Volvemos al nivel 2 (elección de caminos)
+    loadLevel2();
+});
 
 })(); // Fin de tu código
