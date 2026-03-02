@@ -122,7 +122,7 @@ let isCrossingBadly = false; // Controla si decidió cruzar en rojo
         {
             name: "Narrador",
             class: "name-narrador",
-            text: "La tercera multa: no tenir el patinet registrat a la DGT. És necessari el registre oficial. 60 euros.Un totalde 140 euros."
+            text: "La tercera multa: no tenir el patinet registrat a la DGT. És necessari el registre oficial. 60 euros.Un total de 140 euros."
         }
     ];
     // 4. HISTORIA (DIÁLOGOS INTRO)
