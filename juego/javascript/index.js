@@ -39,6 +39,7 @@
     const scooterVideo = document.getElementById('scooter-video');
     const tutorialTeclas = document.getElementById('tutorial-teclas');
     const gameOverText = document.getElementById('game-over-text');
+    const tutorialWS = document.getElementById('tutorial-ws');
     // 2. IMÁGENES PRECARGADAS
     const gifs = {
         rightRun: 'animaciones/correr-derecho.gif',
