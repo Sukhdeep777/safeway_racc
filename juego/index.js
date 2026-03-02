@@ -35,6 +35,8 @@
     const btnPlayAgain = document.getElementById('btn-play-again');
     const busVideoScreen = document.getElementById('bus-video-screen');
     const busVideo = document.getElementById('bus-video');
+    const scooterVideoScreen = document.getElementById('scooter-video-screen');
+    const scooterVideo = document.getElementById('scooter-video');
     const tutorialTeclas = document.getElementById('tutorial-teclas');
     const gameOverText = document.getElementById('game-over-text');
     // 2. IMÁGENES PRECARGADAS
@@ -96,6 +98,32 @@ let isCrossingBadly = false; // Controla si decidió cruzar en rojo
     let rockSpeed = 5;          // Velocidad inicial de las rocas
     let drunkFrameCount = 0;    // Contador de tiempo
     let dizzinessLevel = 0;     // Nivel de borrachera/mareo
+    
+    // --- VARIABLES PARA LOS DIÁLOGOS DEL PATINETE ---
+    let isScooterFinesPlaying = false;
+    let scooterFinesStep = 0;
+    const scooterFinesDialogue = [
+        {
+            name: "Torrent",
+            class: "name-torrent",
+            text: "No hauria de fer servir el patinet sense protecció pròpia... He comès tres greus errors."
+        },
+        {
+            name: "Narrador",
+            class: "name-narrador",
+            text: "Primera multa: No portar casc. La protecció està obligatòria. 50 euros."
+        },
+        {
+            name: "Narrador",
+            class: "name-narrador",
+            text: "Segona multa: Escuchar música mentres conduïs. Distreu i impedeix escoltar els sons de transit. 30 euros."
+        },
+        {
+            name: "Narrador",
+            class: "name-narrador",
+            text: "Tercera multa: No tenir el patinet autoritzat a la DGT. Cal registre oficial. 60 euros. Total: 140 euros que no hauries de gastar."
+        }
+    ];
     // 4. HISTORIA (DIÁLOGOS INTRO)
     const story = [
         {
@@ -466,15 +494,60 @@ function applyPosition(){
         keys.w = false; keys.s = false; // Soltamos teclas
 
         container.style.transform = 'none';
-        
-        // --- NUEVO: Cambiamos el texto al de la caída ---
-        if (gameOverText) {
-            gameOverText.innerText = "Has caigut per no portar casc i t'has lesionat.";
-        }
-        
-        // Mostramos la pantalla de Game Over directamente
-        gameOverScreen.style.display = 'flex';
         player.style.display = 'none'; // Ocultamos a Torrent
+
+        // Mostramos el video del patinete
+        scooterVideoScreen.style.display = 'flex';
+        scooterVideo.currentTime = 0;
+        scooterVideo.play();
+
+        // Obtenemos la duración del video
+        scooterVideo.onloadedmetadata = function() {
+            const videoDuration = scooterVideo.duration;
+            const freezeTime = videoDuration * 0.75; // Congelamos al 75% del video
+
+            const videoCheckInterval = setInterval(() => {
+                if (scooterVideo.currentTime >= freezeTime) {
+                    // Congelamos el video
+                    scooterVideo.pause();
+                    clearInterval(videoCheckInterval);
+
+                    // Esperamos un poco y mostramos el diálogo sobre las multas
+                    setTimeout(() => {
+                        scooterVideoScreen.style.display = 'none';
+                        isScooterFinesPlaying = true;
+                        scooterFinesStep = 0;
+                        showNextScooterFinesDialogue();
+                    }, 500);
+                }
+            }, 100);
+        };
+    }
+
+    // Nueva función para mostrar los diálogos sobre las multas del patinete
+    function showNextScooterFinesDialogue() {
+        if (scooterFinesStep < scooterFinesDialogue.length) {
+            isDialogueActive = true;
+            dialogueBox.style.display = 'block';
+            
+            const line = scooterFinesDialogue[scooterFinesStep];
+            speakerName.textContent = line.name + ":";
+            speakerName.className = "speaker-name " + line.class;
+            dialogueText.textContent = line.text;
+
+            scooterFinesStep++;
+        } else {
+            // Después de todos los diálogos, mostramos la pantalla de Game Over
+            isDialogueActive = false;
+            isScooterFinesPlaying = false;
+            dialogueBox.style.display = 'none';
+            scooterVideoScreen.style.display = 'none';
+
+            if (gameOverText) {
+                gameOverText.innerText = "Has caigut per no portar casc i t'has lesionat.";
+            }
+            gameOverScreen.style.display = 'flex';
+        }
     }
     function checkCollision(nextX) {
         if (currentLevel !== 2) return false; 
@@ -696,6 +769,12 @@ function loadLevelPatinete() {
        
         // Si hay un diálogo activo y pulsamos E...
         if(key === 'e' && isDialogueActive) {
+            // --- NUEVA LÓGICA PARA LOS DIÁLOGOS DEL PATINETE ---
+            if (isScooterFinesPlaying) {
+                showNextScooterFinesDialogue();
+                return;
+            }
+            
             if (!isInitialized) {
                 showNextDialogue();
             } 
@@ -887,6 +966,8 @@ else if (Math.abs(relativeX - 320) < 60) showMessage("Torrent", "name-torrent", 
 
 btnRetry.addEventListener('click', () => {
         gameOverScreen.style.display = 'none';
+        isScooterFinesPlaying = false; // Limpiamos la variable de diálogos del patinete
+        scooterFinesStep = 0;
         
         // Dependiendo del nivel en el que hayamos muerto, recargamos uno u otro
         if (currentLevel === 5) {
