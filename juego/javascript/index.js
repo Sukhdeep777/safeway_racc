@@ -54,7 +54,7 @@
     });
     Object.values(gifs).forEach(path => {
         const preload = new Image();
-        preload.src = path;
+        preload.src = path; 
     });
 
     // 3. VARIABLES DE ESTADO
