@@ -291,7 +291,7 @@ img {
     position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
     width: 70%; min-height: 140px;
     background: rgba(0, 0, 0, 0.85); border: 2px solid #555;
-    padding: 25px; display: none; z-index: 3000;
+    padding: 25px; display: none; z-index: 5001;
     box-sizing: border-box; border-radius: 15px; 
 }
 .speaker-name {

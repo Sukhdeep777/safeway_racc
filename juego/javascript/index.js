@@ -704,60 +704,141 @@ function loadLevel4() {
             }, 500);
         }, 1000);
     }
+// ============================================================
+// LEVEL2.JS — Interacciones nivel 2, patinete, loadLevel3
+// Cargar DESPUÉS de level1.js
+// ============================================================
+
+function checkInteractionsLevel2() {
+    const playerRect      = player.getBoundingClientRect();
+    const containerRect   = container.getBoundingClientRect();
+    const relativePlayerX = (playerRect.left + playerRect.width / 2) - containerRect.left;
+
+    if (isParkUnlocked) {
+        promptSign.classList.remove('visible');
+        promptScooter.classList.remove('visible');
+        promptCar.classList.remove('visible');
+        return;
+    }
+
+    if (Math.abs(relativePlayerX - 75)  < 60) promptSign.classList.add('visible');
+    else promptSign.classList.remove('visible');
+
+    if (Math.abs(relativePlayerX - 320) < 60) promptScooter.classList.add('visible');
+    else promptScooter.classList.remove('visible');
+
+    if (Math.abs(relativePlayerX - 600) < 60) promptCar.classList.add('visible');
+    else promptCar.classList.remove('visible');
+}
+
+function loadLevel3() {
+    if (isTransitioning) return;
+    isTransitioning = true;
+    currentLevel    = 3;
+    blackCurtain.style.opacity = '1';
+    setTimeout(() => {
+        container.classList.remove('level-2');
+        container.classList.add('level-3');
+        posX = 50; velocity = 0; direction = 'right';
+        player.style.left = posX + 'px';
+        setIdle();
+        showMessage("Narrador", "name-narrador", "El parc està tranquil a aquestes hores. L'aire fresc t'ajuda a aclarir la ment. Segueix endavant.", null);
+        setTimeout(() => { blackCurtain.style.opacity = '0'; isTransitioning = false; }, 500);
+    }, 1000);
+}
+
+// === MINIJUEGO PATINETE ===
+
+function spawnRock() {
+    const rock = document.createElement('img');
+    rock.src              = 'imagenes/roca.png';
+    rock.className        = 'obstacle-rock';
+    rock.style.position   = 'absolute';
+    rock.style.width      = '50px';
+    rock.style.zIndex     = '5';
+    rock.style.left       = '850px';
+    rock.style.bottom     = (Math.random() > 0.5 ? 400 : 180) + 'px';
+    container.appendChild(rock);
+    rocks.push(rock);
+}
+
+function triggerScooterDeath() {
+    isMinigameActive = false;
+    isDead    = true;
+    velocity  = 0;
+    keys.w    = false;
+    keys.s    = false;
+
+    container.style.transform = 'none';
+    player.style.display      = 'none';
+
+    scooterVideoScreen.style.display = 'flex';
+    scooterVideo.currentTime = 0;
+    scooterVideo.play();
+
+    function startFreezeLogic() {
+        const freezeTime = scooterVideo.duration * 0.75;
+
+        const videoCheckInterval = setInterval(() => {
+            if (scooterVideo.currentTime >= freezeTime) {
+                scooterVideo.pause();
+                clearInterval(videoCheckInterval);
+
+                setTimeout(() => {
+                    dialogueBox.style.zIndex = '5001'; // ✅ Mismo valor que en el CSS
+                    isScooterFinesPlaying = true;
+                    scooterFinesStep = 0;
+                    showNextScooterFinesDialogue();
+                }, 500);
+            }
+        }, 100);
+    }
+
+    // ✅ Si los metadatos ya están listos, ejecutamos directo
+    // ✅ Si no, esperamos al evento
+    if (scooterVideo.readyState >= 1) {
+        startFreezeLogic();
+    } else {
+        scooterVideo.onloadedmetadata = startFreezeLogic;
+    }
+}
+
 function loadLevelPatinete() {
-        if (isTransitioning) return;
-        isTransitioning = true;
-        currentLevel = 5; // Le asignamos el nivel 5
-        
-        blackCurtain.style.opacity = '1';
+    if (isTransitioning) return;
+    isTransitioning = true;
+    currentLevel    = 5;
+    blackCurtain.style.opacity = '1';
+
+    setTimeout(() => {
+        container.classList.remove('level-2');
+        container.classList.add('level-patinete');
+
+        if (tutorialTeclas) tutorialTeclas.style.display = 'none';
+
+        rocks.forEach(rock => rock.remove());
+        rocks            = [];
+        rockSpawnTimer   = 0;
+        isMinigameActive = true;
+        isDead           = false;
+        rockSpeed        = 5;
+        drunkFrameCount  = 0;
+        dizzinessLevel   = 0;
+        container.style.transform = 'none';
+
+        player.style.display   = 'block';
+        posX = 50; velocity = 0; direction = 'right';
+        player.style.left      = posX + 'px';
+        player.style.transform = 'scale(0.7)';
+        posY = 220;
+        player.style.bottom    = posY + 'px';
+        setIdle();
 
         setTimeout(() => {
-            // Quitamos el fondo de la calle y ponemos el del patinete
-            container.classList.remove('level-2');
-            container.classList.add('level-patinete');
-            
-            // Ocultamos el tutorial
-            if (tutorialTeclas) tutorialTeclas.style.display = 'none';
-
-// --- NUEVO: Limpieza y setup del minijuego ---
-            rocks.forEach(rock => rock.remove());
-            rocks = []; 
-            rockSpawnTimer = 0;
-            isMinigameActive = true; 
-            isDead = false; 
-            
-            // --- NUEVO: Resetear borrachera ---
-            rockSpeed = 5;
-            drunkFrameCount = 0;
-            dizzinessLevel = 0;
-            container.style.transform = 'none'; // Quita el mareo de la pantalla
-
-            // --- ¡AQUÍ ESTÁ LA SOLUCIÓN! ---
-            player.style.display = 'block'; // Volvemos a hacer visible al personaje
-            // -------------------------------
-
-// Posicionamos a Torrent al inicio de la pantalla
-            posX = 50; 
-            velocity = 0; 
-            direction = 'right';
-            player.style.left = posX + 'px';
-            
-            // --- NUEVO: Hacemos al personaje más pequeño para esquivar mejor ---
-            player.style.transform = 'scale(0.7)'; // Prueba a bajarlo a 0.6 si sigue siendo muy grande
-            
-            // Subimos al personaje a la carretera
-            posY = 220;                       
-            player.style.bottom = posY + 'px'; 
-            
-            setIdle();
-
-            // Quitamos el fundido en negro
-            setTimeout(() => { 
-                blackCurtain.style.opacity = '0'; 
-                setTimeout(() => { isTransitioning = false; }, 600);
-            }, 500);
-        }, 1000);
-    }
+            blackCurtain.style.opacity = '0';
+            setTimeout(() => { isTransitioning = false; }, 600);
+        }, 500);
+    }, 1000);
+}
 // 8. INPUTS (TECLADO)
     window.addEventListener('keydown', (e) => {
         if (!gameStarted) return;
