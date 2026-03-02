@@ -7,7 +7,7 @@
     const level1Exit = document.getElementById('level1-exit');
     const keyPrompt = document.getElementById('key-prompt');
     
-    // Elementos Nivel 2
+    // Elementos Nivel 2.
     const promptSign = document.getElementById('prompt-sign');
     const promptScooter = document.getElementById('prompt-scooter');
     const promptCar = document.getElementById('prompt-car');
