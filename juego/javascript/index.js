@@ -646,14 +646,49 @@ function setIdle(){
 
     // --- CARGAR NIVELES ---
 
-    function loadLevel2() {
-        currentLevel = 2;
-        level1Exit.style.display = 'none';
-        container.classList.add('level-2');
-        posX = 50; velocity = 0; direction = 'right';
-        player.style.left = posX + 'px';
-        setIdle();
-    }
+function loadLevel2() {
+    // Reset de todas las variables necesarias
+    currentLevel = 2;
+    isParkUnlocked = false;
+    isTransitioning = false;
+    isDead = false;
+    isMinigameActive = false;
+    isScooterFinesPlaying = false;
+    scooterFinesStep = 0;
+    isDialogueActive = false;
+    isConfirmationActive = false;
+    currentInteraction = null;
+    dialogueBox.style.display = 'none';
+    dialogueBox.style.zIndex = '5001';
+    confirmationModal.style.display = 'none';
+    scooterVideoScreen.style.display = 'none';
+    gameOverScreen.style.display = 'none';
+
+    // Limpiamos rocas que puedan quedar
+    rocks.forEach(r => r.remove());
+    rocks = [];
+
+    // Quitamos clases de otros niveles y ponemos level-2
+    container.classList.remove('level-patinete', 'level-3', 'level-4');
+    container.style.transform = 'none';
+    container.style.backgroundImage = '';
+
+    // Mostramos elementos del nivel 1 que se ocultaron
+    level1Exit.style.display = 'none'; // La puerta no hace falta
+
+    // Reseteamos al jugador
+    player.style.display = 'block';
+    player.style.bottom = '80px';
+    player.style.transform = 'scale(1)';
+    posX = 50;
+    velocity = 0;
+    direction = 'right';
+    player.style.left = posX + 'px';
+
+    // Aplicamos el fondo del nivel 2
+    container.classList.add('level-2');
+    setIdle();
+}
 
     function loadLevel3() {
         if (isTransitioning) return;
