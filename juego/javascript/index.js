@@ -190,9 +190,8 @@
             isParkUnlocked = true;
             promptPark.classList.add('unlocked');
         } else if (currentInteraction === 'paso-peatones') {
-            // El jugador decide cruzar en rojo → se queda parado mirando el móvil
             isCrossingBadly = true;
-            setIdle(); // Muestra movilparado.gif (la lógica está en setIdle)
+            startPhoneDistraction(); // Secuencia cinemática automática
         } else if (currentInteraction === 'scooter') {
             loadLevelPatinete();
         }
@@ -331,6 +330,51 @@
         checkInteractions();
     }
 
+    // =========================================================
+    // === SECUENCIA CINEMÁTICA: DISTRACCIÓN CON EL MÓVIL ======
+    // =========================================================
+    function startPhoneDistraction() {
+        // Bloqueamos completamente el control del jugador
+        velocity = 0;
+        keys.a = false;
+        keys.d = false;
+        direction = 'right';
+
+        // FASE 1: El personaje se para y mira el móvil (2.5 segundos)
+        currentAnimation = null; // Forzamos el cambio de gif
+        img.style.transform = 'scaleX(1)';
+        img.src = 'imagenes/movilparado.gif';
+        currentAnimation = 'imagenes/movilparado.gif';
+
+        setTimeout(() => {
+            // FASE 2: Empieza a caminar solo mirando el móvil
+            currentAnimation = null;
+            img.style.transform = 'scaleX(1)';
+            img.src = 'imagenes/movil.gif';
+            currentAnimation = 'imagenes/movil.gif';
+
+            // Animamos el movimiento automático hacia el paso de peatones
+            function walkTowardsDeath() {
+                if (!isCrossingBadly || isDead) return;
+
+                posX += 1.8; // Velocidad de paseo tranquilo mirando el móvil
+                player.style.left = posX + 'px';
+
+                if (posX >= 427) {
+                    // Ha llegado al medio del paso → atropello
+                    if (gameOverText) {
+                        gameOverText.innerText = "Anar mirant el mòbil mentre creuaves en vermell no ha estat una bona idea...";
+                    }
+                    triggerDeathSequence();
+                } else {
+                    requestAnimationFrame(walkTowardsDeath);
+                }
+            }
+
+            requestAnimationFrame(walkTowardsDeath);
+
+        }, 2500); // 2.5 segundos parado mirando el móvil
+    }
     // =========================================================
 
     // === ANIMACIÓN DE ATROPELLO (DESDE EL FONDO) ===
@@ -532,16 +576,8 @@
             return;
         }
 
-        // Si está cruzando mirando el móvil → gif parado con móvil
-        if (isCrossingBadly) {
-            img.style.transform = 'scaleX(1)';
-            const newSrc = 'imagenes/movilparado.gif';
-            if(currentAnimation !== newSrc) {
-                currentAnimation = newSrc;
-                img.src = newSrc;
-            }
-            return;
-        }
+        // Si está en la secuencia del móvil, no interrumpimos el gif
+        if (isCrossingBadly) return;
 
         img.style.transform = 'scaleX(1)';
         const newSrc = direction === 'left' ? gifs.idleLeft : gifs.idleRight;
@@ -562,16 +598,8 @@
             return;
         }
 
-        // Si está cruzando mirando el móvil → gif de caminar con móvil
-        if (isCrossingBadly) {
-            const newSrc = 'imagenes/movil.gif';
-            if(currentAnimation !== newSrc) {
-                currentAnimation = newSrc;
-                img.src = newSrc;
-            }
-            img.style.transform = dir === 'left' ? 'scaleX(-1)' : 'scaleX(1)';
-            return;
-        }
+        // Si está en la secuencia del móvil, no interrumpimos el gif
+        if (isCrossingBadly) return;
 
         img.style.transform = 'scaleX(1)';
         const newSrc = dir === 'left' ? gifs.leftRun : gifs.rightRun;
@@ -771,7 +799,10 @@
     window.addEventListener('keydown', (e) => {
         if (!gameStarted) return;
         
-        if (isWaitingForLight) return; 
+        if (isWaitingForLight) return;
+        
+        // Bloqueamos movimiento durante la secuencia cinemática del móvil
+        if (isCrossingBadly) return;
 
         const key = e.key.toLowerCase();
        
