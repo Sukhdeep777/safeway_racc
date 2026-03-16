@@ -321,7 +321,11 @@ btnNo.addEventListener('click', () => {
 function applyPosition(){
         const bounds = updateBounds();
         if(posX < bounds.min) posX = bounds.min;
-        
+        // Pared invisible antes del paso de peatones
+        if (currentLevel === 4 && !hasSpokenAtCrosswalk && posX > 130) {
+            posX = 130;
+            velocity = 0;
+        }
         if (currentLevel === 3 && posX >= bounds.max && !isTransitioning) {
             posX = bounds.max; 
             loadLevel4();
@@ -341,7 +345,7 @@ function applyPosition(){
 
         // LÓGICA AUTOMÁTICA NIVEL 4 (Diálogo Semáforo)
         if (currentLevel === 4 && !hasSpokenAtCrosswalk && !isTransitioning && !isDead) {
-            if (posX >= 144) {
+            if (posX >= 128) {
                 velocity = 0;      
                 keys.d = false;    
                 hasSpokenAtCrosswalk = true; 
