@@ -60,8 +60,8 @@
 
     // 3. VARIABLES DE ESTADO
     let velocity = 0;
-    const MAX_SPEED = 3;      
-    const ACCELERATION = 0.3;  
+    const MAX_SPEED = 4;      
+    const ACCELERATION = 0.4;  
     const friction = 0.85;
     let direction = 'right';
     let currentAnimation = null;
@@ -1144,7 +1144,7 @@ else if (Math.abs(relativeX - 320) < 60) showMessage("Torrent", "name-torrent", 
                 blackCurtain.style.opacity = '0'; 
                 showNextDialogue(); 
             }, 500);
-        }, 1500);
+        }, 800);
     }
 
     if(img.complete) { window.addEventListener('keydown', handleStartInput); }
