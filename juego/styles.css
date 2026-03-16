@@ -423,7 +423,7 @@ img {
 .game-container.level-coche {
     background-image: url('imagenes/fondocoche.png');
     background-size: cover;
-    background-position: center 400%;
+    background-position: center 290%;
     background-repeat: repeat-x;
 }
 
@@ -434,6 +434,10 @@ img {
 .game-container.level-coche #arrow-forward,
 .game-container.level-coche #tutorial-teclas,
 .game-container.level-coche #killer-car {
+    display: none !important;
+}
+
+.game-container.level-coche .player {
     display: none !important;
 }
 
