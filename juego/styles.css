@@ -403,7 +403,7 @@ img {
 .tutorial-ws-keys {
     position: absolute;
     bottom: 20px;
-    right: 20px;       /* ← Esquina inferior DERECHA */
+    left: 20px;       /* ← Esquina inferior DERECHA */
     width: 60px;
     height: auto;
     z-index: 11;

@@ -427,11 +427,19 @@ function applyPosition(){
 
     // === BOTÓN VOLVER A JUGAR ===
     btnPlayAgain.addEventListener('click', () => {
-        // La forma más limpia y segura de reiniciar un juego de navegador 
-        // a su estado de "Fábrica" es recargar la página.
-        window.location.reload(); 
-    });
+        // Ocultamos la pantalla de victoria
+        victoryScreen.style.display = 'none';
 
+        // Reseteamos variables del nivel 4
+        hasSpokenAtCrosswalk = false;
+        isCrossingBadly      = false;
+        isDead               = false;
+        isLevelFinished      = false;
+        isWaitingForLight    = false;
+
+        // Volvemos directamente a la elección de los 3 caminos
+        loadLevel2();
+    });
 // === ANIMACIÓN DE VIDEO DEL AUTOBÚS (CINEMÁTICA FINAL) ===
     function playBusVideo() {
         // Frenamos al personaje
@@ -501,6 +509,7 @@ function applyPosition(){
         player.style.display = 'none'; // Ocultamos a Torrent
 
         // Mostramos el video del patinete
+        if (tutorialWS) tutorialWS.style.display = 'none';
         scooterVideoScreen.style.display = 'flex';
         scooterVideo.currentTime = 0;
         scooterVideo.play();
@@ -653,6 +662,7 @@ function loadLevel2() {
     // Reset de todas las variables necesarias
     currentLevel = 2;
     isParkUnlocked = false;
+    promptPark.classList.remove('unlocked'); // ← añade esta línea
     isTransitioning = false;
     isDead = false;
     isMinigameActive = false;
@@ -674,6 +684,7 @@ function loadLevel2() {
     // Quitamos clases de otros niveles y ponemos level-2
     container.classList.remove('level-patinete', 'level-3', 'level-4');
     container.style.transform = 'none';
+    if (tutorialWS) tutorialWS.style.display = '';
     container.style.backgroundImage = '';
 
     // Mostramos elementos del nivel 1 que se ocultaron
