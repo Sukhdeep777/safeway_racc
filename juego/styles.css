@@ -423,7 +423,7 @@ img {
 .game-container.level-coche {
     background-image: url('imagenes/fondocoche.png');
     background-size: cover;
-    background-position: center 290%;
+    background-position: center 400%;
     background-repeat: repeat-x;
 }
 
