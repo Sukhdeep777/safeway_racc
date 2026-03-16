@@ -201,6 +201,9 @@ let isCrossingBadly = false; // Controla si decidió cruzar en rojo
         else if (currentInteraction === 'scooter') {
             loadLevelPatinete();
         }
+        else if (currentInteraction === 'coche') {
+            loadLevelCoche();
+        }
         
         currentInteraction = null; 
     });
@@ -578,6 +581,12 @@ function setIdle(){
             return;
         }
 
+        if (currentLevel === 6) {
+            img.style.transform = 'scaleX(1)';
+            const newSrc = 'imagenes/coche1p.png';
+            if(currentAnimation !== newSrc) { currentAnimation = newSrc; img.src = newSrc; }
+            return;
+        }
         // Para el resto de niveles, lógica normal
         img.style.transform = 'scaleX(1)'; // Reseteamos el volteo por si acaso
         const newSrc = direction === 'left' ? gifs.idleLeft : gifs.idleRight;
@@ -879,6 +888,58 @@ function loadLevelPatinete() {
         }, 500);
     }, 1000);
 }
+
+// === CARGAR NIVEL COCHE ===
+function loadLevelCoche() {
+    if (isTransitioning) return;
+    isTransitioning = true;
+    currentLevel = 6;
+
+    blackCurtain.style.opacity = '1';
+
+    setTimeout(() => {
+        // Quitamos clases anteriores y ponemos la del coche
+        container.classList.remove('level-2', 'level-3', 'level-4', 'level-patinete');
+        container.classList.add('level-coche');
+        container.style.transform = 'none';
+        container.style.backgroundImage = '';
+
+        // Reseteamos estado
+        isDead = false;
+        isLevelFinished = false;
+        isCrossingBadly = false;
+        isWaitingForLight = false;
+        isMinigameActive = false;
+        killerCar.style.display = 'none';
+        rocks.forEach(r => r.remove());
+        rocks = [];
+
+        // Reseteamos jugador (ahora será el coche)
+        player.style.display = 'block';
+        player.style.bottom = '80px';
+        player.style.transform = 'scale(1)';
+        posX = 0;
+        player.style.left = '0px'; // El CSS lo fuerza a 0 de todas formas
+        velocity = 0;
+        direction = 'right';
+        player.style.left = posX + 'px';
+        setIdle(); // Cargará coche1p.png
+
+        // Diálogo inicial de la escena
+        showMessage(
+            "Narrador", "name-narrador",
+            "Has decidit agafar el cotxe. Però has begut aquesta nit... Conduir ara podria tenir conseqüències molt greus.",
+            null
+        );
+
+        setTimeout(() => {
+            blackCurtain.style.opacity = '0';
+            setTimeout(() => { isTransitioning = false; }, 600);
+        }, 500);
+
+    }, 1000);
+}
+
 // 8. INPUTS (TECLADO)
     window.addEventListener('keydown', (e) => {
         if (!gameStarted) return;
