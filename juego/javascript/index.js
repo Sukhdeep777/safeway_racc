@@ -580,13 +580,6 @@ function setIdle(){
             }
             return;
         }
-
-        if (currentLevel === 6) {
-            img.style.transform = 'scaleX(1)';
-            const newSrc = 'imagenes/coche1p.png';
-            if(currentAnimation !== newSrc) { currentAnimation = newSrc; img.src = newSrc; }
-            return;
-        }
         // Para el resto de niveles, lógica normal
         img.style.transform = 'scaleX(1)'; // Reseteamos el volteo por si acaso
         const newSrc = direction === 'left' ? gifs.idleLeft : gifs.idleRight;
