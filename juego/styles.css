@@ -423,8 +423,8 @@ img {
 .game-container.level-coche {
     background-image: url('imagenes/fondocoche.png');
     background-size: cover;
-    background-position: center;
-    background-repeat: repeat-x; /* ← Permite que el fondo se repita horizontalmente */
+    background-position: center 400%;
+    background-repeat: repeat-x;
 }
 
 .game-container.level-coche .player {
