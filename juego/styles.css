@@ -196,7 +196,7 @@ img {
 
 /* ENTRADA AL PARQUE (Centro) */
 #prompt-park {
-    left: 50%;
+    left: 45%;
     bottom: 200px;
     transform: translateX(-50%);
     display: none; 
@@ -421,7 +421,7 @@ img {
    NIVEL COCHE (CONDUCCIÓ)
    ========================================= */
 .game-container.level-coche {
-    background-image: url('imagenes/fondocoche.png');
+    background-image: url('imagenes/fondocoche.gif');
     background-size: cover;
     background-position: center 400%;
     background-repeat: repeat-x;
