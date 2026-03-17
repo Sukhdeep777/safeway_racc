@@ -111,8 +111,8 @@ img {
    ========================================= */
 .interactive-object {
     position: absolute;
-    bottom: 80px;
-    left: 800px;
+    bottom: 180px;
+    left: 870px;
     height: auto;
     width: auto;
     display: flex;
@@ -123,7 +123,7 @@ img {
 
 .door-img {
     position: relative;
-    height: 300px;
+    height: 200px;
     width: auto;
     margin: 0;
     image-rendering: -webkit-optimize-contrast;
