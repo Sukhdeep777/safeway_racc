@@ -172,6 +172,11 @@ let isCrossingBadly = false; // Controla si decidió cruzar en rojo
         isDialogueActive = false;
         dialogueBox.style.display = 'none';
         currentInteraction = null;
+
+        // Al cerrar el diálogo inicial del coche, arrancamos los efectos
+        if (currentLevel === 6) {
+            container.classList.add('drunk-active');
+        }
     }
 
     function openConfirmation() {
@@ -1184,6 +1189,8 @@ document.getElementById('btn-new-path').addEventListener('click', () => {
 
     // Volvemos al nivel 2 (elección de caminos)
     loadLevel2();
+
+    
 });
 
 })(); // Fin de tu código

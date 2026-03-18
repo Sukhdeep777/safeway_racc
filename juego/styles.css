@@ -457,3 +457,49 @@ img {
 .game-container.level-coche #car-overlay {
     display: block;
 }
+/* MÓVIL APAGADO — entre los asientos */
+#movil-apagado {
+    display: none;
+    position: absolute;
+    bottom: 11%;
+    left: 50%;
+    width: 65px;
+    z-index: 14;
+    pointer-events: none;
+    transform: rotate(-10deg);
+}
+
+@keyframes phone-pulse {
+    0%, 100% { opacity: 1;    transform: rotate(-10deg) scale(1);    }
+    50%       { opacity: 0.75; transform: rotate(-10deg) scale(1.05); }
+}
+
+.game-container.level-coche #movil-apagado {
+    display: block;
+    animation: phone-pulse 2s infinite ease-in-out;
+}
+
+.game-container.level-coche #movil-apagado {
+    display: block;
+}
+
+/* BORROSIDAD PROGRESIVA (se va acumulando poco a poco) */
+@keyframes drunk-progressive {
+    0%   { filter: blur(0px)   brightness(1);    }
+    20%  { filter: blur(0.5px) brightness(0.98); }
+    40%  { filter: blur(1px)   brightness(0.96); }
+    60%  { filter: blur(1.8px) brightness(0.94); }
+    80%  { filter: blur(2.5px) brightness(0.92); }
+    100% { filter: blur(3.5px) brightness(0.88); }
+}
+
+.game-container.level-coche {
+    animation: drunk-progressive 10s ease-in forwards;
+    /* forwards = se queda en el estado final, no vuelve atrás */
+}
+
+/* Asegúrate de que level-coche no tenga otro filter heredado */
+.game-container.level-coche #car-overlay {
+    animation: none; /* Borramos cualquier animación anterior del overlay */
+}
+
