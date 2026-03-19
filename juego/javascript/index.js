@@ -88,6 +88,10 @@ let isCrossingBadly = false; // Controla si decidió cruzar en rojo
     const keys = { a: false, d: false, e: false, w: false, s: false };    
     let isWaitingForLight = false; // Bloquea al jugador mientras el semáforo cambia
     let isLevelFinished = false; // Controla si ya se activó el final
+        // --- VARIABLES ÀVIA NIVEAU COCHE ---
+    let grandmaActive = false;
+    let grandmaHasStarted = false;
+    let grandmaAnimFrame = null;
 
     // --- NUEVAS VARIABLES PARA EL MINIJUEGO DEL PATINETE ---
 // --- NUEVAS VARIABLES PARA EL MINIJUEGO DEL PATINETE ---
@@ -173,9 +177,10 @@ let isCrossingBadly = false; // Controla si decidió cruzar en rojo
         dialogueBox.style.display = 'none';
         currentInteraction = null;
 
-        // Al cerrar el diálogo inicial del coche, arrancamos los efectos
-        if (currentLevel === 6) {
-            container.classList.add('drunk-active');
+        // Nivel coche: primer diàleg → arrancar àvia després d'un retard
+        if (currentLevel === 6 && !grandmaHasStarted) {
+            grandmaHasStarted = true;
+            setTimeout(startGrandmaAnimation, 10000); // 1.8s de marge per llegir l'entorn
         }
     }
 
@@ -575,6 +580,73 @@ function applyPosition(){
             gameOverScreen.style.display = 'flex';
         }
     }
+        // === ANIMACIÓ ÀVIA (LEVEL COCHE) ===
+    function startGrandmaAnimation() {
+        const grandma = document.getElementById('grandma');
+        if (!grandma || grandmaActive) return;
+
+        grandmaActive = true;
+        grandma.style.display = 'block';
+
+        // Punt de fuga real del parabrises del cotxe (centre de la carretera al fons)
+        let gWidth  = 4;     // Molt petita = molt lluny
+        let gBottom = 445;   // Alçada del punt de fuga (parabrises superior)
+        let gX      = 460;   // Centre-dret de la carretera
+
+        grandma.style.width      = gWidth  + 'px';
+        grandma.style.bottom     = gBottom + 'px';
+        grandma.style.left       = gX      + 'px';
+        grandma.style.display    = 'block';
+
+        function animateGrandma() {
+            if (!grandmaActive) return;
+
+            // Velocitat progressiva: més lenta al principi (lluny), més ràpida al final (a prop)
+            let speedFactor = gWidth / 30;  // Acceleració natural perspectiva
+
+            gWidth  += 0.4 + speedFactor;   // Creix exponencialment
+            gBottom -= 1.2 + speedFactor;   // Baixa pantalla (s'acosta)
+            gX      -= 1.0 + speedFactor * 0.5; // Creua cap a esquerra
+
+            grandma.style.width  = gWidth  + 'px';
+            grandma.style.bottom = gBottom + 'px';
+            grandma.style.left   = gX      + 'px';
+
+            // Para quan arriba a mida de "impacte" (just davant del cotxe)
+            if (gWidth >= 130 || gBottom <= 230) {
+                grandmaActive = false;
+                triggerGrandmaCollision();
+                return;
+            }
+
+            grandmaAnimFrame = requestAnimationFrame(animateGrandma);
+        }
+
+        grandmaAnimFrame = requestAnimationFrame(animateGrandma);
+    }
+
+    function triggerGrandmaCollision() {
+        // 1. Eliminar COMPLETAMENT l'efecte de borrositat
+        container.style.animation = 'none';
+        container.style.filter = 'none';
+
+        // 2. Congelar el GIF de l'àvia
+        const grandma = document.getElementById('grandma');
+        if (grandma) {
+            const frozenSrc = grandma.src.split('?')[0] + '?freeze=' + Date.now();
+            grandma.src = frozenSrc;
+        }
+
+        // 3. Aplicar filtre gris (temps aturat) amb transició
+        const greyOverlay = document.getElementById('grey-overlay');
+        if (greyOverlay) {
+            greyOverlay.style.display = 'block';
+            requestAnimationFrame(() => {
+                greyOverlay.style.opacity = '1';
+            });
+        }
+
+    }
     function checkCollision(nextX) {
         if (currentLevel !== 2) return false; 
         const carStyle = window.getComputedStyle(carObstacle);
@@ -926,6 +998,17 @@ function loadLevelCoche() {
         killerCar.style.display = 'none';
         rocks.forEach(r => r.remove());
         rocks = [];
+
+        // Reset àvia
+        grandmaActive = false;
+        grandmaHasStarted = false;
+        if (grandmaAnimFrame) { cancelAnimationFrame(grandmaAnimFrame); grandmaAnimFrame = null; }
+        container.style.animation = '';
+        container.style.filter    = '';
+        const grandmaEl = document.getElementById('grandma');
+        if (grandmaEl) grandmaEl.style.display = 'none';
+        const greyEl = document.getElementById('grey-overlay');
+        if (greyEl) { greyEl.style.display = 'none'; greyEl.style.opacity = '0'; }
 
         // Reseteamos jugador (ahora será el coche)
         player.style.display = 'block';
