@@ -40,54 +40,6 @@
     const tutorialTeclas = document.getElementById('tutorial-teclas');
     const gameOverText = document.getElementById('game-over-text');
     const tutorialWS = document.getElementById('tutorial-ws');
-
-    // =========================================
-    // AUDIO — Declaración de todos los sonidos
-    // =========================================
-    const audioDisco = new Audio('audios/gente_disco.mp3');
-    audioDisco.loop   = true;
-    audioDisco.volume = 0.25; // Volumen bajo: ambiental de fondo
-
-    // Dos instancias de coche.mp3 para que puedan sonar de forma independiente
-    // audioCochePass  → coche que pasa por el semáforo (corto, no loop)
-    // audioMotor      → motor en bucle mientras conducimos
-    const audioCochePass = new Audio('audios/coche.mp3');
-    audioCochePass.loop   = false;
-    audioCochePass.volume = 0.75;
-
-    const audioMotor = new Audio('audios/coche.mp3');
-    audioMotor.loop   = true;
-    audioMotor.volume = 0.45;
-
-    const audioViento = new Audio('audios/viento.mp3');
-    audioViento.loop   = true;
-    audioViento.volume = 0.6;
-
-    const audioVibracion = new Audio('audios/movil_vibrar.mp3');
-    audioVibracion.loop   = false;
-    audioVibracion.volume = 0.8;
-
-    const audioLlamada = new Audio('audios/llamada.mp3');
-    audioLlamada.loop   = false;
-    audioLlamada.volume = 0.8;
-
-    /** Detiene TODOS los audios del juego y reinicia su posición */
-    function stopAllAudio() {
-        [audioDisco, audioCochePass, audioMotor, audioVibracion, audioLlamada, audioViento].forEach(a => {
-            a.pause();
-            a.currentTime = 0;
-        });
-    }
-
-    /** Detiene motor y coche-pass (útil al salir del nivel coche / nivel 4) */
-    function stopCarAudio() {
-        audioCochePass.pause();
-        audioCochePass.currentTime = 0;
-        audioMotor.pause();
-        audioMotor.currentTime = 0;
-    }
-    // =========================================
-
     // 2. IMÁGENES PRECARGADAS
     const gifs = {
         rightRun: 'animaciones/correr-derecho.gif',
@@ -95,6 +47,7 @@
         idleRight: 'animaciones/paradoderecha.gif',
         idleLeft: 'animaciones/paradoizquierda.gif'
     };
+    // (Debajo de los gifs del jugador...)
     const bgPreloads = ['imagenes/busamarillo.gif', 'imagenes/busverde.gif'];
     bgPreloads.forEach(path => {
         const preloadBg = new Image();
@@ -114,7 +67,7 @@
     let currentAnimation = null;
     let currentLevel = 1;
     let posX = 0;
-    let posY = 70;
+    let posY = 70; // Por si quieres usarlo para el patinete o futuras mecánicas
     
     let isInitialized = false; 
     let gameStarted = false;
@@ -126,27 +79,32 @@
     
     let isParkUnlocked = false; 
     let isTransitioning = false; 
-    let isCrossingBadly = false;
-    let isDead = false;
+let isCrossingBadly = false; // Controla si decidió cruzar en rojo
+    let isDead = false;          // Controla si está en la animación de atropello
     
+    // VARIABLE NUEVA: Para controlar el diálogo automático del semáforo
     let hasSpokenAtCrosswalk = false;
 
     const keys = { a: false, d: false, e: false, w: false, s: false };    
-    let isWaitingForLight = false;
-    let isLevelFinished = false;
-
+    let isWaitingForLight = false; // Bloquea al jugador mientras el semáforo cambia
+    let isLevelFinished = false; // Controla si ya se activó el final
+        // --- VARIABLES ÀVIA NIVEAU COCHE ---
     let grandmaActive = false;
     let grandmaHasStarted = false;
     let grandmaAnimFrame = null;
 
+    // --- NUEVAS VARIABLES PARA EL MINIJUEGO DEL PATINETE ---
+// --- NUEVAS VARIABLES PARA EL MINIJUEGO DEL PATINETE ---
     let rocks = [];           
     let rockSpawnTimer = 0;   
     let isMinigameActive = false; 
 
-    let rockSpeed = 5;
-    let drunkFrameCount = 0;
-    let dizzinessLevel = 0;
+    // --- NUEVAS VARIABLES PARA EL EFECTO MAREO ---
+    let rockSpeed = 5;          // Velocidad inicial de las rocas
+    let drunkFrameCount = 0;    // Contador de tiempo
+    let dizzinessLevel = 0;     // Nivel de borrachera/mareo
     
+    // --- VARIABLES PARA LOS DIÁLOGOS DEL PATINETE ---
     let isScooterFinesPlaying = false;
     let scooterFinesStep = 0;
     const scooterFinesDialogue = [
@@ -163,7 +121,7 @@
         {
             name: "Narrador",
             class: "name-narrador",
-            text: "La segona multa: escoltar música mentre condueixes. Això et distreu i t'impedeix escoltar els sons del trànsit. 30 euros."
+            text: "La segona multa: escoltar música mentre condueixes. Això et distreu i t’impedeix escoltar els sons del trànsit. 30 euros."
         },
         {
             name: "Narrador",
@@ -171,7 +129,6 @@
             text: "La tercera multa: no tenir el patinet registrat a la DGT. És necessari el registre oficial. 60 euros.Un total de 140 euros."
         }
     ];
-
     // 4. HISTORIA (DIÁLOGOS INTRO)
     const story = [
         {
@@ -220,9 +177,10 @@
         dialogueBox.style.display = 'none';
         currentInteraction = null;
 
+        // Nivel coche: primer diàleg → arrancar àvia després d'un retard
         if (currentLevel === 6 && !grandmaHasStarted) {
             grandmaHasStarted = true;
-            setTimeout(startGrandmaAnimation, 10000);
+            setTimeout(startGrandmaAnimation, 10000); // 1.8s de marge per llegir l'entorn
         }
     }
 
@@ -238,7 +196,7 @@
         isConfirmationActive = false;
     }
 
-    // --- LÓGICA DE BOTONES (SÍ / NO) ---
+// --- LÓGICA DE BOTONES (SÍ / NO) ---
     btnYes.addEventListener('click', () => {
         closeConfirmation(); 
 
@@ -246,83 +204,95 @@
             isParkUnlocked = true;
             promptPark.classList.add('unlocked');
         } else if (currentInteraction === 'paso-peatones') {
+            // El jugador decide cruzar en rojo
             isCrossingBadly = true; 
-        } else if (currentInteraction === 'scooter') {
+        } 
+        // --- AQUÍ AÑADES LO DEL PATINETE ---
+        else if (currentInteraction === 'scooter') {
             loadLevelPatinete();
-        } else if (currentInteraction === 'coche') {
+        }
+        else if (currentInteraction === 'coche') {
             loadLevelCoche();
         }
         
         currentInteraction = null; 
     });
 
-    btnNo.addEventListener('click', () => {
+btnNo.addEventListener('click', () => {
         closeConfirmation(); 
 
         if (currentInteraction === 'paso-peatones') {
+            // El jugador decide ser prudente y esperar
             isWaitingForLight = true;
+            
+            // Forzamos al jugador a quedarse completamente quieto
             keys.a = false;
             keys.d = false;
             velocity = 0;
             setIdle();
 
-            // ── AUDIO: coche que pasa en verde (el "seguro") ──────────────────
-            audioCochePass.currentTime = 0;
-            audioCochePass.play().catch(() => {});
-            // ─────────────────────────────────────────────────────────────────
-
+            // --- 1. ANIMACIÓN DEL COCHE VERTICAL (DESDE EL FONDO) ---
             killerCar.style.display = 'block';
             
-            let carY = 400;
-            let carScale = 0.2;
+            let carY = 400; // Empieza lejos en el horizonte
+            let carScale = 0.2; // Escala inicial pequeña
             
+            // Lo posicionamos un poco más a la derecha de Torrent para que pase por la carretera
+            // Ajusta este "+ 150" si necesitas que el coche pase más a la izquierda o derecha
             killerCar.style.left = (posX + 250) + 'px'; 
             killerCar.style.bottom = carY + 'px';
             killerCar.style.transform = `scale(${carScale})`;
 
             function passCarVertically() {
-                carY -= 25;
-                carScale += 0.08;
+                carY -= 25; // Velocidad de caída muy alta (pasa rápido)
+                carScale += 0.08; // Crece rápido para mantener la perspectiva
                 
                 killerCar.style.bottom = carY + 'px';
                 killerCar.style.transform = `scale(${carScale})`;
 
+                // Cuando el coche sale de la pantalla por abajo (hacia la cámara)
+// Cuando el coche sale de la pantalla por abajo (hacia la cámara)
                 if (carY < -300) {
-                    killerCar.style.display = 'none';
-
-                    // ── AUDIO: el coche ya no se ve → paramos el sonido ───────
-                    audioCochePass.pause();
-                    audioCochePass.currentTime = 0;
-                    // ─────────────────────────────────────────────────────────
-
+                    killerCar.style.display = 'none'; // Lo ocultamos
+                    
+                    // --- 2. TRANSICIÓN DE FONDOS CON FUNDIDO ---
                     changeBackgroundSmoothly('imagenes/busamarillo.gif');
 
+                    // Esperamos 3 segundos y cambiamos a verde
                     setTimeout(() => {
                         changeBackgroundSmoothly('imagenes/busverde.gif');
                         
+                        // Esperamos a que acabe el fundido (600ms) para lanzar el diálogo
                         setTimeout(() => {
+                            // Mensaje educativo y de alivio
                             showMessage("Torrent", "name-torrent", "Uf... Has vist a quina velocitat anava aquell cotxe? Menys mal que m'he esperat. Ara sí que està verd.", null);
+                            
+                            // Liberamos al jugador
                             isWaitingForLight = false;
                         }, 600); 
 
                     }, 3000); 
                     
                 } else {
+                    // Seguimos animando hasta que salga de la pantalla
                     requestAnimationFrame(passCarVertically);
                 }
             }
             
+            // Disparamos la animación del coche
             requestAnimationFrame(passCarVertically);
         }
 
         currentInteraction = null; 
     });
 
-    // --- FUNCIÓN PARA TRANSICIONES SUAVES DE FONDO ---
+// --- FUNCIÓN PARA TRANSICIONES SUAVES DE FONDO ---
     function changeBackgroundSmoothly(newImgSrc) {
+        // Aseguramos que el jugador y el coche siempre estén por delante
         player.style.zIndex = '10';
         killerCar.style.zIndex = '10';
 
+        // Creamos una capa temporal
         const fader = document.createElement('div');
         fader.style.position = 'absolute';
         fader.style.top = '0';
@@ -330,25 +300,27 @@
         fader.style.width = '100%';
         fader.style.height = '100%';
         fader.style.backgroundImage = `url('${newImgSrc}')`;
+        // Ajusta esto a 'cover' o '100% 100%' según cómo tengas tu CSS original
         fader.style.backgroundSize = 'cover'; 
         fader.style.backgroundPosition = 'center';
-        fader.style.zIndex = '1';
+        fader.style.zIndex = '1'; // Se pone justo encima del fondo actual
         fader.style.opacity = '0';
-        fader.style.transition = 'opacity 0.6s ease-in-out';
+        fader.style.transition = 'opacity 0.6s ease-in-out'; // Duración del fundido (0.6 seg)
         fader.style.pointerEvents = 'none';
 
         container.appendChild(fader);
 
+        // Disparamos la transición visual
         requestAnimationFrame(() => {
             fader.style.opacity = '1';
         });
 
+        // Cuando termina el fundido, aplicamos el fondo real y borramos la capa
         setTimeout(() => {
             container.style.backgroundImage = `url('${newImgSrc}')`;
             fader.remove();
         }, 600);
     }
-
     // 6. MOVIMIENTO Y FÍSICA
     function updateBounds(){
         const rect = container.getBoundingClientRect();
@@ -356,9 +328,10 @@
         return { min: 0, max: rect.width - pRect.width };
     }
 
-    function applyPosition(){
+function applyPosition(){
         const bounds = updateBounds();
         if(posX < bounds.min) posX = bounds.min;
+        // Pared invisible antes del paso de peatones
         if (currentLevel === 4 && !hasSpokenAtCrosswalk && posX > 130) {
             posX = 130;
             velocity = 0;
@@ -367,10 +340,12 @@
             posX = bounds.max; 
             loadLevel4();
         } 
+        // --- LÓGICA DE VICTORIA ARREGLADA ---
+        // Añadimos !isTransitioning para que no salte durante el fundido a negro
         else if (currentLevel === 4 && !isTransitioning && !isCrossingBadly && posX >= 600 && !isDead && !isLevelFinished) {
-            isLevelFinished = true;
+            isLevelFinished = true; // Evita que se dispare en bucle
             posX = 600; 
-            playBusVideo();
+            playBusVideo(); // Llamamos al video
         }
         else if (posX > bounds.max) {
             posX = bounds.max;
@@ -378,6 +353,7 @@
 
         player.style.left = posX + 'px';
 
+        // LÓGICA AUTOMÁTICA NIVEL 4 (Diálogo Semáforo)
         if (currentLevel === 4 && !hasSpokenAtCrosswalk && !isTransitioning && !isDead) {
             if (posX >= 128) {
                 velocity = 0;      
@@ -387,6 +363,8 @@
             }
         }
 
+        // LÓGICA DE ATROPELLO
+        // Si decidió cruzar (isCrossingBadly) y llega al medio de la carretera (aprox pixel 427)
         if (currentLevel === 4 && isCrossingBadly && posX >= 427 && !isDead) {
             triggerDeathSequence(); 
         }
@@ -394,7 +372,7 @@
         checkInteractions();
     }
 
-    // === ANIMACIÓN DE ATROPELLO (DESDE EL FONDO) ===
+// === ANIMACIÓN DE ATROPELLO (DESDE EL FONDO) ===
     function triggerDeathSequence() {
         isDead = true;
         velocity = 0;
@@ -402,48 +380,46 @@
         keys.d = false;
         setIdle();
 
+        // --- NUEVO: Nos aseguramos de que salga el texto del coche ---
         if (gameOverText) {
             gameOverText.innerText = "Creuar en vermell no ha estat una bona idea...";
         }
 
-        // ── AUDIO: coche que atropella ────────────────────────────────────────
-        audioCochePass.currentTime = 0;
-        audioCochePass.play().catch(() => {});
-        // ─────────────────────────────────────────────────────────────────────
-
         killerCar.style.display = 'block';
         
-        let carY = 400;
-        let carScale = 0.2;
+        // Posición inicial: Lejos en el horizonte (arriba y pequeño)
+        let carY = 400; // Altura en el horizonte (puedes subirlo si quieres que empiece más lejos)
+        let carScale = 0.2; // Escala muy pequeña
         
-        killerCar.style.left = (posX - 50) + 'px';
+        // Centramos el coche con la posición actual del jugador
+        killerCar.style.left = (posX - 50) + 'px'; // Ajusta el -50 para centrar tu coche.png con el personaje
         killerCar.style.bottom = carY + 'px';
         killerCar.style.transform = `scale(${carScale})`;
         
         let isHit = false;
 
         function animateCar() {
-            carY -= 12;
-            carScale += 0.04;
+            carY -= 12; // Velocidad a la que el coche "baja" hacia la cámara
+            carScale += 0.04; // Velocidad a la que el coche "crece" (efecto 3D)
             
             killerCar.style.bottom = carY + 'px';
             killerCar.style.transform = `scale(${carScale})`;
 
+            // El jugador está en bottom: 80px. El impacto ocurre cuando el coche llega a esa altura.
             if (!isHit && carY <= 100) {
                 isHit = true;
             }
 
+            // Si el coche lo golpea, el jugador es arrastrado hacia abajo (hacia la cámara)
             if (isHit) {
                 player.style.bottom = carY + 'px'; 
             }
 
-            if (carY < -300) {
-                // ── AUDIO: coche fuera de pantalla → paramos el sonido ────────
-                audioCochePass.pause();
-                audioCochePass.currentTime = 0;
-                // ─────────────────────────────────────────────────────────────
-                gameOverScreen.style.display = 'flex';
-                player.style.display = 'none';
+            // Cuando el coche (y el jugador) salen de la pantalla por abajo
+// Cuando el coche sale de la pantalla...
+            if (carY < -300) {  // (O si usas la horizontal: si carX > 1200)
+                gameOverScreen.style.display = 'flex'; // Muestra la pantalla negra
+                player.style.display = 'none';         // <-- AÑADE ESTO: Oculta a Torrent
             } else {
                 requestAnimationFrame(animateCar);
             }
@@ -452,60 +428,69 @@
         requestAnimationFrame(animateCar);
     }
 
-    // === ANIMACIÓN DE VICTORIA ===
+// === ANIMACIÓN DE VICTORIA ===
     function triggerVictory() {
         velocity = 0;
         keys.a = false;
         keys.d = false;
         setIdle();
+        
+        // Mostramos la pantalla de victoria (usamos 'flex' porque así lo centramos en el CSS en línea)
         victoryScreen.style.display = 'flex';
     }
 
     // === BOTÓN VOLVER A JUGAR ===
     btnPlayAgain.addEventListener('click', () => {
+        // Ocultamos la pantalla de victoria
         victoryScreen.style.display = 'none';
 
+        // Reseteamos variables del nivel 4
         hasSpokenAtCrosswalk = false;
         isCrossingBadly      = false;
         isDead               = false;
         isLevelFinished      = false;
         isWaitingForLight    = false;
 
+        // Volvemos directamente a la elección de los 3 caminos
         loadLevel2();
     });
-
-    // === ANIMACIÓN DE VIDEO DEL AUTOBÚS (CINEMÁTICA FINAL) ===
+// === ANIMACIÓN DE VIDEO DEL AUTOBÚS (CINEMÁTICA FINAL) ===
     function playBusVideo() {
+        // Frenamos al personaje
         velocity = 0;
         keys.a = false;
         keys.d = false;
         setIdle();
-
-        // Paramos el motor antes de reproducir el vídeo del autobús
-        stopCarAudio();
         
+        // Mostramos la pantalla negra y empezamos el vídeo
         busVideoScreen.style.display = 'flex';
         busVideo.play();
 
+        // Este evento detecta exactamente el segundo en el que el vídeo termina
         busVideo.onended = () => {
-            busVideoScreen.style.display = 'none';
-            triggerVictory();
+            busVideoScreen.style.display = 'none'; // Ocultamos el vídeo
+            triggerVictory(); // Ahora sí, lanzamos la pantalla de "Objetivo Conseguido"
         };
     }
 
-    // === FUNCIONES AUXILIARES MINIJUEGO PATINETE ===
+// === FUNCIONES AUXILIARES MINIJUEGO PATINETE ===
+
+    // Función para crear una roca nueva
+// Función para crear una roca nueva
     function spawnRock() {
         const rock = document.createElement('img');
         rock.src = 'imagenes/roca.png';
-        rock.className = 'obstacle-rock';
+        rock.className = 'obstacle-rock'; // Clase para poder borrarlas luego
         rock.style.position = 'absolute';
         rock.style.width = '50px';  
         rock.style.zIndex = '5';    
         rock.style.left = '850px';  
 
+        // --- NUEVO: Solo dos posiciones posibles (Máximo o Mínimo) ---
         const carrilArriba = 400;
         const carrilAbajo = 180;
         
+        // 50% de probabilidad de salir arriba o abajo
         if (Math.random() > 0.5) {
             rock.style.bottom = carrilArriba + 'px';
         } else {
@@ -516,6 +501,8 @@
         rocks.push(rock); 
     }
 
+    // Función genérica para detectar colisión entre dos rectángulos (2D)
+    // "margin" sirve para hacer la colisión un poco más permisiva y que no sea tan frustrante
     function check2DCollision(rect1, rect2, margin = 10) {
         return !(
             rect1.top + margin    > rect2.bottom - margin ||
@@ -525,48 +512,46 @@
         );
     }
 
+    // Función específica para morir en el patinete
     function triggerScooterDeath() {
-        isMinigameActive = false;
+        isMinigameActive = false; // Paramos el juego
         isDead = true;
         velocity = 0;
-        keys.w = false; keys.s = false;
-
-        audioViento.pause();
-        audioViento.currentTime = 0;
+        keys.w = false; keys.s = false; // Soltamos teclas
 
         container.style.transform = 'none';
-        player.style.display = 'none';
+        player.style.display = 'none'; // Ocultamos a Torrent
 
+        // Mostramos el video del patinete
         if (tutorialWS) tutorialWS.style.display = 'none';
         scooterVideoScreen.style.display = 'flex';
         scooterVideo.currentTime = 0;
         scooterVideo.play();
 
-        function startFreezeLogic() {
-            const freezeTime = scooterVideo.duration * 0.75;
+        // Obtenemos la duración del video
+        scooterVideo.onloadedmetadata = function() {
+            const videoDuration = scooterVideo.duration;
+            const freezeTime = videoDuration * 0.75; // Congelamos al 75% del video
 
             const videoCheckInterval = setInterval(() => {
                 if (scooterVideo.currentTime >= freezeTime) {
+                    // Congelamos el video
                     scooterVideo.pause();
                     clearInterval(videoCheckInterval);
 
+                    // Esperamos un poco y mostramos el diálogo sobre las multas
                     setTimeout(() => {
-                        dialogueBox.style.zIndex = '5001';
+                        scooterVideoScreen.style.display = 'none';
                         isScooterFinesPlaying = true;
                         scooterFinesStep = 0;
                         showNextScooterFinesDialogue();
                     }, 500);
                 }
             }, 100);
-        }
-
-        if (scooterVideo.readyState >= 1) {
-            startFreezeLogic();
-        } else {
-            scooterVideo.onloadedmetadata = startFreezeLogic;
-        }
+        };
     }
 
+    // Nueva función para mostrar los diálogos sobre las multas del patinete
     function showNextScooterFinesDialogue() {
         if (scooterFinesStep < scooterFinesDialogue.length) {
             isDialogueActive = true;
@@ -584,6 +569,7 @@
             dialogueBox.style.display = 'none';
             scooterVideoScreen.style.display = 'none';
 
+            // ✅ Cambiamos el título y ocultamos el botón de reintentar
             const titleEl = document.getElementById('game-over-title');
             if (titleEl) titleEl.innerText = "T'HAN ENXAMPAT!";
             if (gameOverText) gameOverText.innerText = "Has rebut 140 euros de multes per no respectar les normes del patinet.";
@@ -594,8 +580,7 @@
             gameOverScreen.style.display = 'flex';
         }
     }
-
-    // === ANIMACIÓ ÀVIA (LEVEL COCHE) ===
+        // === ANIMACIÓ ÀVIA (LEVEL COCHE) ===
     function startGrandmaAnimation() {
         const grandma = document.getElementById('grandma');
         if (!grandma || grandmaActive) return;
@@ -603,9 +588,10 @@
         grandmaActive = true;
         grandma.style.display = 'block';
 
-        let gWidth  = 4;
-        let gBottom = 445;
-        let gX      = 460;
+        // Punt de fuga real del parabrises del cotxe (centre de la carretera al fons)
+        let gWidth  = 4;     // Molt petita = molt lluny
+        let gBottom = 445;   // Alçada del punt de fuga (parabrises superior)
+        let gX      = 460;   // Centre-dret de la carretera
 
         grandma.style.width      = gWidth  + 'px';
         grandma.style.bottom     = gBottom + 'px';
@@ -615,16 +601,18 @@
         function animateGrandma() {
             if (!grandmaActive) return;
 
-            let speedFactor = gWidth / 30;
+            // Velocitat progressiva: més lenta al principi (lluny), més ràpida al final (a prop)
+            let speedFactor = gWidth / 30;  // Acceleració natural perspectiva
 
-            gWidth  += 0.4 + speedFactor;
-            gBottom -= 1.2 + speedFactor;
-            gX      -= 1.0 + speedFactor * 0.5;
+            gWidth  += 0.4 + speedFactor;   // Creix exponencialment
+            gBottom -= 1.2 + speedFactor;   // Baixa pantalla (s'acosta)
+            gX      -= 1.0 + speedFactor * 0.5; // Creua cap a esquerra
 
             grandma.style.width  = gWidth  + 'px';
             grandma.style.bottom = gBottom + 'px';
             grandma.style.left   = gX      + 'px';
 
+            // Para quan arriba a mida de "impacte" (just davant del cotxe)
             if (gWidth >= 130 || gBottom <= 230) {
                 grandmaActive = false;
                 triggerGrandmaCollision();
@@ -638,18 +626,18 @@
     }
 
     function triggerGrandmaCollision() {
-        audioMotor.pause();    audioMotor.currentTime = 0;
-        audioVibracion.pause(); audioVibracion.currentTime = 0;
-        audioLlamada.pause();   audioLlamada.currentTime = 0;
+        // 1. Eliminar COMPLETAMENT l'efecte de borrositat
         container.style.animation = 'none';
         container.style.filter = 'none';
 
+        // 2. Congelar el GIF de l'àvia
         const grandma = document.getElementById('grandma');
         if (grandma) {
             const frozenSrc = grandma.src.split('?')[0] + '?freeze=' + Date.now();
             grandma.src = frozenSrc;
         }
 
+        // 3. Aplicar filtre gris (temps aturat) amb transició
         const greyOverlay = document.getElementById('grey-overlay');
         if (greyOverlay) {
             greyOverlay.style.display = 'block';
@@ -657,8 +645,8 @@
                 greyOverlay.style.opacity = '1';
             });
         }
-    }
 
+    }
     function checkCollision(nextX) {
         if (currentLevel !== 2) return false; 
         const carStyle = window.getComputedStyle(carObstacle);
@@ -672,7 +660,8 @@
         return false;
     }
 
-    function setIdle(){
+function setIdle(){
+        // Si estamos en el nivel del patinete, forzamos la imagen del patinete
         if (currentLevel === 5) {
             const newSrc = 'imagenes/patinete.gif';
             if(currentAnimation !== newSrc) {
@@ -681,7 +670,8 @@
             }
             return;
         }
-        img.style.transform = 'scaleX(1)';
+        // Para el resto de niveles, lógica normal
+        img.style.transform = 'scaleX(1)'; // Reseteamos el volteo por si acaso
         const newSrc = direction === 'left' ? gifs.idleLeft : gifs.idleRight;
         if(currentAnimation !== newSrc) {
             currentAnimation = newSrc;
@@ -690,17 +680,20 @@
     }
 
     function setRun(dir){
+        // Si estamos en el nivel del patinete, forzamos la imagen del patinete
         if (currentLevel === 5) {
             const newSrc = 'imagenes/patinete.gif';
             if(currentAnimation !== newSrc) {
                 currentAnimation = newSrc;
                 img.src = newSrc;
             }
+            // Volteamos el patinete en espejo si vamos a la izquierda
             img.style.transform = dir === 'left' ? 'scaleX(-1)' : 'scaleX(1)';
             return;
         }
 
-        img.style.transform = 'scaleX(1)';
+        // Para el resto de niveles, lógica normal
+        img.style.transform = 'scaleX(1)'; // Reseteamos el volteo por si acaso
         const newSrc = dir === 'left' ? gifs.leftRun : gifs.rightRun;
         if(currentAnimation !== newSrc) {
             currentAnimation = newSrc;
@@ -746,51 +739,51 @@
 
     // --- CARGAR NIVELES ---
 
-    function loadLevel2() {
-        // ── AUDIO: paramos disco y motor al volver al menú de caminos ─────────
-        stopAllAudio();
-        // ─────────────────────────────────────────────────────────────────────
+function loadLevel2() {
+    // Reset de todas las variables necesarias
+    currentLevel = 2;
+    isParkUnlocked = false;
+    promptPark.classList.remove('unlocked'); // ← añade esta línea
+    isTransitioning = false;
+    isDead = false;
+    isMinigameActive = false;
+    isScooterFinesPlaying = false;
+    scooterFinesStep = 0;
+    isDialogueActive = false;
+    isConfirmationActive = false;
+    currentInteraction = null;
+    dialogueBox.style.display = 'none';
+    dialogueBox.style.zIndex = '5001';
+    confirmationModal.style.display = 'none';
+    scooterVideoScreen.style.display = 'none';
+    gameOverScreen.style.display = 'none';
 
-        currentLevel = 2;
-        isParkUnlocked = false;
-        promptPark.classList.remove('unlocked');
-        isTransitioning = false;
-        isDead = false;
-        isMinigameActive = false;
-        isScooterFinesPlaying = false;
-        scooterFinesStep = 0;
-        isDialogueActive = false;
-        isConfirmationActive = false;
-        currentInteraction = null;
-        dialogueBox.style.display = 'none';
-        dialogueBox.style.zIndex = '5001';
-        confirmationModal.style.display = 'none';
-        scooterVideoScreen.style.display = 'none';
-        gameOverScreen.style.display = 'none';
+    // Limpiamos rocas que puedan quedar
+    rocks.forEach(r => r.remove());
+    rocks = [];
 
-        rocks.forEach(r => r.remove());
-        rocks = [];
+    // Quitamos clases de otros niveles y ponemos level-2
+    container.classList.remove('level-patinete', 'level-3', 'level-4');
+    container.style.transform = 'none';
+    if (tutorialWS) tutorialWS.style.display = '';
+    container.style.backgroundImage = '';
 
-        container.classList.remove('level-patinete', 'level-3', 'level-4', 'level-coche');
-        container.style.transform = 'none';
-        container.style.animation = '';
-        container.style.filter    = '';
-        if (tutorialWS) tutorialWS.style.display = '';
-        container.style.backgroundImage = '';
+    // Mostramos elementos del nivel 1 que se ocultaron
+    level1Exit.style.display = 'none'; // La puerta no hace falta
 
-        level1Exit.style.display = 'none';
+    // Reseteamos al jugador
+    player.style.display = 'block';
+    player.style.bottom = '80px';
+    player.style.transform = 'scale(1)';
+    posX = 50;
+    velocity = 0;
+    direction = 'right';
+    player.style.left = posX + 'px';
 
-        player.style.display = 'block';
-        player.style.bottom = '80px';
-        player.style.transform = 'scale(1)';
-        posX = 50;
-        velocity = 0;
-        direction = 'right';
-        player.style.left = posX + 'px';
-
-        container.classList.add('level-2');
-        setIdle();
-    }
+    // Aplicamos el fondo del nivel 2
+    container.classList.add('level-2');
+    setIdle();
+}
 
     function loadLevel3() {
         if (isTransitioning) return;
@@ -808,24 +801,27 @@
         }, 1000);
     }
 
-    function loadLevel4() {
+function loadLevel4() {
         if (isTransitioning) return;
         isTransitioning = true;
         currentLevel = 4;
         
         hasSpokenAtCrosswalk = false; 
-        isCrossingBadly = false;
-        isDead = false;
+        isCrossingBadly = false; // Reset
+        isDead = false;          // Reset
         isLevelFinished = false; 
+        
+        // <-- ESTAS DOS LÍNEAS FALTABAN -->
         isWaitingForLight = false; 
-        container.style.backgroundImage = "";
+        container.style.backgroundImage = ""; // Borra el verde/amarillo para que vuelva al rojo por defecto
 
         blackCurtain.style.opacity = '1';
         killerCar.style.display = 'none'; 
         
-        player.style.display = 'block';
+        // <-- AÑADE ESTAS DOS LÍNEAS PARA RESETEAR AL JUGADOR -->
+        player.style.display = 'block';  // Lo vuelve a hacer visible
         player.style.transform = 'scale(1)';
-        player.style.bottom = '80px';
+        player.style.bottom = '80px';    // Lo devuelve a su altura original
         
         setTimeout(() => {
             container.classList.remove('level-3');
@@ -842,147 +838,216 @@
             }, 500);
         }, 1000);
     }
+// ============================================================
+// LEVEL2.JS — Interacciones nivel 2, patinete, loadLevel3
+// Cargar DESPUÉS de level1.js
+// ============================================================
 
-    function checkInteractionsLevel2() {
-        const playerRect      = player.getBoundingClientRect();
-        const containerRect   = container.getBoundingClientRect();
-        const relativePlayerX = (playerRect.left + playerRect.width / 2) - containerRect.left;
+function checkInteractionsLevel2() {
+    const playerRect      = player.getBoundingClientRect();
+    const containerRect   = container.getBoundingClientRect();
+    const relativePlayerX = (playerRect.left + playerRect.width / 2) - containerRect.left;
 
-        if (isParkUnlocked) {
-            promptSign.classList.remove('visible');
-            promptScooter.classList.remove('visible');
-            promptCar.classList.remove('visible');
-            return;
-        }
-
-        if (Math.abs(relativePlayerX - 75)  < 60) promptSign.classList.add('visible');
-        else promptSign.classList.remove('visible');
-
-        if (Math.abs(relativePlayerX - 320) < 60) promptScooter.classList.add('visible');
-        else promptScooter.classList.remove('visible');
-
-        if (Math.abs(relativePlayerX - 600) < 60) promptCar.classList.add('visible');
-        else promptCar.classList.remove('visible');
+    if (isParkUnlocked) {
+        promptSign.classList.remove('visible');
+        promptScooter.classList.remove('visible');
+        promptCar.classList.remove('visible');
+        return;
     }
 
-    function loadLevelPatinete() {
-        if (isTransitioning) return;
-        isTransitioning = true;
-        currentLevel    = 5;
-        blackCurtain.style.opacity = '1';
+    if (Math.abs(relativePlayerX - 75)  < 60) promptSign.classList.add('visible');
+    else promptSign.classList.remove('visible');
+
+    if (Math.abs(relativePlayerX - 320) < 60) promptScooter.classList.add('visible');
+    else promptScooter.classList.remove('visible');
+
+    if (Math.abs(relativePlayerX - 600) < 60) promptCar.classList.add('visible');
+    else promptCar.classList.remove('visible');
+}
+
+function loadLevel3() {
+    if (isTransitioning) return;
+    isTransitioning = true;
+    currentLevel    = 3;
+    blackCurtain.style.opacity = '1';
+    setTimeout(() => {
+        container.classList.remove('level-2');
+        container.classList.add('level-3');
+        posX = 50; velocity = 0; direction = 'right';
+        player.style.left = posX + 'px';
+        setIdle();
+        showMessage("Narrador", "name-narrador", "El parc està tranquil a aquestes hores. L'aire fresc t'ajuda a aclarir la ment. Segueix endavant.", null);
+        setTimeout(() => { blackCurtain.style.opacity = '0'; isTransitioning = false; }, 500);
+    }, 1000);
+}
+
+// === MINIJUEGO PATINETE ===
+
+function spawnRock() {
+    const rock = document.createElement('img');
+    rock.src              = 'imagenes/roca.png';
+    rock.className        = 'obstacle-rock';
+    rock.style.position   = 'absolute';
+    rock.style.width      = '50px';
+    rock.style.zIndex     = '5';
+    rock.style.left       = '850px';
+    rock.style.bottom     = (Math.random() > 0.5 ? 400 : 180) + 'px';
+    container.appendChild(rock);
+    rocks.push(rock);
+}
+
+function triggerScooterDeath() {
+    isMinigameActive = false;
+    isDead    = true;
+    velocity  = 0;
+    keys.w    = false;
+    keys.s    = false;
+
+    container.style.transform = 'none';
+    player.style.display      = 'none';
+
+    scooterVideoScreen.style.display = 'flex';
+    scooterVideo.currentTime = 0;
+    scooterVideo.play();
+
+    function startFreezeLogic() {
+        const freezeTime = scooterVideo.duration * 0.75;
+
+        const videoCheckInterval = setInterval(() => {
+            if (scooterVideo.currentTime >= freezeTime) {
+                scooterVideo.pause();
+                clearInterval(videoCheckInterval);
+
+                setTimeout(() => {
+                    dialogueBox.style.zIndex = '5001'; // ✅ Mismo valor que en el CSS
+                    isScooterFinesPlaying = true;
+                    scooterFinesStep = 0;
+                    showNextScooterFinesDialogue();
+                }, 500);
+            }
+        }, 100);
+    }
+
+    // ✅ Si los metadatos ya están listos, ejecutamos directo
+    // ✅ Si no, esperamos al evento
+    if (scooterVideo.readyState >= 1) {
+        startFreezeLogic();
+    } else {
+        scooterVideo.onloadedmetadata = startFreezeLogic;
+    }
+}
+
+function loadLevelPatinete() {
+    if (isTransitioning) return;
+    isTransitioning = true;
+    currentLevel    = 5;
+    blackCurtain.style.opacity = '1';
+
+    setTimeout(() => {
+        container.classList.remove('level-2');
+        container.classList.add('level-patinete');
+
+        if (tutorialTeclas) tutorialTeclas.style.display = 'none';
+
+        rocks.forEach(rock => rock.remove());
+        rocks            = [];
+        rockSpawnTimer   = 0;
+        isMinigameActive = true;
+        isDead           = false;
+        rockSpeed        = 5;
+        drunkFrameCount  = 0;
+        dizzinessLevel   = 0;
+        container.style.transform = 'none';
+
+        player.style.display   = 'block';
+        posX = 50; velocity = 0; direction = 'right';
+        player.style.left      = posX + 'px';
+        player.style.transform = 'scale(0.7)';
+        posY = 220;
+        player.style.bottom    = posY + 'px';
+        setIdle();
 
         setTimeout(() => {
-            container.classList.remove('level-2');
-            container.classList.add('level-patinete');
+            blackCurtain.style.opacity = '0';
+            setTimeout(() => { isTransitioning = false; }, 600);
+        }, 500);
+    }, 1000);
+}
 
-            if (tutorialTeclas) tutorialTeclas.style.display = 'none';
+// === CARGAR NIVEL COCHE ===
+function loadLevelCoche() {
+    if (isTransitioning) return;
+    isTransitioning = true;
+    currentLevel = 6;
 
-            rocks.forEach(rock => rock.remove());
-            rocks            = [];
-            rockSpawnTimer   = 0;
-            isMinigameActive = true;
-            isDead           = false;
-            rockSpeed        = 5;
-            drunkFrameCount  = 0;
-            dizzinessLevel   = 0;
-            container.style.transform = 'none';
+    blackCurtain.style.opacity = '1';
 
-            player.style.display   = 'block';
-            posX = 50; velocity = 0; direction = 'right';
-            player.style.left      = posX + 'px';
-            player.style.transform = 'scale(0.7)';
-            posY = 220;
-            player.style.bottom    = posY + 'px';
-            setIdle();
+    setTimeout(() => {
+        // Quitamos clases anteriores y ponemos la del coche
+        container.classList.remove('level-2', 'level-3', 'level-4', 'level-patinete');
+        container.classList.add('level-coche');
+        container.style.transform = 'none';
+        container.style.backgroundImage = '';
 
-            audioViento.currentTime = 0;
-            audioViento.play().catch(() => {});
-            setTimeout(() => {
-                blackCurtain.style.opacity = '0';
-                setTimeout(() => { isTransitioning = false; }, 600);
-            }, 500);
-        }, 1000);
-    }
+        // Reseteamos estado
+        isDead = false;
+        isLevelFinished = false;
+        isCrossingBadly = false;
+        isWaitingForLight = false;
+        isMinigameActive = false;
+        killerCar.style.display = 'none';
+        rocks.forEach(r => r.remove());
+        rocks = [];
 
-    // === CARGAR NIVEL COCHE ===
-    function loadLevelCoche() {
-        if (isTransitioning) return;
-        isTransitioning = true;
-        currentLevel = 6;
+        // Reset àvia
+        grandmaActive = false;
+        grandmaHasStarted = false;
+        if (grandmaAnimFrame) { cancelAnimationFrame(grandmaAnimFrame); grandmaAnimFrame = null; }
+        container.style.animation = '';
+        container.style.filter    = '';
+        const grandmaEl = document.getElementById('grandma');
+        if (grandmaEl) grandmaEl.style.display = 'none';
+        const greyEl = document.getElementById('grey-overlay');
+        if (greyEl) { greyEl.style.display = 'none'; greyEl.style.opacity = '0'; }
 
-        blackCurtain.style.opacity = '1';
+        // Reseteamos jugador (ahora será el coche)
+        player.style.display = 'block';
+        player.style.bottom = '80px';
+        player.style.transform = 'scale(1)';
+        posX = 0;
+        player.style.left = '0px'; // El CSS lo fuerza a 0 de todas formas
+        velocity = 0;
+        direction = 'right';
+        player.style.left = posX + 'px';
+        setIdle(); // Cargará coche1p.png
+
+        // Diálogo inicial de la escena
+        showMessage(
+            "Narrador", "name-narrador",
+            "Has decidit agafar el cotxe. Però has begut aquesta nit... Conduir ara podria tenir conseqüències molt greus.",
+            null
+        );
 
         setTimeout(() => {
-            container.classList.remove('level-2', 'level-3', 'level-4', 'level-patinete');
-            container.classList.add('level-coche');
-            container.style.transform = 'none';
-            container.style.backgroundImage = '';
+            blackCurtain.style.opacity = '0';
+            setTimeout(() => { isTransitioning = false; }, 600);
+        }, 500);
 
-            isDead = false;
-            isLevelFinished = false;
-            isCrossingBadly = false;
-            isWaitingForLight = false;
-            isMinigameActive = false;
-            killerCar.style.display = 'none';
-            rocks.forEach(r => r.remove());
-            rocks = [];
+    }, 1000);
+}
 
-            grandmaActive = false;
-            grandmaHasStarted = false;
-            if (grandmaAnimFrame) { cancelAnimationFrame(grandmaAnimFrame); grandmaAnimFrame = null; }
-            container.style.animation = '';
-            container.style.filter    = '';
-            const grandmaEl = document.getElementById('grandma');
-            if (grandmaEl) grandmaEl.style.display = 'none';
-            const greyEl = document.getElementById('grey-overlay');
-            if (greyEl) { greyEl.style.display = 'none'; greyEl.style.opacity = '0'; }
-
-            player.style.display = 'block';
-            player.style.bottom = '80px';
-            player.style.transform = 'scale(1)';
-            posX = 0;
-            velocity = 0;
-            direction = 'right';
-            player.style.left = posX + 'px';
-            setIdle();d
-
-            // ── AUDIO: motor en bucle mientras conducimos ─────────────────────
-            // Cuando acabe la vibración, arranca la llamada
-            audioVibracion.onended = () => {
-                audioLlamada.currentTime = 0;
-                audioLlamada.play().catch(() => {});
-            };
-
-            audioMotor.currentTime = 0;
-            audioMotor.play().catch(() => {});
-
-            audioVibracion.currentTime = 0;
-            audioVibracion.play().catch(() => {});
-            // ─────────────────────────────────────────────────────────────────
-
-            showMessage(
-                "Narrador", "name-narrador",
-                "Has decidit agafar el cotxe. Però has begut aquesta nit... Conduir ara podria tenir conseqüències molt greus.",
-                null
-            );
-
-            setTimeout(() => {
-                blackCurtain.style.opacity = '0';
-                setTimeout(() => { isTransitioning = false; }, 600);
-            }, 500);
-
-        }, 1000);
-    }
-
-    // 8. INPUTS (TECLADO)
+// 8. INPUTS (TECLADO)
     window.addEventListener('keydown', (e) => {
         if (!gameStarted) return;
         
+        // Bloqueo del jugador mientras espera el semáforo
         if (isWaitingForLight) return; 
 
         const key = e.key.toLowerCase();
        
+        // Si hay un diálogo activo y pulsamos E...
         if(key === 'e' && isDialogueActive) {
+            // --- NUEVA LÓGICA PARA LOS DIÁLOGOS DEL PATINETE ---
             if (isScooterFinesPlaying) {
                 showNextScooterFinesDialogue();
                 return;
@@ -990,10 +1055,14 @@
             
             if (!isInitialized) {
                 showNextDialogue();
-            } else {
+            } 
+            else {
+                // Si la interacción es del tipo 'paso-peatones' (la automática),
+                // al cerrar el texto abrimos la confirmación
                 if (currentInteraction === 'paso-peatones') {
                     openConfirmation();
-                } else if (['cartel', 'scooter', 'coche'].includes(currentInteraction)) {
+                } 
+                else if (['cartel', 'scooter', 'coche'].includes(currentInteraction)) {
                     openConfirmation();
                 } else {
                     closeMessage();
@@ -1007,7 +1076,7 @@
         if(key === 'a') keys.a = true;
         if(key === 'd') keys.d = true;
         if(key === 'w' || e.key === 'ArrowUp') keys.w = true;
-        if(key === 's' || e.key === 'ArrowDown') keys.s = true;
+        if(key === 's' || e.key === 'ArrowDown') keys.s = true;
 
         if(key === 'e' && !isDialogueActive && !isConfirmationActive) {
             const playerRect = player.getBoundingClientRect();
@@ -1020,22 +1089,22 @@
                 if (isParkUnlocked && Math.abs(relativeX - 500) < 100) { loadLevel3(); return; }
                 if (!isParkUnlocked) {
                     if (Math.abs(relativeX - 75) < 60) showMessage("Torrent", "name-torrent", "La meva casa està molt lluny.", "cartel");
-                    else if (Math.abs(relativeX - 320) < 60) showMessage("Torrent", "name-torrent", "Hi ha un patinet aquí. Puc agafar-lo per arribar més ràpid, però no porto casc. L'agafo?", "scooter");
-                    else if (Math.abs(relativeX - 600) < 100) showMessage("Torrent", "name-torrent", "No sé si estic en bones condicions per conduir...", "coche");
+else if (Math.abs(relativeX - 320) < 60) showMessage("Torrent", "name-torrent", "Hi ha un patinet aquí. Puc agafar-lo per arribar més ràpid, però no porto casc. L'agafo?", "scooter");                    else if (Math.abs(relativeX - 600) < 100) showMessage("Torrent", "name-torrent", "No sé si estic en bones condicions per conduir...", "coche");
                 }
             }
         }
     });
 
-    window.addEventListener('keyup', (e) => {
-        const key = e.key.toLowerCase();
-        if(key === 'a') keys.a = false;
-        if(key === 'd') keys.d = false;
-        if(key === 'w' || e.key === 'ArrowUp') keys.w = false;
-        if(key === 's' || e.key === 'ArrowDown') keys.s = false;
-    });
+        window.addEventListener('keyup', (e) => {
+        const key = e.key.toLowerCase();
+        if(key === 'a') keys.a = false;
+        if(key === 'd') keys.d = false;
+        if(key === 'w' || e.key === 'ArrowUp') keys.w = false;
+        if(key === 's' || e.key === 'ArrowDown') keys.s = false;
+    });
 
-    // 9. LOOP PRINCIPAL
+
+// 9. LOOP PRINCIPAL
     function loop(){
         if (!isInitialized || isDialogueActive || isConfirmationActive) {
              if(isInitialized) requestAnimationFrame(loop);
@@ -1043,41 +1112,52 @@
         }
 
         // --- LÓGICA EXCLUSIVA PARA EL PATINETE (NIVEL 5) ---
+       // --- LÓGICA EXCLUSIVA PARA EL PATINETE (NIVEL 5) ---
         if (currentLevel === 5) {
+            // Solo ejecutamos la lógica si el minijuego está activo y no estamos muertos
             if (!isMinigameActive || isDead) {
                 requestAnimationFrame(loop);
                 return;
             }
 
+            // 0. LÓGICA DEL TIEMPO Y MAREO (Se actualiza aprox cada 5 segundos = 300 frames)
             drunkFrameCount++;
             if (drunkFrameCount % 300 === 0) { 
-                rockSpeed += 1.5;
-                dizzinessLevel += 0.8;
+                rockSpeed += 1.5;        // Las rocas van más rápido
+                dizzinessLevel += 0.8;   // Aumenta el nivel de mareo visual
             }
 
+            // Aplicamos el efecto visual de balanceo a la pantalla si hay mareo
             if (dizzinessLevel > 0) {
+                // Fórmulas matemáticas para balancear la pantalla suavemente
                 let rotacion = Math.sin(drunkFrameCount * 0.03) * dizzinessLevel;
                 let movY = Math.cos(drunkFrameCount * 0.04) * (dizzinessLevel * 2);
                 container.style.transform = `rotate(${rotacion}deg) translateY(${movY}px) scale(1.05)`;
             }
 
+            // 1. MOVIMIENTO DEL JUGADOR (W/S)
             let speedY = 0;
             const VELOCIDAD_PATINETE = 4; 
 
             if (keys.w) speedY = VELOCIDAD_PATINETE;
             if (keys.s) speedY = -VELOCIDAD_PATINETE;
 
+            // Involuntario desvío vertical para simular pérdida de equilibrio
             let perdidaEquilibrio = Math.sin(drunkFrameCount * 0.05) * (dizzinessLevel * 1.5);
 
             if (speedY !== 0 || perdidaEquilibrio !== 0) {
-                posY += speedY + perdidaEquilibrio;
-                if (posY > 340) posY = 340;
-                if (posY < 150) posY = 150;
+                posY += speedY + perdidaEquilibrio; // Sumamos tu tecla + el mareo involuntario
+                
+                // LÍMITES DE LOS CARRILES
+                if (posY > 340) posY = 340; // Límite superior
+                if (posY < 150) posY = 150; // Límite inferior
                 player.style.bottom = posY + 'px';
             }
-            setRun('right');
+            setRun('right'); // Forzamos la animación
 
+            // 2. GENERACIÓN DE ROCAS
             rockSpawnTimer++;
+            // Cuanto más mareo, menos tiempo tarda en salir la siguiente roca
             let tiempoSpawn = Math.max(40, 90 - (dizzinessLevel * 10)); 
             
             if (rockSpawnTimer > tiempoSpawn) {
@@ -1085,22 +1165,26 @@
                 rockSpawnTimer = 0;
             }
 
+            // 3. ACTUALIZACIÓN DE ROCAS (Movimiento y Colisión)
             const playerRect = player.getBoundingClientRect();
 
             for (let i = rocks.length - 1; i >= 0; i--) {
                 const rock = rocks[i];
                 
+                // Mover roca a la izquierda (usando la rockSpeed dinámica)
                 let currentRockX = parseFloat(rock.style.left);
                 currentRockX -= rockSpeed; 
                 rock.style.left = currentRockX + 'px';
 
+                // Comprobar Colisión
                 const rockRect = rock.getBoundingClientRect();
                 if (check2DCollision(playerRect, rockRect, 15)) { 
-                    triggerScooterDeath();
+                    triggerScooterDeath(); // ¡CHOCASTE!
                     requestAnimationFrame(loop); 
-                    return;
+                    return; // Salimos del frame actual
                 }
 
+                // Borrar roca si sale de la pantalla
                 if (currentRockX < -100) {
                     rock.remove();      
                     rocks.splice(i, 1); 
@@ -1108,8 +1192,9 @@
             }
 
         }
-        // --- LÓGICA NORMAL (NIVELES 1 AL 4 Y 6) ---
+        // --- LÓGICA NORMAL (NIVELES 1 AL 4) ---
         else {
+            // (Todo el bloque "else" de los niveles normales sigue exactamente igual que antes)
             if (keys.a && !keys.d) direction = 'left';
             if (keys.d && !keys.a) direction = 'right';
 
@@ -1136,7 +1221,6 @@
         
         requestAnimationFrame(loop);
     }
-
     // 10. INICIO DEL JUEGO
     function handleStartInput() {
         if (gameStarted) return;
@@ -1147,12 +1231,6 @@
             introScreen.style.display = 'none';
             const video = introScreen.querySelector('video');
             if(video) video.pause();
-
-            // ── AUDIO: música de discoteca al arrancar el nivel 1 ─────────────
-            audioDisco.currentTime = 0;
-            audioDisco.play().catch(() => {});
-            // ─────────────────────────────────────────────────────────────────
-
             posX = 50; applyPosition(); setIdle();
             setTimeout(() => { 
                 blackCurtain.style.opacity = '0'; 
@@ -1164,32 +1242,38 @@
     if(img.complete) { window.addEventListener('keydown', handleStartInput); }
     else { img.onload = () => { window.addEventListener('keydown', handleStartInput); }; }
 
-    btnRetry.addEventListener('click', () => {
+btnRetry.addEventListener('click', () => {
         gameOverScreen.style.display = 'none';
-        isScooterFinesPlaying = false;
+        isScooterFinesPlaying = false; // Limpiamos la variable de diálogos del patinete
         scooterFinesStep = 0;
         
+        // Dependiendo del nivel en el que hayamos muerto, recargamos uno u otro
         if (currentLevel === 5) {
-            loadLevelPatinete();
+            loadLevelPatinete(); // Si morimos en el patinete, reiniciamos el patinete
         } else {
-            loadLevel4();
+            loadLevel4(); // Si morimos en el paso de peatones, reiniciamos el paso de peatones
         }
     });
 
-    document.getElementById('btn-new-path').addEventListener('click', () => {
-        gameOverScreen.style.display = 'none';
-        const titleEl = document.getElementById('game-over-title');
-        if (titleEl) titleEl.innerText = "HAS ESTAT ATROPELLAT!";
-        document.getElementById('btn-retry').style.display = 'inline-block';
-        document.getElementById('btn-new-path').style.display = 'none';
-        dialogueBox.style.zIndex = '';
+document.getElementById('btn-new-path').addEventListener('click', () => {
+    // Reseteamos la pantalla de game over para la próxima vez
+    gameOverScreen.style.display = 'none';
+    const titleEl = document.getElementById('game-over-title');
+    if (titleEl) titleEl.innerText = "HAS ESTAT ATROPELLAT!";
+    document.getElementById('btn-retry').style.display = 'inline-block';
+    document.getElementById('btn-new-path').style.display = 'none';
+    dialogueBox.style.zIndex = ''; // Reset z-index del diálogo
 
-        isScooterFinesPlaying = false;
-        scooterFinesStep = 0;
-        rocks.forEach(r => r.remove());
-        rocks = [];
+    // Limpieza de variables del patinete
+    isScooterFinesPlaying = false;
+    scooterFinesStep = 0;
+    rocks.forEach(r => r.remove());
+    rocks = [];
 
-        loadLevel2();
-    });
+    // Volvemos al nivel 2 (elección de caminos)
+    loadLevel2();
 
-})();
+    
+});
+
+})(); // Fin de tu código
