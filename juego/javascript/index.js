@@ -62,9 +62,18 @@
     const audioViento = new Audio('audios/viento.mp3');
     audioViento.loop   = true;
     audioViento.volume = 0.6;
+
+    const audioVibracion = new Audio('audios/movil_vibrar.mp3');
+    audioVibracion.loop   = false;
+    audioVibracion.volume = 0.8;
+
+    const audioLlamada = new Audio('audios/llamada.mp3');
+    audioLlamada.loop   = false;
+    audioLlamada.volume = 0.8;
+
     /** Detiene TODOS los audios del juego y reinicia su posición */
     function stopAllAudio() {
-        [audioDisco, audioCochePass, audioMotor].forEach(a => {
+        [audioDisco, audioCochePass, audioMotor, audioVibracion, audioLlamada, audioViento].forEach(a => {
             a.pause();
             a.currentTime = 0;
         });
@@ -524,7 +533,7 @@
 
         audioViento.pause();
         audioViento.currentTime = 0;
-        
+
         container.style.transform = 'none';
         player.style.display = 'none';
 
@@ -629,6 +638,9 @@
     }
 
     function triggerGrandmaCollision() {
+        audioMotor.pause();    audioMotor.currentTime = 0;
+        audioVibracion.pause(); audioVibracion.currentTime = 0;
+        audioLlamada.pause();   audioLlamada.currentTime = 0;
         container.style.animation = 'none';
         container.style.filter = 'none';
 
@@ -932,11 +944,20 @@
             velocity = 0;
             direction = 'right';
             player.style.left = posX + 'px';
-            setIdle();
+            setIdle();d
 
             // ── AUDIO: motor en bucle mientras conducimos ─────────────────────
+            // Cuando acabe la vibración, arranca la llamada
+            audioVibracion.onended = () => {
+                audioLlamada.currentTime = 0;
+                audioLlamada.play().catch(() => {});
+            };
+
             audioMotor.currentTime = 0;
             audioMotor.play().catch(() => {});
+
+            audioVibracion.currentTime = 0;
+            audioVibracion.play().catch(() => {});
             // ─────────────────────────────────────────────────────────────────
 
             showMessage(
