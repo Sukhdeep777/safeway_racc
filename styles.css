@@ -89,7 +89,7 @@ a{
     align-content: center;
     border-radius: 20px;
     justify-content: center;
-    padding: 10px;
+    padding: 15px;
 }
 
 .absolute{
@@ -106,4 +106,30 @@ a{
     position: absolute;
     left: 250px;
     top: 2px;
+}
+
+.content {
+    transition: color 0.3s ease, transform 0.2s ease;
+
+}
+
+.content:hover {
+    background-color: #ffd829c7;
+    color: black;
+}
+
+.absolute-content:hover {
+    background-color: #ffd829c7;
+    color: black;
+}
+
+.absolute-joc:hover {
+    background-color: #ffd829c7;
+    color: black;
+}
+
+.content:hover {
+    color: black;
+    background-color: #ffd829c7;
+    transform: scale(1.1);
 }
