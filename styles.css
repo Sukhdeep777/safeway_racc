@@ -6,6 +6,7 @@ body{
     flex-direction: column;
     align-items: center;
     background-color: #fff;
+    position: relative;
 }
 
 header{
@@ -89,4 +90,20 @@ a{
     border-radius: 20px;
     justify-content: center;
     padding: 10px;
+}
+
+.absolute{
+    position: absolute;
+    top: 300px;
+}
+
+.absolute-content{
+    position: absolute;
+    right: 250px;
+}
+
+.absolute-joc{
+    position: absolute;
+    left: 250px;
+    top: 2px;
 }
