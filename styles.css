@@ -1,28 +1,24 @@
-body{
+body {
     margin: 0;
     padding: 0;
-    font-family: "Montserrat", sans-serif; 
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background-color: #fff;
-    position: relative;
+    font-family: "Montserrat", sans-serif;
+    background-color: #9c9b9b81;
+    display: block; 
 }
 
-header{
-    background-color: #ffd829;
-    color: white;
-    padding: 10px 0;
+header {
+    background-color: #000000d0;
     width: 100%;
-    text-align: center;
+    padding: 10px 0;
 }
+/* background-color: #ffd829; */
 
 .header-margin{
     margin: 0 20px;
 }
 
 h1{
-    color: #000;
+    color: #ffd829;
 }
 
 /* HEADER LIST */
@@ -33,7 +29,7 @@ nav ul{
 .lista{
     a{
         text-decoration: none;
-        color: #000;
+        color: #ffd829;
         font-weight: bold;
     }
 }
@@ -84,28 +80,27 @@ a{
     color: white;
 }
 
-.content{
-    background-color: rgba(128, 128, 128, 0.534);
-    align-content: center;
-    border-radius: 20px;
-    justify-content: center;
-    padding: 15px;
+.content {
+    background-color: #000000b2;
+    color: #fff;
+    font-weight: 800;
+    letter-spacing: 1px;
+    padding: 15px 40px; 
+    border-radius: 50px; 
 }
 
-.absolute{
+.absolute-joc {
     position: absolute;
-    top: 300px;
+    top: 750px; 
+    left: 50%;
+    margin-left: -300px; 
 }
 
-.absolute-content{
+.absolute-content {
     position: absolute;
-    right: 250px;
-}
-
-.absolute-joc{
-    position: absolute;
-    left: 250px;
-    top: 2px;
+    top: 750px; 
+    left: 50%;
+    margin-left: 100px;
 }
 
 .content {
@@ -132,4 +127,18 @@ a{
     color: black;
     background-color: #ffd829c7;
     transform: scale(1.1);
+}
+
+.racc {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    height: 700px;
+    width: auto;
+    box-shadow: rgba(255, 255, 255, 0.486) 10px 20px 20px;
+}
+.contenedor {
+    width: 1400px;
+    margin: 0 auto;
+    position: relative;
 }
