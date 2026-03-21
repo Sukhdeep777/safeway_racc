@@ -40,7 +40,8 @@
     const tutorialTeclas = document.getElementById('tutorial-teclas');
     const gameOverText = document.getElementById('game-over-text');
     const tutorialWS = document.getElementById('tutorial-ws');
-
+    const carVideoScreen = document.getElementById('car-video-screen');
+    const carVideo       = document.getElementById('car-video');
     // 2. IMÁGENES PRECARGADAS
     const gifs = {
         rightRun: 'animaciones/correr-derecho.gif',
@@ -556,12 +557,12 @@
     function triggerGrandmaCollision() {
         // 1. Parar el loop principal del juego
         isDialogueActive = true;
-
+    
         // 2. Cancelar la animación de la àvia
         grandmaActive = false;
         if (grandmaAnimFrame) { cancelAnimationFrame(grandmaAnimFrame); grandmaAnimFrame = null; }
-
-        // 3. Cambio de fondo instantáneo — capturamos el blur actual antes de tocar la clase
+    
+        // 3. Cambio de fondo instantáneo
         const currentFilter = window.getComputedStyle(container).filter;
         container.style.transition = 'none';
         container.style.animation = 'none';
@@ -569,15 +570,14 @@
         container.classList.remove('level-coche');
         container.classList.add('level-coche-frozen');
         container.style.backgroundImage = "url('imagenes/conducir_coche_quieto.png')";
-        // Aplicamos el blur congelado en el punto exacto en que estaba
         container.style.filter = currentFilter;
-
+    
         // 4. Ocultar señora, jugador y tutorial al instante
         const grandmaEl2 = document.getElementById('grandma');
         if (grandmaEl2) grandmaEl2.style.display = 'none';
         player.style.display = 'none';
         if (tutorialTeclas) tutorialTeclas.style.display = 'none';
-
+    
         // 5. Aplicar filtre gris (temps aturat)
         const greyOverlay = document.getElementById('grey-overlay');
         if (greyOverlay) {
@@ -586,30 +586,56 @@
                 greyOverlay.style.opacity = '1';
             });
         }
-
+    
+        // --- Helper: reproduce un vídeo a pantalla completa y llama cb al terminar ---
+        function playCarVideo(src, cb) {
+            carVideo.src = src;
+            carVideoScreen.style.display = 'flex';
+            carVideo.currentTime = 0;
+            carVideo.play();
+            carVideo.onended = () => {
+                // No ocultamos el vídeo — queda pausado en el último fotograma como fondo
+                cb();
+            };
+        }
+    
         // 6. Lanzar el QTE
         startQTE(
-            // ✅ ÉXITO: frenó a tiempo → continúa el juego
+            // ✅ ÉXITO: frenó a tiempo → vídeo señora esquivada → continúa el juego
             () => {
-                isDialogueActive = false;
-                container.style.filter = 'none';
-                container.classList.remove('level-coche-frozen');
-                container.classList.add('level-coche');
-                container.style.animation = '';
-                container.style.animationPlayState = '';
-                container.style.backgroundImage = '';
+                // Quitar overlay gris antes del vídeo
+                const greyEl = document.getElementById('grey-overlay');
+                if (greyEl) { greyEl.style.opacity = '0'; greyEl.style.display = 'none'; }
+    
+                playCarVideo('videos/señora_esquivada.mp4', () => {
+                    isDialogueActive = false;
+                    container.style.filter = 'none';
+                    container.classList.remove('level-coche-frozen');
+                    container.style.animation = '';
+                    container.style.backgroundImage = '';
+
+                    const titleEl = document.getElementById('game-over-title');
+                    if (titleEl) titleEl.innerText = "L'HAS ESQUIVAT!";
+                    if (gameOverText) gameOverText.innerText = "Has evitat atropellar l'àvia, però recorda: mai beguis si has de conduir i no et distreguis amb el mòbil. La carretera exigeix tota la teva atenció.";
+                    document.getElementById('btn-retry').style.display = 'none';
+                    document.getElementById('btn-new-path').style.display = 'inline-block';
+                    gameOverScreen.style.display = 'flex';
+                });
             },
-            // ❌ FALLO: atropella a la señora → pantalla de game over
+            // ❌ FALLO: atropella a la señora → vídeo coche → pantalla game over
             () => {
                 container.style.filter = 'none';
                 const greyEl = document.getElementById('grey-overlay');
                 if (greyEl) { greyEl.style.opacity = '0'; greyEl.style.display = 'none'; }
-                const titleEl = document.getElementById('game-over-title');
-                if (titleEl) titleEl.innerText = "HAS ATROPELLAT L'ÀVIA!";
-                if (gameOverText) gameOverText.innerText = "No has reaccionat a temps. Conduir begut té conseqüències molt greus.";
-                document.getElementById('btn-retry').style.display    = 'none';
-                document.getElementById('btn-new-path').style.display = 'inline-block';
-                gameOverScreen.style.display = 'flex';
+    
+                playCarVideo('videos/video-coche.mp4', () => {
+                    const titleEl = document.getElementById('game-over-title');
+                    if (titleEl) titleEl.innerText = "NO HAS ESQUIVAT L'ÀVIA!";
+                    if (gameOverText) gameOverText.innerText = "No has reaccionat a temps i t'has xocat. Conduir begut té conseqüències molt greus.";
+                    document.getElementById('btn-retry').style.display = 'none';
+                    document.getElementById('btn-new-path').style.display = 'inline-block';
+                    gameOverScreen.style.display = 'flex';
+                });
             }
         );
     }
@@ -1183,7 +1209,8 @@
         scooterFinesStep = 0;
         rocks.forEach(r => r.remove());
         rocks = [];
-
+        carVideoScreen.style.display = 'none';
+        carVideo.src = '';
         loadLevel2();
     });
 
