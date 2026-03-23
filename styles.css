@@ -223,3 +223,11 @@ nav ul li a:hover {
     border-bottom: 8px solid yellow;
     padding-bottom: 25px;
 }
+
+.contain{
+    width: 1400px;
+}
+
+p{
+    text-align: justify;
+}
