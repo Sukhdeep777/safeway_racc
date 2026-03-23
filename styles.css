@@ -1,7 +1,7 @@
 body {
     margin: 0;
-    padding: 0;
-    font-family: "Montserrat", sans-serif;
+    padding: 0px;
+    font-family: "Poppins", sans-serif;
     background-color: #9c9b9b81;
     display: block; 
 }
@@ -146,4 +146,72 @@ a{
 .pas-a-pas {
     margin-top: 20px;
     margin-bottom: 20px;
+}
+
+.img-mida-1 {
+    width: 500px;
+    height: 300px;
+}
+
+.img-mida-2 {
+    width: 300px;
+    height: 200px;
+}
+
+.img-mida-3 {
+    width: 60px;
+    height: 60px;
+}
+
+.img-mida-4 {
+    width: 100px;
+    height: 35px;
+}
+
+.img-mida-5 {
+    width: 85px;
+    height: 60px;
+}
+
+ul {
+   list-style: none; 
+   display: flex;
+   gap: 35px;
+
+   padding: 15px;
+   border-radius: 10px;
+   background-color: white;
+   box-shadow: 5px 5px 10px 0 rgba(0, 0, 0, 0.3);
+}
+
+ul li {
+    background-color: white;
+    padding: 7px;
+    border-radius: 10px;
+}
+
+.div-mig-flex {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    padding: 35px 0px 35px 0px;
+}
+
+section {
+    padding: 0px 15px 0px 15px;
+}
+
+.back-titulo {
+    background-color: white;
+    width: fit-content;
+    padding: 5px 10px 5px 10px;
+    border-radius: 10px;
+}
+
+.bcc-fotos {
+    background-color: rgba(255, 255, 255, 0.144);
+    width: fit-content;
+    padding: 15px;
+    box-shadow: 5px 5px 10px 0 rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
 }
