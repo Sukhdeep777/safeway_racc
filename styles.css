@@ -26,22 +26,21 @@ nav ul{
     list-style: none;
 }
 
-.lista{
-    a{
-        text-decoration: none;
-        color: #ffd829;
-        font-weight: bold;
-    }
+.lista a{
+    text-decoration: none;
+    color: #ffd829;
+    font-weight: bold;
 }
 
 /* LOGO */
 .logo{
     object-fit: cover;
     height: 50px;
-    img{
-        width: 100%;
-        height: 100%;
-    }
+}
+
+.logo img{
+    width: 100%;
+    height: 100%;
 }
 
 /* MARGIN, FLEX AND GAP */
