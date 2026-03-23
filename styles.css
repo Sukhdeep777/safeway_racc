@@ -15,15 +15,11 @@ body {
 header {
     background-color: #000000d0;
     width: 100%;
-    padding: 10px 0;
+    padding: 10px 20px;
     position: sticky;
     top: 0;
 }
 /* background-color: #ffd829; */
-
-.header-margin{
-    margin: 0 20px;
-}
 
 h1{
     color: #ffd829;
@@ -135,14 +131,20 @@ a{
     background-color: #ffd829c7;
 }
 .racc {
-    height: 700px;
+    max-height: 650px;
     width: auto;
     box-shadow: rgba(255, 255, 255, 0.486) 10px 20px 20px;
 }
 .contenedor {
-    width: 1400px;
-    margin: 0px auto;
+    width: 100%;
     margin-bottom: 30px;
+    display: flex;
+    justify-content: center;
+}
+
+.contendedor{
+    display: flex;
+    justify-content: center;
 }
 
 .btns{
@@ -270,4 +272,94 @@ nav ul li a:hover {
 
 p{
     text-align: justify;
+}
+
+/* MEDIA QUIRES */
+
+/* =========================================
+   MEDIA QUERIES (Para hacer tu código responsivo)
+   ========================================= */
+
+/* Para Tablets (Pantallas menores a 1024px) */
+@media screen and (max-width: 1151px) {
+    /* Quitamos el ancho fijo gigante para que no haya scroll horizontal */
+    .contain {
+        width: 100%;
+        padding: 0 15px; 
+    }
+
+    /* Ajustamos la imagen del enlace del juego para que no se salga por la derecha */
+    .game-link img {
+        margin-left: 0;
+        width: 100%;
+        max-width: 550px;
+        margin: 0 auto;
+        display: block;
+    }
+
+    /* Permitimos que las filas de flexbox se envuelvan si no hay espacio */
+    .flex, .div-mig-flex, .patroc {
+        flex-wrap: wrap;
+    }
+
+    /* Ajustamos las imágenes para que no desborden su contenedor */
+    .img-mida-0, .img-mida-1, .img-mida-2 {
+        max-width: 100%;
+        height: auto;
+    }
+
+    .racc{
+        max-height: 400px;
+    }
+}
+
+/* Para Móviles (Pantallas menores a 576px) */
+@media screen and (max-width: 576px) {
+    header {
+        display: flex;
+        flex-direction: column; /* Apila el logo y el menú */
+        align-items: center;
+        gap: 15px;
+        padding-bottom: 15px;
+    }
+
+    nav ul {
+        flex-wrap: wrap;
+        justify-content: center;
+        padding: 0;
+        margin: 0;
+    }
+
+    /* Hacemos que la imagen principal se adapte bien sin deformarse */
+    .racc {
+        height: auto;
+        max-height: 250px;
+        width: 100%;
+        object-fit: cover; 
+    }
+
+    /* Como has puesto display: block, alineamos el contenido */
+    .contenedor {
+        display: block;
+        padding: 0 15px;
+    }
+
+    .btns {
+        padding-left: 0; /* Quitamos el padding izquierdo que tenías */
+        align-items: center;
+        width: 100%;
+    }
+
+    .btns-1 {
+        margin-top: 30px; /* Reducimos el salto gigante de 120px */
+    }
+
+    .content1 {
+        width: 100%; /* Botones a lo ancho de toda la pantalla en móvil */
+        text-align: center;
+    }
+
+    .bcc-fotos {
+        width: 100%; /* Que el fondo de las fotos ocupe todo el ancho */
+    }
 }
