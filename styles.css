@@ -3,7 +3,9 @@ body {
     padding: 0px;
     font-family: "Poppins", sans-serif;
     background-color: #9c9b9b81;
-    display: block; 
+    display: flex; 
+    flex-direction: column;
+    min-height: 100vh;
 }
 
 header {
@@ -36,6 +38,8 @@ nav ul{
 .logo{
     object-fit: cover;
     height: 50px;
+    background: white;
+    padding: 10px;
 }
 
 .logo img{
@@ -48,6 +52,9 @@ nav ul{
     display: flex;
 }
 
+.m-top{
+    margin-top: 30px;
+}
 .between{
     justify-content: space-between;
 }
@@ -64,10 +71,6 @@ nav ul{
     align-items: center;
 }
 
-.contenido{
-    gap: 500px;
-}
-
 .game-link img{
     width: 550px;
     height: 300px;
@@ -79,35 +82,23 @@ a{
     color: white;
 }
 
-.content {
+
+.content1 {
     background-color: #000000b2;
     color: #fff;
     font-weight: 800;
     letter-spacing: 1px;
     padding: 15px 40px; 
     border-radius: 50px; 
+    display: flex;
+    justify-content: center;
 }
 
-.absolute-joc {
-    position: absolute;
-    top: 750px; 
-    left: 50%;
-    margin-left: -300px; 
-}
-
-.absolute-content {
-    position: absolute;
-    top: 750px; 
-    left: 50%;
-    margin-left: 100px;
-}
-
-.content {
+.content1 {
     transition: color 0.3s ease, transform 0.2s ease;
-
 }
 
-.content:hover {
+.content1:hover {
     background-color: #ffd829c7;
     color: black;
 }
@@ -115,37 +106,51 @@ a{
 .absolute-content:hover {
     background-color: #ffd829c7;
     color: black;
+    transform: scale(1.1);
 }
 
 .absolute-joc:hover {
     background-color: #ffd829c7;
     color: black;
+    transform: scale(1.1);
 }
 
 .content:hover {
     color: black;
     background-color: #ffd829c7;
-    transform: scale(1.1);
 }
-
 .racc {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
     height: 700px;
     width: auto;
     box-shadow: rgba(255, 255, 255, 0.486) 10px 20px 20px;
 }
 .contenedor {
     width: 1400px;
-    margin: 0 auto;
-    position: relative;
+    margin: 0px auto;
+    flex: 1;
+}
+
+.btns{
+    flex-direction: column;
+    justify-content: center;
+    padding-left: 50px;
+}
+
+.btns-1{
+    margin-top: 120px;
 }
 
 .pas-a-pas {
     margin-top: 20px;
     margin-bottom: 20px;
 }
+
+footer{
+    background: #000;
+    padding: 20px;
+}
+
+/* IMG */
 
 .img-mida-1 {
     width: 500px;
