@@ -11,31 +11,49 @@
 </head>
 <body>
     <main>
-        <header>
-            <div class="flex between header-margin">
-                <div class="flex gap-20">
+            <header>
+                <div class="flex between header-margin">
+                    <div class="flex gap-20">
+                        <div class="flex center">
+                            <div class="logo">
+                                <img src="images/racclogo.png" alt="">
+                            </div>                    
+                        </div>
+                        <div>
+                            <h1>SAFEWAY_RACC</h1>                    
+                        </div>
+                    </div>
                     <div class="flex center">
-                        <div class="logo">
-                            <img src="images/racclogo.png" alt="">
-                        </div>                    
-                    </div>
-                    <div>
-                        <h1>SAFEWAY_RACC</h1>                    
+                        <nav>
+                            <ul class="flex gap-20">
+                                <li class="lista"><a href="index.html">INICI</a></li>
+                                <li class="lista"><a href="inici.html">COM HO HE FET</a></li>
+                                <li class="lista"><a href="juego/safeway.html" target="_blank">JOC</a></li>
+                            </ul>
+                        </nav>
                     </div>
                 </div>
-                <div class="flex center">
-                    <nav>
-                        <ul class="flex gap-20">
-                            <li class="lista"><a href="index.html">INICI</a></li>
-                            <li class="lista"><a href="inici.html">COM HO HE FET</a></li>
-                            <li class="lista"><a href="juego/safeway.html" target="_blank">JOC</a></li>
-                        </ul>
-                    </nav>
-                </div>
-            </div>
-        </header>
+            </header>
         <div class="center">
-            <section>
+                <section>
+                <h2 class="back-titulo">Introducció:</h1>
+                <div class="intro-flex">
+                    <p>El projecte consisteix en el desenvolupament d’un videojoc interactiu centrat en la presa de decisions en situacions quotidianes amb risc potencial. En aquest cas, l’usuari assumirà el control d’un personatge que ha de tornar a casa a la nit després d’haver assistit a una festa, un context realista que pot comportar diferents perills si no es prenen les precaucions adequades. L’objectiu principal és conscienciar sobre l’exposició a riscos durant la mobilitat nocturna dels vianants, especialment en moments en què l’atenció pot estar reduïda o les condicions no són òptimes.</p>
+
+                    <p>
+                        Això s’aconsegueix fent que el jugador hagi d’analitzar cada situació amb atenció i triar entre tres camins diferents, cadascun amb conseqüències pròpies. D’aquesta manera, es fomenta el pensament crític i la capacitat de prendre decisions informades, tot mostrant com petites eleccions poden tenir un impacte significatiu en la seguretat personal.
+                    </p>
+                    <p>
+                        Com a grup, aquest projecte té com a objectiu principal contribuir a la millora de la seguretat en situacions quotidianes, especialment en contextos de mobilitat nocturna. Hem escollit desenvolupar un videojoc basat en la presa de decisions perquè considerem que aquest format permet als usuaris implicar-se activament en l’experiència i, sobretot, reflexionar de manera més profunda a partir dels seus propis errors i encerts. En lloc de limitar-se a rebre informació de forma passiva, els jugadors experimenten directament les conseqüències de les seves accions, fet que afavoreix un aprenentatge més significatiu i durador.
+                    </p>
+                </div>
+                <div class="div-mig-flex">
+                    <div class="butt">
+                        <div class="bcc-fotos">
+                            <img src="img_contenido/intro.png" alt="intro" class="img-mida-1">
+                        </div>
+                    </div>
+                </div>
                 <h2 class="back-titulo">Història del joc:</h2>
                 <span class="back-titulo">INICI</span>
                 <p>Començarem al menú inicial i prenem qualsevol botó per iniciar el joc. El jugador principal apareix en una discoteca plena de gent ballant, escoltant música i gaudint de la nit. De sobte, el narrador apareix i ens explica qui és el personatge, què ha passat dins la discoteca i quines decisions hauran de prendre a partir d’ara. Per tornar a casa, el protagonista ha de prendre decisions crítiques que afectaran el seu futur, entre tres camins possibles.</p>
@@ -54,8 +72,10 @@
                         2) (No esquiva l’àvia) Si el protagonista decideix anar amb el cotxe més endavant, quan hagi d’esquivar la senyora, però no ho aconsegueixi esquivarà a la senyora i es xocarà amb un arbre mentre que el so de l’ambulància se senti de fons.
                     </p>
                     <div class="div-mig-flex">
-                        <div class="bcc-fotos">
-                            <img src="img_contenido/2.png" alt="img2" class="img-mida-1">
+                        <div class="butt">
+                            <div class="bcc-fotos">
+                                <img src="img_contenido/2.png" alt="img2" class="img-mida-1">
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -64,10 +84,12 @@
                     En aquest segon camí, agafaràs el patinet sense casc i recorreràs la carretera esquivant pedretes. Fes servir la tecla W per moure’t cap amunt i la tecla S per moure’t cap avall. Cada 4 segons, el patinet anirà més ràpidament, i si xoca contra una roca, sortirem disparats i ens sortirà una animació d’un policia multant-nos.
                 </p>
                 <div class="div-mig-flex">
-                    <div class="bcc-fotos">
-                        <img src="img_contenido/3.png" alt="img3" class="img-mida-1">
-                        <img src="img_contenido/4.png" alt="img4" class="img-mida-1">
-                        <img src="img_contenido/5.png" alt="img5" class="img-mida-1">
+                    <div class="butt">
+                        <div class="bcc-fotos">
+                            <img src="img_contenido/3.png" alt="img3" class="img-mida-1">
+                            <img src="img_contenido/4.png" alt="img4" class="img-mida-1">
+                            <img src="img_contenido/5.png" alt="img5" class="img-mida-1">
+                        </div>
                     </div>
                 </div>
                 <div class="back-titulo"><span>TERCER CAMÍ (Caminant)</span></div>
@@ -75,27 +97,33 @@
                     En el tercer camí, després d’escollir l’opció de caminar cap a casa, ens dirigirem cap a la dreta, on apareixerà una fletxa que ens indicarà que continuem avançant. Després de recórrer un tram més del camí, arribarem a l’estació d’autobusos, on la vorera està separada per un pas de vianants amb un semàfor en vermell. El narrador explicarà el que pensa Torrent, que observa que sembla que no hi hagi cotxes circulant. A sota de l’explicació del narrador, apareixerà una pregunta: creuràs amb el semàfor en vermell?
                 </p>
                 <div class="div-mig-flex">
-                    <div class="bcc-fotos">
-                        <img src="img_contenido/6.png" alt="img6" class="img-mida-1">
-                        <img src="img_contenido/7.png" alt="img7" class="img-mida-1">
+                    <div class="butt">
+                        <div class="bcc-fotos">
+                            <img src="img_contenido/6.png" alt="img6" class="img-mida-1">
+                            <img src="img_contenido/7.png" alt="img7" class="img-mida-1">
+                        </div>
                     </div>
                 </div>
                 <div class="back-titulo"><span>Decisió 1:</span></div>
                 <div>
                     <p>1) (Caminar en vermell) Si decideixes passar amb el semàfor en vermell, caminaràs amb el personatge pel pas de vianants. Mentre avances, un cotxe passarà a tota velocitat en vermell i farà sortir el personatge i el cotxe de la pantalla, fent la sensació que el personatge ha estat atropellat.</p>
                     <div class="div-mig-flex">
-                        <div class="bcc-fotos">
-                            <img src="img_contenido/8.png" alt="img8" class="img-mida-1">
-                            <img src="img_contenido/9.png" alt="img9" class="img-mida-1">
+                        <div class="butt">
+                            <div class="bcc-fotos">
+                                <img src="img_contenido/8.png" alt="img8" class="img-mida-1">
+                                <img src="img_contenido/9.png" alt="img9" class="img-mida-1">
+                            </div>
                         </div>
                     </div>
                 </div>
                 
                 <div><p>2) (Caminar en verd) Si decideixes travessar amb el semàfor en verd, veuràs com el cotxe passa a tota velocitat. Quan el semàfor s'ha posat en verd, caminaràs tranquil·lament i podràs interactuar amb l’autobús per anar a casa.</p></div>
                 <div class="div-mig-flex">
-                    <div class="bcc-fotos">
-                        <img src="img_contenido/10.png" alt="img10" class="img-mida-1">
-                        <img src="img_contenido/11.png" alt="img11" class="img-mida-1">
+                    <div class="butt">
+                        <div class="bcc-fotos">
+                            <img src="img_contenido/10.png" alt="img10" class="img-mida-1">
+                            <img src="img_contenido/11.png" alt="img11" class="img-mida-1">
+                        </div>
                     </div>
                 </div>
                 <h3 class="back-titulo">COM HO HEM FET</h3>
@@ -106,8 +134,10 @@
                     Des del primer moment teníem clar que volíem tractar sobre tot el tema de l’alcohol, ja que solen haver-hi molts casos d’irresponsabilitat amb l’alcohol.
                 </p>
                 <div class="div-mig-flex">
-                    <div class="bcc-fotos">
-                        <img src="img_contenido/12.png" alt="img12" class="img-mida-1">
+                    <div class="butt">
+                        <div class="bcc-fotos">
+                            <img src="img_contenido/12.png" alt="img12" class="img-mida-1">
+                        </div>
                     </div>
                 </div>
                 <h4 class="back-titulo">CONTEXT DEL JOC</h4>
@@ -173,8 +203,10 @@
                         La segona opció és esperar que el semàfor es posi en verd abans de creuar el carrer. Si el jugador pren aquesta decisió, Torrent respectarà les normes de seguretat viària i podrà continuar el seu trajecte sense perill, aconseguint finalment tornar a casa de manera segura.
                     </p>
                     <div class="div-mig-flex">
-                        <div class="bcc-fotos">
-                            <img src="img_contenido/13.png" alt="img13" class="img-mida-1">
+                        <div class="butt">
+                            <div class="bcc-fotos">
+                                <img src="img_contenido/13.png" alt="img13" class="img-mida-1">
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -217,9 +249,11 @@
                     </p>
                 </div>
                 <div class="div-mig-flex">
-                    <div class="bcc-fotos">
-                        <img src="img_contenido/14.png" alt="img14" class="img-mida-1">
-                        <img src="img_contenido/15.png" alt="img15" class="img-mida-1">
+                    <div class="butt">
+                        <div class="bcc-fotos">
+                            <img src="img_contenido/14.png" alt="img14" class="img-mida-1">
+                            <img src="img_contenido/15.png" alt="img15" class="img-mida-1">
+                        </div>
                     </div>
                 </div>
                 <h4 class="back-titulo">ELABORACIÓ DIGITAL</h4>
@@ -230,9 +264,11 @@
                     </p>
                 </div>
                 <div class="div-mig-flex">
-                    <div class="bcc-fotos">
-                        <img src="img_contenido/16.png" alt="img16" class="img-mida-1">
-                        <img src="img_contenido/17.png" alt="img17" class="img-mida-1">
+                    <div class="butt">
+                        <div class="bcc-fotos">
+                            <img src="img_contenido/16.png" alt="img16" class="img-mida-1">
+                            <img src="img_contenido/17.png" alt="img17" class="img-mida-1">
+                        </div>
                     </div>
                 </div>
                 <h5 class="back-titulo">Disseny d'escenaris</h5>
