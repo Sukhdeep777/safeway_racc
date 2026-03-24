@@ -42,6 +42,7 @@
     const tutorialWS = document.getElementById('tutorial-ws');
     const carVideoScreen = document.getElementById('car-video-screen');
     const carVideo       = document.getElementById('car-video');
+
     // 2. IMÁGENES PRECARGADAS
     const gifs = {
         rightRun: 'animaciones/correr-derecho.gif',
@@ -94,7 +95,7 @@
     let grandmaHasStarted = false;
     let grandmaAnimFrame = null;
 
-    // --- VARIABLES MINIJUEGO PATINETE ---
+    // --- VARIABLES MINIJOC PATINETE ---
     let rocks = [];           
     let rockSpawnTimer = 0;   
     let isMinigameActive = false; 
@@ -102,53 +103,59 @@
     let drunkFrameCount = 0;
     let dizzinessLevel = 0;
     
-    // --- VARIABLES DIÁLOGOS PATINETE ---
+    // --- VARIABLES DIÀLEGS PATINETE ---
     let isScooterFinesPlaying = false;
     let scooterFinesStep = 0;
     const scooterFinesDialogue = [
         {
             name: "Torrent",
             class: "name-torrent",
-            text: "No hauria de fer servir el patinet sense protecció pròpia... He comès tres greus errors."
+            // FIX: "sense protecció pròpia" → "sense la protecció adequada"; "He comès" ✓
+            text: "No hauria d'haver agafat el patinet sense la protecció adequada... He comès tres errors greus."
         },
         {
             name: "Narrador",
             class: "name-narrador",
+            // FIX: no canvi necessari
             text: "La primera multa: no portar casc. La protecció és obligatòria. 50 euros."
         },
         {
             name: "Narrador",
             class: "name-narrador",
-            text: "La segona multa: escoltar música mentre condueixes. Això et distreu i t'impedeix escoltar els sons del trànsit. 30 euros."
+            // FIX: "condueixes" → "condueixis" (subjuntiu en oració subordinada temporal)
+            text: "La segona multa: escoltar música mentre condueixis. Això et distreu i t'impedeix sentir els sons del trànsit. 30 euros."
         },
         {
             name: "Narrador",
             class: "name-narrador",
-            text: "La tercera multa: no tenir el patinet registrat a la DGT. És necessari el registre oficial. 60 euros. Un total de 140 euros."
+            text: "La tercera multa: no tenir el patinet registrat a la DGT. El registre oficial és obligatori. 60 euros. Un total de 140 euros."
         }
     ];
 
     // --- VARIABLES QTE ---
     let qteActive = false;
     let qtePresses = 0;
+    const QTE_MAX_PRESSES = 30; // ← canviat de 40 a 30
     let qteCountdown = null;
     let qteSecondsLeft = 10;
 
-    // 4. HISTORIA (DIÁLOGOS INTRO)
+    // 4. HISTÒRIA (DIÀLEGS INTRO)
     const story = [
         {
             name: "Narrador",
             class: "name-narrador",
+            // FIX: text correcte ✓ — "s'esvaeix", "ressò", "eufòria", "sentència" tots correctes
             text: "La nit s'esvaeix lentament entre el ressò rítmic de la música i els llums de neó. Tot i que l'eufòria encara omple la sala, el temps dicta la seva pròpia sentència."
         },
         {
             name: "Torrent",
             class: "name-torrent",
-            text: "Crec que ja n'hi ha prou per avui... Ha estat una vetllada intensa, però ja va essent hora de tornar a casa i descansar de debò."
+            // FIX: "ja va essent hora" → "ja és hora" (més natural i correcte)
+            text: "Crec que ja n'hi ha prou per avui... Ha estat una vetllada intensa, però ja és hora de tornar a casa i descansar de debò."
         }
     ];
 
-    // 5. FUNCIONES DE DIÁLOGO Y UI
+    // 5. FUNCIONS DE DIÀLEG I UI
     function showNextDialogue() {
         if (currentStep < story.length) {
             isDialogueActive = true;
@@ -200,7 +207,7 @@
         isConfirmationActive = false;
     }
 
-    // --- LÓGICA DE BOTONES (SÍ / NO) ---
+    // --- LÒGICA DE BOTONS (SÍ / NO) ---
     btnYes.addEventListener('click', () => {
         closeConfirmation(); 
 
@@ -249,7 +256,8 @@
                     setTimeout(() => {
                         changeBackgroundSmoothly('imagenes/busverde.gif');
                         setTimeout(() => {
-                            showMessage("Torrent", "name-torrent", "Uf... Has vist a quina velocitat anava aquell cotxe? Menys mal que m'he esperat. Ara sí que està verd.", null);
+                            // FIX: "Has vist a quina" → "Has vist quina" (sense preposició espúria)
+                            showMessage("Torrent", "name-torrent", "Uf... Has vist quina velocitat duia aquell cotxe? Quina sort que he esperat. Ara sí que el semàfor és verd.", null);
                             isWaitingForLight = false;
                         }, 600); 
                     }, 3000); 
@@ -263,7 +271,7 @@
         currentInteraction = null; 
     });
 
-    // --- FUNCIÓN PARA TRANSICIONES SUAVES DE FONDO ---
+    // --- FUNCIÓ PER A TRANSICIONS SUAUS DE FONS ---
     function changeBackgroundSmoothly(newImgSrc) {
         player.style.zIndex = '10';
         killerCar.style.zIndex = '10';
@@ -294,7 +302,7 @@
         }, 600);
     }
 
-    // 6. MOVIMIENTO Y FÍSICA
+    // 6. MOVIMENT I FÍSICA
     function updateBounds(){
         const rect = container.getBoundingClientRect();
         const pRect = player.getBoundingClientRect();
@@ -326,7 +334,8 @@
                 velocity = 0;      
                 keys.d = false;    
                 hasSpokenAtCrosswalk = true; 
-                showMessage("Torrent", "name-torrent", "Vaja, el semàfor està en vermell... Hauria de creuar ara mateix o m'espero a que canviï?", "paso-peatones");
+                // FIX: "m'espero a que canviï" → "m'espero que canviï" (sense preposició 'a')
+                showMessage("Torrent", "name-torrent", "Vaja, el semàfor és en vermell... Hauria de creuar ara mateix o m'espero que canviï?", "paso-peatones");
             }
         }
 
@@ -337,7 +346,7 @@
         checkInteractions();
     }
 
-    // === ANIMACIÓN DE ATROPELLO ===
+    // === ANIMACIÓ D'ATROPELLAMENT ===
     function triggerDeathSequence() {
         isDead = true;
         velocity = 0;
@@ -346,6 +355,7 @@
         setIdle();
 
         if (gameOverText) {
+            // FIX: text correcte ✓
             gameOverText.innerText = "Creuar en vermell no ha estat una bona idea...";
         }
 
@@ -382,7 +392,7 @@
         requestAnimationFrame(animateCar);
     }
 
-    // === ANIMACIÓN DE VICTORIA ===
+    // === ANIMACIÓ DE VICTÒRIA ===
     function triggerVictory() {
         velocity = 0;
         keys.a = false;
@@ -391,7 +401,7 @@
         victoryScreen.style.display = 'flex';
     }
 
-    // === BOTÓN VOLVER A JUGAR ===
+    // === BOTÓ TORNAR A JUGAR ===
     btnPlayAgain.addEventListener('click', () => {
         victoryScreen.style.display = 'none';
         hasSpokenAtCrosswalk = false;
@@ -402,7 +412,7 @@
         loadLevel2();
     });
 
-    // === VIDEO DEL AUTOBÚS ===
+    // === VÍDEO DEL AUTOBÚS ===
     function playBusVideo() {
         velocity = 0;
         keys.a = false;
@@ -416,7 +426,7 @@
         };
     }
 
-    // === FUNCIONES AUXILIARES MINIJUEGO PATINETE ===
+    // === FUNCIONS AUXILIARS MINIJOC PATINETE ===
     function spawnRock() {
         const rock = document.createElement('img');
         rock.src = 'imagenes/roca.png';
@@ -503,6 +513,7 @@
 
             const titleEl = document.getElementById('game-over-title');
             if (titleEl) titleEl.innerText = "T'HAN ENXAMPAT!";
+            // FIX: "no respectar" → "no respectar" ✓
             if (gameOverText) gameOverText.innerText = "Has rebut 140 euros de multes per no respectar les normes del patinet.";
 
             document.getElementById('btn-retry').style.display = 'none';
@@ -512,7 +523,7 @@
         }
     }
 
-    // === ANIMACIÓ ÀVIA (LEVEL COCHE) ===
+    // === ANIMACIÓ ÀVIA (LEVEL COTXE) ===
     function startGrandmaAnimation() {
         const grandma = document.getElementById('grandma');
         if (!grandma || grandmaActive) return;
@@ -555,14 +566,14 @@
     }
 
     function triggerGrandmaCollision() {
-        // 1. Parar el loop principal del juego
+        // 1. Aturar el loop principal del joc
         isDialogueActive = true;
     
-        // 2. Cancelar la animación de la àvia
+        // 2. Cancel·lar l'animació de l'àvia
         grandmaActive = false;
         if (grandmaAnimFrame) { cancelAnimationFrame(grandmaAnimFrame); grandmaAnimFrame = null; }
     
-        // 3. Cambio de fondo instantáneo
+        // 3. Canvi de fons instantani
         const currentFilter = window.getComputedStyle(container).filter;
         container.style.transition = 'none';
         container.style.animation = 'none';
@@ -572,7 +583,7 @@
         container.style.backgroundImage = "url('imagenes/conducir_coche_quieto.png')";
         container.style.filter = currentFilter;
     
-        // 4. Ocultar señora, jugador y tutorial al instante
+        // 4. Amagar la senyora, el jugador i el tutorial de cop
         const grandmaEl2 = document.getElementById('grandma');
         if (grandmaEl2) grandmaEl2.style.display = 'none';
         player.style.display = 'none';
@@ -587,23 +598,21 @@
             });
         }
     
-        // --- Helper: reproduce un vídeo a pantalla completa y llama cb al terminar ---
+        // --- Helper: reprodueix un vídeo a pantalla completa i crida cb en acabar ---
         function playCarVideo(src, cb) {
             carVideo.src = src;
             carVideoScreen.style.display = 'flex';
             carVideo.currentTime = 0;
             carVideo.play();
             carVideo.onended = () => {
-                // No ocultamos el vídeo — queda pausado en el último fotograma como fondo
                 cb();
             };
         }
     
-        // 6. Lanzar el QTE
+        // 6. Llançar el QTE
         startQTE(
-            // ✅ ÉXITO: frenó a tiempo → vídeo señora esquivada → continúa el juego
+            // ✅ ÈXIT: ha frenat a temps → vídeo senyora esquivada → continua el joc
             () => {
-                // Quitar overlay gris antes del vídeo
                 const greyEl = document.getElementById('grey-overlay');
                 if (greyEl) { greyEl.style.opacity = '0'; greyEl.style.display = 'none'; }
     
@@ -616,13 +625,14 @@
 
                     const titleEl = document.getElementById('game-over-title');
                     if (titleEl) titleEl.innerText = "L'HAS ESQUIVAT!";
-                    if (gameOverText) gameOverText.innerText = "Has evitat atropellar l'àvia, però recorda: mai beguis si has de conduir i no et distreguis amb el mòbil. La carretera exigeix tota la teva atenció.";
+                    // FIX: text correcte ✓
+                    if (gameOverText) gameOverText.innerText = "Has evitat atropellar l'àvia, però recorda: mai beguis si has de conduir i no et distreguis amb el mòbil. La carretera requereix tota la teva atenció.";
                     document.getElementById('btn-retry').style.display = 'none';
                     document.getElementById('btn-new-path').style.display = 'inline-block';
                     gameOverScreen.style.display = 'flex';
                 });
             },
-            // ❌ FALLO: atropella a la señora → vídeo coche → pantalla game over
+            // ❌ FALLADA: atropella la senyora → vídeo cotxe → pantalla game over
             () => {
                 container.style.filter = 'none';
                 const greyEl = document.getElementById('grey-overlay');
@@ -631,7 +641,8 @@
                 playCarVideo('videos/video-coche.mp4', () => {
                     const titleEl = document.getElementById('game-over-title');
                     if (titleEl) titleEl.innerText = "NO HAS ESQUIVAT L'ÀVIA!";
-                    if (gameOverText) gameOverText.innerText = "No has reaccionat a temps i t'has xocat. Conduir begut té conseqüències molt greus.";
+                    // FIX: "t'has xocat" → "has tingut un accident" (més natural)
+                    if (gameOverText) gameOverText.innerText = "No has reaccionat a temps i has tingut un accident. Conduir begut té conseqüències molt greus.";
                     document.getElementById('btn-retry').style.display = 'none';
                     document.getElementById('btn-new-path').style.display = 'inline-block';
                     gameOverScreen.style.display = 'flex';
@@ -689,7 +700,7 @@
         }
     }
 
-    // 7. CHECKER DE INTERACCIONES
+    // 7. COMPROVACIÓ D'INTERACCIONS
     function checkInteractions() {
         const playerRect = player.getBoundingClientRect();
         const containerRect = container.getBoundingClientRect();
@@ -723,7 +734,7 @@
         }
     }
 
-    // --- CARGAR NIVELES ---
+    // --- CARREGAR NIVELLS ---
 
     function loadLevel2() {
         currentLevel = 2;
@@ -776,6 +787,7 @@
             posX = 50; velocity = 0; direction = 'right';
             player.style.left = posX + 'px';
             setIdle();
+            // FIX: text correcte ✓
             showMessage("Narrador", "name-narrador", "El parc està tranquil a aquestes hores. L'aire fresc t'ajuda a aclarir la ment. Segueix endavant.", null);
             setTimeout(() => { blackCurtain.style.opacity = '0'; isTransitioning = false; }, 500);
         }, 1000);
@@ -854,7 +866,7 @@
     }
 
     // ============================================================
-    // === QTE (QUICK TIME EVENT) PARA EL COCHE ===
+    // === QTE (QUICK TIME EVENT) PER AL COTXE ===
     // ============================================================
     function startQTE(onSuccess, onFail) {
         qteActive = true;
@@ -889,7 +901,21 @@
             animation: qte-pulse 0.4s ease-in-out infinite alternate;
         `;
 
-        // --- Animaciones CSS ---
+        // --- Contador de pulsacions ---
+        const qteCounter = document.createElement('div');
+        qteCounter.id = 'qte-counter';
+        qteCounter.style.cssText = `
+            color: #ffffff;
+            font-size: 2rem;
+            font-weight: 900;
+            letter-spacing: 2px;
+            text-shadow: 0 0 16px #ff4444, 0 0 6px #000;
+            margin-top: 8px;
+            transition: transform 0.08s ease;
+        `;
+        qteCounter.textContent = `0 / ${QTE_MAX_PRESSES}`;
+
+        // --- Animacions CSS ---
         const styleTag = document.createElement('style');
         styleTag.textContent = `
             @keyframes qte-pulse {
@@ -900,14 +926,34 @@
                 0%   { transform: scale(1.18); }
                 100% { transform: scale(1); }
             }
+            @keyframes qte-counter-pop {
+                0%   { transform: scale(1.3); color: #ffdd00; }
+                100% { transform: scale(1);   color: #ffffff; }
+            }
         `;
         document.head.appendChild(styleTag);
 
-        // --- Montar overlay (solo el GIF) ---
+        // --- Muntar overlay (GIF + comptador) ---
+        // --- Text d'instrucció ---
+        const qteLabel = document.createElement('div');
+        qteLabel.style.cssText = `
+            color: #ffffff;
+            font-size: 1.4rem;
+            font-weight: 900;
+            text-shadow: 0 0 10px #ff4444, 0 0 4px #000;
+            margin-bottom: 16px;
+            letter-spacing: 1px;
+            text-align: center;
+        `;
+        qteLabel.textContent = '¡Pulsa E 30 vegades!';
+
+        // --- Muntar overlay (instrucció + GIF + comptador) ---
+        qteOverlay.appendChild(qteLabel);
         qteOverlay.appendChild(qteGif);
+        qteOverlay.appendChild(qteCounter);
         document.body.appendChild(qteOverlay);
 
-        // --- Cuenta atrás ---
+        // --- Compte enrere ---
         qteCountdown = setInterval(() => {
             qteSecondsLeft--;
             if (qteSecondsLeft <= 0) {
@@ -915,18 +961,24 @@
             }
         }, 1000);
 
-        // --- Listener de pulsaciones ---
+        // --- Listener de pulsacions ---
         function qteKeyHandler(e) {
             if (!qteActive) return;
             if (e.key.toLowerCase() === 'e') {
                 qtePresses++;
 
-                // Flash de golpe en el GIF
+                // Actualitzar comptador
+                qteCounter.textContent = `${qtePresses} / ${QTE_MAX_PRESSES}`;
+                qteCounter.style.animation = 'none';
+                void qteCounter.offsetWidth;
+                qteCounter.style.animation = 'qte-counter-pop 0.15s ease forwards';
+
+                // Flash de cop en el GIF
                 qteGif.style.animation = 'none';
                 void qteGif.offsetWidth;
                 qteGif.style.animation = 'qte-hit 0.1s ease, qte-pulse 0.4s ease-in-out 0.1s infinite alternate';
 
-                if (qtePresses >= 40) {
+                if (qtePresses >= QTE_MAX_PRESSES) {
                     endQTE(true, qteOverlay, styleTag, onSuccess, onFail);
                 }
             }
@@ -945,7 +997,7 @@
         if (success) { onSuccess(); } else { onFail(); }
     }
 
-    // === CARGAR NIVEL COCHE (con QTE integrado) ===
+    // === CARREGAR NIVELL COTXE (amb QTE integrat) ===
     function loadLevelCoche() {
         if (isTransitioning) return;
         isTransitioning = true;
@@ -988,6 +1040,7 @@
             player.style.left = posX + 'px';
             setIdle();
 
+            // FIX: text correcte ✓
             showMessage(
                 "Narrador", "name-narrador",
                 "Has decidit agafar el cotxe. Però has begut aquesta nit... Conduir ara podria tenir conseqüències molt greus.",
@@ -1002,13 +1055,13 @@
         }, 1000);
     }
 
-    // 8. INPUTS (TECLADO)
+    // 8. ENTRADES (TECLAT)
     window.addEventListener('keydown', (e) => {
         if (!gameStarted) return;
         
         if (isWaitingForLight) return; 
 
-        // Bloqueamos teclas de movimiento si el QTE está activo
+        // Bloquegem tecles de moviment si el QTE és actiu
         if (qteActive) return;
 
         const key = e.key.toLowerCase();
@@ -1050,9 +1103,10 @@
             if (currentLevel === 2) {
                 if (isParkUnlocked && Math.abs(relativeX - 500) < 100) { loadLevel3(); return; }
                 if (!isParkUnlocked) {
-                    if (Math.abs(relativeX - 75) < 60) showMessage("Torrent", "name-torrent", "La meva casa està molt lluny.", "cartel");
-                    else if (Math.abs(relativeX - 320) < 60) showMessage("Torrent", "name-torrent", "Hi ha un patinet aquí. Puc agafar-lo per arribar més ràpid, però no porto casc. L'agafo?", "scooter");
-                    else if (Math.abs(relativeX - 600) < 100) showMessage("Torrent", "name-torrent", "No sé si estic en bones condicions per conduir...", "coche");
+                    // FIX: text correcte ✓
+                    if (Math.abs(relativeX - 75) < 60) showMessage("Torrent", "name-torrent", "La meva casa és molt lluny d'aquí.", "cartel");
+                    else if (Math.abs(relativeX - 320) < 60) showMessage("Torrent", "name-torrent", "Hi ha un patinet aquí. Puc agafar-lo per arribar més aviat, però no porto casc. L'agafo?", "scooter");
+                    else if (Math.abs(relativeX - 600) < 100) showMessage("Torrent", "name-torrent", "No sé si estic en condicions de conduir...", "coche");
                 }
             }
         }
@@ -1086,21 +1140,21 @@
             }
 
             if (dizzinessLevel > 0) {
-                let rotacion = Math.sin(drunkFrameCount * 0.03) * dizzinessLevel;
+                let rotacio = Math.sin(drunkFrameCount * 0.03) * dizzinessLevel;
                 let movY = Math.cos(drunkFrameCount * 0.04) * (dizzinessLevel * 2);
-                container.style.transform = `rotate(${rotacion}deg) translateY(${movY}px) scale(1.05)`;
+                container.style.transform = `rotate(${rotacio}deg) translateY(${movY}px) scale(1.05)`;
             }
 
             let speedY = 0;
-            const VELOCIDAD_PATINETE = 4; 
+            const VELOCITAT_PATINETE = 4; 
 
-            if (keys.w) speedY = VELOCIDAD_PATINETE;
-            if (keys.s) speedY = -VELOCIDAD_PATINETE;
+            if (keys.w) speedY = VELOCITAT_PATINETE;
+            if (keys.s) speedY = -VELOCITAT_PATINETE;
 
-            let perdidaEquilibrio = Math.sin(drunkFrameCount * 0.05) * (dizzinessLevel * 1.5);
+            let perdudaEquilibri = Math.sin(drunkFrameCount * 0.05) * (dizzinessLevel * 1.5);
 
-            if (speedY !== 0 || perdidaEquilibrio !== 0) {
-                posY += speedY + perdidaEquilibrio;
+            if (speedY !== 0 || perdudaEquilibri !== 0) {
+                posY += speedY + perdudaEquilibri;
                 if (posY > 340) posY = 340;
                 if (posY < 150) posY = 150;
                 player.style.bottom = posY + 'px';
@@ -1108,9 +1162,9 @@
             setRun('right');
 
             rockSpawnTimer++;
-            let tiempoSpawn = Math.max(40, 90 - (dizzinessLevel * 10)); 
+            let tempsSpawn = Math.max(40, 90 - (dizzinessLevel * 10)); 
             
-            if (rockSpawnTimer > tiempoSpawn) {
+            if (rockSpawnTimer > tempsSpawn) {
                 spawnRock();
                 rockSpawnTimer = 0;
             }
@@ -1164,7 +1218,7 @@
         requestAnimationFrame(loop);
     }
 
-    // 10. INICIO DEL JUEGO
+    // 10. INICI DEL JOC
     function handleStartInput() {
         if (gameStarted) return;
         gameStarted = true;
