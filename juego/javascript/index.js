@@ -512,7 +512,7 @@
                 velocity = 0;
                 keys.d   = false;
                 hasSpokenAtCrosswalk = true;
-                showMessage("Torrent", "name-torrent", "Vaja, el semàfor és en vermell... Hauria de creuar ara mateix o m'espero que canviï?", "paso-peatones");
+                showMessage("Torrent", "name-torrent", "El semàfor és vermell… creuo o m’espero que canviï?", "paso-peatones");
             }
         }
 
